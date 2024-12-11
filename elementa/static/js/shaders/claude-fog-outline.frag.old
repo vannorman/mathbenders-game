@@ -1,0 +1,107 @@
+// Fragment Shader
+precision highp float;
+
+varying vec2 vUv;
+
+uniform sampler2D uColorMap;
+uniform sampler2D uDepthMap;
+//uniform vec4 uScreenSize;
+uniform vec2 uPixelSize;
+uniform mat4 matrix_projection;
+uniform vec3 camera_position;
+uniform float uTime;
+
+// Custom uniforms
+uniform float uOutlineThickness;
+uniform vec4 uOutlineColor;
+uniform int uCelLevels;
+uniform float uFogDensity;
+uniform float uFogHeightFalloff;
+uniform vec3 uFogColor;
+uniform float uPlayerY;
+
+uniform float uPixelX;
+uniform float uPixelY;
+
+//float linearizeDepth(float depth) {
+//    float z = depth * 2.0 - 1.0;
+//    return (2.0 * near * far) / (far + near - z * (far - near));
+//}
+
+vec3 applyOutline(sampler2D depthMap, vec2 uv) {
+    float depth = texture2D(depthMap, uv).r;
+    float depthDiff = 0.0;
+
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            vec2 offset = vec2(float(x) * uPixelX * uOutlineThickness, float(y) * uPixelY * uOutlineThickness);// * uOutlineThickness * uPixelSize;
+            float sampleDepth = texture2D(depthMap, uv + offset).r;
+            depthDiff += abs(sampleDepth - depth);
+        }
+    }
+    return vec3(1.0,0.0,0.0);
+
+    return vec3(step(0.01, depthDiff));
+}
+
+
+vec3 applyCelShading(vec3 color) {
+    float brightness = dot(color, vec3(0.299, 0.587, 0.114));
+    float cel = floor(brightness * float(uCelLevels)) / float(uCelLevels);
+    return color * cel;
+}
+
+float calculateFogFactor(float depth) {
+    float fogHeight = camera_position.y - uPlayerY;
+    float heightFactor = exp(-fogHeight * uFogHeightFalloff);
+    return 1.0 - exp(-depth * uFogDensity * heightFactor);
+}
+
+void main(void) {
+    vec4 texColor = texture2D(uColorMap, vUv);
+    vec3 color = texColor.rgb;
+   // vec3 color = texture2D(uColorMap, vUv).rgb;
+    float depth = linearizeDepth(texture2D(uDepthMap, vUv).r);
+    // gl_FragColor = vec4(vUv, 0.0, 1.0);
+   
+ // Apply outline
+    vec3 outline = applyOutline(uDepthMap, vUv);
+  // color = mix(color, uOutlineColor.rgb, outline.r);
+    float o = outline.r;
+    color = mix(color,vec3(0,0,0),o/2.0);
+
+    // Apply cell
+   // color = applyCelShading(color);
+
+
+    // Apply fog
+//    float fogFactor = calculateFogFactor(depth);
+  //  color = mix(color, uFogColor, fogFactor);
+
+    gl_FragColor = vec4(color, texColor.a);
+    
+
+}
+
+
+void main2(void) {
+    vec4 texColor = texture2D(uColorMap, vUv);
+    vec3 color = texColor.rgb;
+   // vec3 color = texture2D(uColorMap, vUv).rgb;
+    float depth = linearizeDepth(texture2D(uDepthMap, vUv).r);
+    
+    // Apply outline
+    vec3 outline = applyOutline(uDepthMap, vUv);
+    color = mix(color, uOutlineColor.rgb, outline);
+    
+    // Apply cel shading
+    color = applyCelShading(color);
+    
+    // Apply fog
+    float fogFactor = calculateFogFactor(depth);
+    color = mix(color, uFogColor, fogFactor);
+    
+    gl_FragColor = vec4(color, texColor.a);
+   // gl_FragColor = vec4(color, 1.0);
+}
+

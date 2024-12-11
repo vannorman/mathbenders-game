@@ -1,0 +1,55 @@
+What does this app do?
+- Help you plan trips
+    [✓] high level "x city y days" 
+    [ ] low lever "today we will ..." 
+    [ ] make reservations 
+        - RV reservation sites are not standardized, write a standardizing scraper
+    [ ] plug into google maps to draw the route
+    [ ] Mobile friendly
+    [ ] Multiple months
+- Keep a diary of per-day experiences
+    [ ] text editor opens for each calendar cell, enter, load, edit, and save notes as part of trip
+    [ ] ability to put links to external websites
+    [ ] 
+
+MILESTONES
+    - Phil test user
+        - open each cell, add text, add links, "print" whole trip.
+        - multiple month capability 
+
+CORE MECHANICS
+    - Numbers destroy numbers. Sometimes.
+    GADGETS
+        - All gadgets are editable in 3d.
+        - The operation of the gadget depends on how you've set up the internal state machine.
+        - Gadgets can be powerful.
+        - No gadget can possibly solve any challenge.
+        - Or can it? (infinity)
+    ENEMIES
+        - After deserting your homeworld, sentinels of the Math Lords are sent to imprison you. DON'T let them succeed! It takes FOREVER to break out of one of their dumb prisons.
+        - You can vanquish the sentinels by zeroing out their shields. Since they don't believe in the alien world's special mathematics, they think they will choke to death, and so quickly vanquish (teleport back to the nearest ship.)
+    ZEROING
+        - When +1 and -1 or any other two numbers combine to zero, they annihalte - or so it seems.
+        - Actually, they are teleported to the nearest "gravity" source. Most planets, that's the planet. If you zero something then both numbers go to the underworld in the planet's core.
+        - 
+
+^ STORY ARC
+    SETTING
+    You work for CorpNumb, a sleepy and by-the-books mathematics investment firm. 
+    You are NOT to deal with infinities here sir, just like in training, we stick to our 2s and 3s with doing our carries 
+    and long division and sometimes pi. NumbCorp (more like NumbNuts if you ask for me). Sends you to alien planets to harvest
+    exotic resources called Euls. They have something to do with growth; Euler E EulerAngles had prophesized about it, some time
+    in the past. But the past is relative; yesterday and last week seem relatively close, but the yesterdays and last weeks from five
+    years ago all sort of blend together; almost like the present is just the focal point. 
+
+    MISSION
+    Travel to planet E28 and harvest some Euls for us. You'll be accompanied by 3 other pods. Land there, abolish local defenses (zero them), storm the castle (Goldbach's Castle -- how DO those larger numbers survive without deteriorating into primes? -- where each wall is 2 primes added together.)
+    Your teammates get in their 3 ships as the planet will now implode without any Euls.
+    Your ship doesn't take off. You'll need to forage for fuel.
+    Good luck!
+
+    STORY ARC
+    You decide the aliens who study infinity are cooler than your corporate overlords and you defect. Sentinels are sent after you and you're caught and put into a space ship number prison which you have to escape. "BLAST!" they cry. How could you have figured it out again? After a while you learn to be on your guard against Sentinels. Or, you can purposely get caught, tell the corp you want back in, then go on a new mission.
+
+
+

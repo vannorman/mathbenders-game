@@ -1,0 +1,30 @@
+@ Companies
+    thesocialcat.com - influencer marketing
+    https://www.facebook.com/Glewee - influencer marketing
+
+^ from https://earthly.dev/blog/shutting-down-earthly-ci/
+
+    The odd thing about direct calls with prospects was that we could never convince them to try out any of our products when talking to them face to face. Not Earthly CI, not Satellites, not even Earthly. At this point, we probably had over 100 calls with prospects. We were hearing over and over how they spent 2 years migrating to their current setup, how they put so much effort into it, and how throwing all that away would be so wasteful. And how annoying it is to switch CIs.
+
+    And yet, when users were coming on their own to our website, through a mix of product-led / word of mouth and content marketing, the adoption of Earthly was happening every single day. At a very significant and increasing rate.
+
+
+
+
+@ Quips
+    - We're basically making Ender's game for math
+    - TikTok reels - "Which subject did you struggle with the MOST?" (tiktok cut to "^math")
+    - What's your worst memory of Mathematics?? ^Mults, fracs, algebra
+    - "Don't play this math game" 
+    — "not for the feint of heart" 
+    —"i almost died. not like my life total. some black hole thing opened up and took my whole estate! !!"
+    "Mom can't stop you - it's educational"
+
+# Outreach
+    - contact teachers to find teacher ambassadors for local area
+    - airdrop real estate or ambassadorship to all players at once in a certain geo to "win" real estate or influencer status (via Justin)
+    - e.g. https://www.linkedin.com/posts/tom-alder_this-guy-pulled-off-one-of-the-most-exponential-activity-7094647397816930304-Ltoz?utm_source=share&utm_medium=member_ios
+
+// Videos
+    - Story follows a kid like a movie trailer. bad at math. anxiety. test. drill and kill. parents upset. horror. but they find our game. become math champion, destroy all their enemies
+
