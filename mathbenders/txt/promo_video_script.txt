@@ -1,0 +1,42 @@
+^ SUMMARY
+    3 minute long movie trailer style promo video.
+    Intro the setting, character, the story/drama, and leave them wishing for something.
+
+^ SCENE 1
+    @ Corporate onboarding music 
+    # You're on the space ship.
+    Welcome to NumberGloom corporation. Your training begins now. Your task is to help us mine the precious Euler resource from nearby planets.
+    # pan to the character's face. Narrator is speaking to the character. Character blinks and reacts.
+    We provide full training, JUST like you learned in school. It's important you recognize the DANGERS of negative numbers. WE use them in various tools and gadgets which you will be trained on.
+    # multiblaster, rocket launcher
+    These are gadgets which contain negative numbers safely. But sometimes negative numbers can breach the surface.
+    # show a volcano of negative spikeys
+    Don't worry, we'll train you as best we can to prepare you.
+    # pan to training facility (bust down wall, kill a spikey, use a hoop)
+    We expect your missions to be dangerous. You will be traveling to many different alien worlds.
+    # pan to scenes of 3 or 4 differnetly colored and decorated alien scenes
+
+^ SCENE 2
+    @ Adventure music 
+    You'll encounter many hazards.
+    # 3 quick pans; Dodge the spikey, cross the chasm (risers?), run from the bubble beast.
+    And sometimes you'll encounter aliens.
+    # innocent but ominous looking alien tribe with glowing infinity flag.
+    You're NOT to associate with them.
+    # aliens worship infinity over a black hole fire.
+    Infinities are dangerous.
+
+^ SCENE 3
+    @ Ominous music
+    Here at NumberGloom we collect the precious Euler resource for the greater good.
+    # Show resource collection mechanic e.g. a spaceship
+    And, the aliens have KIDNAPPED some of our famous mathematicians. You have to rescue them!
+    # Show Einstein and Euler working in an alien lab, Ada Lovelace.
+    Your job is simple. Harvest the Euler resource and bring our mathematicians home.
+    # Show the spaceship and the NumberGloom dull world
+    
+
+
+
+
+

@@ -1,0 +1,13 @@
+Globally here are the main areas that need rework
+
+RealmBuilder break into smaller files (in progress)
+RealmBuilder mode /state functionality  (draft written)
+Class/instance system to replace global consts (in progress)
+NumberInfo 
+    - instantiation / handling of multiple number states (todo)
+    - difference between "nocollision" numbers like ammo; "explode on impact" like rocket; "combine" like regular numbers;
+TemplateInfo system
+Gadget inheritance
+
+keywords to search codebase:
+[ 'relies', 'ugh', 'awkward', 'hacky', 'todo', 'TODO', 'bug', 'annoying', 'race condition' ]

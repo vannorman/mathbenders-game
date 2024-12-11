@@ -1,5 +1,0 @@
-SUPABASE_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJubGh4d2Vkb3pxaHFxY2lrYmJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3NjM3OTAsImV4cCI6MjA0NzMzOTc5MH0.qRMfASg2ELSiZkp6NUtuN7zKCJghNZ2jTWqQ0dOB8Vc
-SUPABASE_URL=https://bnlhxwedozqhqqcikbbp.supabase.co
-SUPABASE_CALLBACK="https://game.mathbreakers.com/loginpage"
-SUPABASE_GAME_CALLBACK="https://game.mathbreakers.com/game"
-APP_SECRET_KEY=8Ig5FWrXXD2ppe8PfJ+fiuxHhdmkUEK2lKvz0cdn8vQ=

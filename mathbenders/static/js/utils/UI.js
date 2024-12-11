@@ -1,0 +1,588 @@
+class UIScrollView {
+    constructor(options){
+        const {
+            group,
+            content,
+            viewport
+        } = options;
+        this.group = group;
+        this.content = content;
+        this.viewport = viewport;
+    }
+
+    destroy(){
+        this.group?.destroy();
+        this.content?.destroy();
+        this.viewport?.destroy();
+    }
+
+}
+
+class UISlider {
+    constructor(options){
+        const { 
+            labelElement, 
+            onChangeFn = ()=>{}, 
+            isMoving = false, 
+            indicatorElement, 
+            sliderElement, 
+            textIndicatorElement, 
+            val=0,      
+            group, 
+            maxVal = 1.0,
+            minStep = 0.01,
+            precision = 2,
+        } = options;
+        this._isMoving = isMoving;
+        this._indicatorElement = indicatorElement;
+        this._sliderElement = sliderElement;
+        this._val = val; 
+        this._maxVal = maxVal;
+        this._group = group;
+        this.OnPress = this.OnPress.bind(this);
+        this.OnUnPress = this.OnUnPress.bind(this);
+        this._textIndicatorElement = textIndicatorElement;
+        this._onChangeFn = onChangeFn; // callback? does this need a custom function injection? Or simple callback fn that takes a fn as argument already, called "Callback"? Eyton
+        this._minStep = minStep;
+        this._precision = precision;
+
+        const $this = this;
+        this._indicatorElement.on('mousedown', function () {
+            $this.OnPress();
+            Mouse.RegisterFunctionToRunOnCursorUp( {name:"SliderMouseUp", fn: () => {  
+                $this.OnUnPress();
+            }});
+            
+        });
+
+        this._sliderElement.on('mousedown',function(){
+            const minPosX = $this._sliderElement.screenCorners[0].x; 
+            const maxPosX = $this._sliderElement.screenCorners[1].x;
+            const range = maxPosX-minPosX;
+            // mousex can go from minPosX to maxPosX
+            const val = (Mouse.x - minPosX) / range;
+            $this.SetVal({resultX:val,fireOnChangeFn:true});
+            
+        });
+
+        this._indicatorElement.on('mouseenter', function () { 
+            pc.app.graphicsDevice.canvas.style.cursor='pointer'; 
+        });
+        
+        this._indicatorElement.on('mouseleave', function () { 
+            if (!$this._isMoving) pc.app.graphicsDevice.canvas.style.cursor='auto'; 
+        });
+
+
+        pc.app.on('update', function(){ 
+            
+            if ($this._isMoving) {
+                const delta = (Mouse.x -  $this._mouseDownX) * pc.app.graphicsDevice.width/window.innerWidth; // what was x position of mouse when we first clicked
+                const startAnchorX = $this._mouseDownAnchorX; // what was x position of slider when we first clicked
+                const deltaAnchorX = delta / $this._sliderWidth;
+                let resultX = startAnchorX + deltaAnchorX;
+                $this.SetVal({resultX:resultX});
+           }
+        });
+
+        
+    }
+
+    SetVal(options){
+        const { resultX, fireOnChangeFn=true} = options;
+        if (resultX < 0) resultX = 0;
+        else if (resultX > 1) resultX = 1;
+        // console.log("resultx;"+resultX+", thisval:"+$this._val+", minst;"+$this._minStep);
+        let val = resultX * this._maxVal;
+
+        // if minstep is 0.5 and maxval is 2 it should be 0, 0.5, 1, 1.5, 2
+        // here, let's say val is 0.6
+        val = Math.round(val / this._minStep) * this._minStep;
+        this._val = val;
+        if (this._minStep % 1 != 0){
+            this._textIndicatorElement.text = (val).toFixed(this._precision);
+        } else {
+            this._textIndicatorElement.text = Math.round(val);
+
+        }
+        if (fireOnChangeFn) this._onChangeFn(val);
+        let snappedResultX = val / this._maxVal;
+        this._sliderWidth = UI.GetElementDim(this._sliderElement).x; // cant do this in initailization for some reason
+        this._indicatorWidth = this._indicatorElement.width/this._sliderWidth; // static width of handle in anchor terms
+        this._indicatorElement.anchor = [snappedResultX,0.5,snappedResultX+this._indicatorWidth/this._sliderWidth,0.5];
+
+ 
+    }
+
+    OnPress(){
+        pc.app.graphicsDevice.canvas.style.cursor='pointer'; 
+        this._sliderWidth = UI.GetElementDim(this._sliderElement).x; // cant do this in initailization for some reason
+        this._mouseDownX = Mouse.x;
+        this._mouseDownAnchorX = this._indicatorElement.anchor.x;
+        this._isMoving = true;
+    } 
+
+    OnUnPress(){
+        pc.app.graphicsDevice.canvas.style.cursor='auto'; 
+        this._isMoving = false;
+    }
+
+    get val() { return this._val; }
+    get group() { return this._group; }
+    get isMoving() { return this._isMoving; }
+    set isMoving(value) { this._isMoving = value; }
+}
+
+const UI = {
+    createInputWithLabel(options={}){
+        const {
+            onChangeFn,
+            labelWidth=50,
+            inputWidth=90,
+            height=40,
+            //anchor=[.5,.5,.5,.5],
+            //pivot=[0.5,0.5],
+            text="labell",
+        } = options;
+        const group = new pc.Entity("input label group");
+        group.addComponent('element',{
+            type:'image',
+            width:inputWidth+labelWidth,
+            height:35,
+            color:pc.Color.GREEN,
+        });
+
+        const textA = new pc.Entity('Text'); // text
+        textA.addComponent('element', {
+            type: 'text',
+            text: text,
+            anchor:[0,0.5,0,0.5],
+            pivot:[0,0.5],
+            height:35,
+            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+            width:labelWidth,
+            fontSize : 12,
+            color:pc.Color.BLACK,
+        });
+        group.addChild(textA);
+
+        let textInputGroup = new pc.Entity();
+        textInputGroup.addComponent('element',{
+            type:'image',
+            useInput:true,
+            anchor:[0.36, 0.5, 0.36, 0.5],
+            pivot:[0,0.5],
+            width:inputWidth,
+            height:35,
+        });
+        textInputGroup.addComponent('script');
+       
+        const textInput = new pc.Entity('Text'); // text
+        textInput.addComponent('element', {
+            type: 'text',
+            text: text,
+            anchor:[0.1,0,0.1,0],
+            pivot:[0,0.5],
+            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+            fontSize : 12,
+            color:pc.Color.BLACK,
+            useInput:true,
+        });
+        textInputGroup.addChild(textInput);
+        textInputGroup.script.create('uiInputField',{attributes:{textEntity:textInput,placeHolderColor:new pc.Color(0.1,0.1,0.1)}});
+        textInputGroup.script.uiInputField.init();
+
+        group.addChild(textInputGroup);
+        textInputGroup.on('updatedvalue',function(val){
+            onChangeFn(val);
+            //console.log("RM:"+val);
+        });
+        const inputGroup = {
+            root : group,
+            inputText : textInput.element,
+            labelText : textA.element,
+        }
+        return inputGroup;
+    },
+
+    SetUpItemButton(options={}){
+        const {
+            parentEl,
+            mouseDown,
+            mouseEnter,
+            mouseLeave,
+            width,
+            height,
+            textureAsset,
+            anchor=[.5,.5,.5,.5],
+            cursor='auto',
+            pivot=[0.5,0.5],
+            color,
+            text="",
+        }=options;
+        const ent = new pc.Entity("btn");
+        ent.addComponent('element',{ 
+            layers: [pc.LAYERID_UI],
+            type: pc.ELEMENTTYPE_IMAGE, 
+            anchor:anchor,
+            pivot:pivot, 
+            width:width, 
+            height:height, 
+            useInput:true,
+        })
+        if (textureAsset) ent.element.textureAsset=textureAsset;
+        if (color) ent.element.textureAsset=textureAsset;
+        if (text) {
+             const textA = new pc.Entity('Text'); // text
+             textA.addComponent('element', {
+                type: 'text',
+                text: text,
+                anchor:[0,0,0,0],
+                pivot:[0.5,0.5],
+                fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+                fontSize : 12,
+                color:pc.Color.WHITE,
+            });
+            ent.addChild(textA); 
+        }
+        parentEl.addChild(ent);
+        UI.HoverColor({element:ent.element,cursor:cursor});
+        ent.element.on('mousedown',function(){ mouseDown(ent); });
+        return ent;
+    },
+
+    AddCloseWindowButton(options={}){
+        const { onClickFn, parentEl } = options;
+        const closeBtn = UI.SetUpItemButton({
+            parentEl:parentEl,
+            width:35,height:35,
+            textureAsset:assets.textures.ui.builder.closeWindow,
+            anchor:[1,1,1,1],
+            pivot:[0.6,0.6],
+            mouseDown:onClickFn,
+            cursor:'pointer',
+        });
+    },
+    CreateScrollableLayoutGroup(options){
+        const {screen,itemList=[]}=options;
+        function createScrollbar(horizontal) {
+            const handle = new pc.Entity('Handle');
+            const handleOptions = {
+                type: pc.ELEMENTTYPE_IMAGE,
+                color: new pc.Color(1, 1, 1),
+                opacity: 1,
+                margin: new pc.Vec4(0, 0, 0, 0),
+                rect: new pc.Vec4(0, 0, 1, 1),
+                mask: false,
+                useInput: true
+            };
+            if (horizontal) {
+                // @ts-ignore engine-tsd
+                handleOptions.anchor = new pc.Vec4(0, 0, 0, 1); // Split in Y
+                // @ts-ignore engine-tsd
+                handleOptions.pivot = new pc.Vec2(0, 0); // Bottom left
+            } else {
+                // @ts-ignore engine-tsd
+                handleOptions.anchor = new pc.Vec4(0, 1, 1, 1); // Split in X
+                // @ts-ignore engine-tsd
+                handleOptions.pivot = new pc.Vec2(1, 1); // Top right
+            }
+            handle.addComponent('element', handleOptions);
+            handle.addComponent('button', {
+                active: true,
+                imageEntity: handle,
+                hitPadding: new pc.Vec4(0, 0, 0, 0),
+                transitionMode: pc.BUTTON_TRANSITION_MODE_TINT,
+                hoverTint: new pc.Color(1, 1, 1),
+                pressedTint: new pc.Color(1, 1, 1),
+                inactiveTint: new pc.Color(1, 1, 1),
+                fadeDuration: 0
+            });
+
+            const scrollbar = new pc.Entity(horizontal ? 'HorizontalScrollbar' : 'VerticalScrollbar');
+
+            scrollbar.addChild(handle);
+
+            const scrollbarOptions = {
+                type: pc.ELEMENTTYPE_IMAGE,
+                color: new pc.Color(0.5, 0.5, 0.5),
+                opacity: 1,
+                rect: new pc.Vec4(0, 0, 1, 1),
+                mask: false,
+                useInput: false
+            };
+
+            const scrollbarSize = 20;
+
+            if (horizontal) {
+                // @ts-ignore engine-tsd
+                scrollbarOptions.anchor = new pc.Vec4(0, 0, 1, 0);
+                // @ts-ignore engine-tsd
+                scrollbarOptions.pivot = new pc.Vec2(0, 0);
+                // @ts-ignore engine-tsd
+                scrollbarOptions.margin = new pc.Vec4(0, 0, scrollbarSize, -scrollbarSize);
+            } else {
+                // @ts-ignore engine-tsd
+                scrollbarOptions.anchor = new pc.Vec4(1, 0, 1, 1);
+                // @ts-ignore engine-tsd
+                scrollbarOptions.pivot = new pc.Vec2(1, 1);
+                // @ts-ignore engine-tsd
+                scrollbarOptions.margin = new pc.Vec4(-scrollbarSize, scrollbarSize, 0, 0);
+            }
+            scrollbar.addComponent('element', scrollbarOptions);
+            scrollbar.addComponent('scrollbar', {
+                orientation: horizontal ? pc.ORIENTATION_HORIZONTAL : pc.ORIENTATION_VERTICAL,
+                value: 0,
+                handleSize: 0.5,
+                handleEntity: handle
+            });
+
+            return scrollbar;
+        }
+        
+        const text = new pc.Entity('Text');
+        text.addComponent('element', {
+            alignment: new pc.Vec2(0, 0),
+            anchor: new pc.Vec4(0, 1, 0, 1),
+            autoHeight: true,
+            autoWidth: false,
+            fontAsset: assets.font.id,
+            fontSize: 32,
+            lineHeight: 36,
+            pivot: new pc.Vec2(0, 1),
+            text:
+                'This is a scroll view control. You can scroll the content by dragging the vertical ' +
+                'or horizontal scroll bars, by dragging the content itself, by using the mouse wheel, or ' +
+                'by using a trackpad. Notice the elastic bounce if you drag the content beyond the ' +
+                'limits of the scroll view.',
+            type: pc.ELEMENTTYPE_TEXT,
+            width: 600,
+            color:pc.Color.BLACK,
+            wrapLines: true
+        });
+
+
+
+
+        // Group to hold the content inside the scroll view's viewport
+        const content = new pc.Entity('Content');
+//        content.addChild(text);
+
+        content.addComponent('element', {
+            anchor: new pc.Vec4(0, 1, 0, 1),
+            height: 400,
+            pivot: new pc.Vec2(0, 1),
+            type: pc.ELEMENTTYPE_GROUP,
+            useInput: true,
+            width: 600
+        });
+
+        content.addComponent("layoutgroup", {
+        orientation: pc.ORIENTATION_VERTICAL,
+            spacing: new pc.Vec2(10, 10),
+            widthFitting: pc.FITTING_NONE,
+            heightFitting: pc.FITTING_NONE,
+            wrap: false,
+        });
+        // Scroll view viewport
+        const viewport = new pc.Entity('Viewport');
+        viewport.addChild(content);
+
+        viewport.addComponent('element', {
+            anchor: new pc.Vec4(0, 0, 1, 1),
+            color: new pc.Color(0.2, 0.2, 0.2),
+            margin: new pc.Vec4(0, 20, 20, 0),
+            mask: true,
+            opacity: 1,
+            pivot: new pc.Vec2(0, 1),
+            rect: new pc.Vec4(0, 0, 1, 1),
+            type: pc.ELEMENTTYPE_IMAGE,
+            useInput: false
+        });
+
+//        const horizontalScrollbar = createScrollbar(true);
+        const verticalScrollbar = createScrollbar(false);
+
+        // Create a scroll view
+        const scrollview = new pc.Entity('ScrollView');
+        scrollview.addChild(viewport);
+ //       scrollview.addChild(horizontalScrollbar);
+        scrollview.addChild(verticalScrollbar);
+
+        // You must add the scrollview entity to the hierarchy BEFORE adding the scrollview component
+        screen.addChild(scrollview);
+
+        scrollview.addComponent('element', {
+            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
+            height: 200,
+            pivot: new pc.Vec2(0.5, 0.5),
+            type: pc.ELEMENTTYPE_GROUP,
+            useInput: false,
+            width: 400
+        });
+
+        scrollview.addComponent('scrollview', {
+            bounceAmount: 0.1,
+            contentEntity: content,
+            friction: 0.05,
+            useMouseWheel: true,
+            mouseWheelSensitivity: pc.Vec2.ONE,
+//            horizontal: true,
+            //horizontalScrollbarEntity: horizontalScrollbar,
+            // horizontalScrollbarVisibility: pc.SCROLLBAR_VISIBILITY_SHOW_WHEN_REQUIRED,
+            scrollMode: pc.SCROLL_MODE_BOUNCE,
+            vertical: true,
+            verticalScrollbarEntity: verticalScrollbar,
+            verticalScrollbarVisibility: pc.SCROLLBAR_VISIBILITY_SHOW_WHEN_REQUIRED,
+            viewportEntity: viewport
+        });
+
+        itemList.forEach(x=>{
+           content.addChild(x); 
+        });
+        const newScrollView = new UIScrollView({group:scrollview,viewport:viewport,content:content});
+        return newScrollView;
+
+    },
+    HoverColor(options={}){
+        const {
+            element,
+            colorOff=new pc.Color(0.9,0.9,0.9),
+            colorOn=pc.Color.WHITE,
+            cursor='auto',
+            opacityOn=1,
+            opacityOff=1,
+            useSelectedState=false }= options;
+        element.on('mouseenter',function(){
+            if(!useSelectedState || !element.isSelected) {
+                element.color=colorOn;
+                pc.app.graphicsDevice.canvas.style.cursor=cursor;
+                element.opacity=opacityOn;
+            }
+        });
+        element.on('mouseleave',function(){
+            if (!useSelectedState || !element.isSelected) {
+                element.color=colorOff;
+                pc.app.graphicsDevice.canvas.style.cursor='auto';
+                element.opacity=opacityOff;
+            }
+        });
+        element.color=colorOff;
+    },
+    createSlider(options={}){
+        const { 
+            labelText="label",
+            onChangeFn, 
+            minVal = 0, 
+            maxVal = 2, 
+            width=180, 
+            sliderWidth=140,
+            height=50, 
+            sliderHeight=10,
+            sliderIndicatorWidth=10,
+            sliderIndicatorHeight=25,
+            minStep=.01,
+            precision = 2,
+        } = options;
+
+        const group = new pc.Entity('sliderGroup');
+        group.addComponent('element', {
+            type: 'image',
+            color:pc.Color.BLUE,
+            opacity:0.4,
+            width: width,
+            height: height,
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5]
+        });
+
+       // Slider
+        const slider = new pc.Entity('slider');
+        slider.addComponent('element', {
+            anchor: [0.4, 0.5, 0.4, 0.5],
+            pivot: [0.5, 0.5],
+            type: 'image',
+            width: sliderWidth,
+            height: sliderHeight,
+            color:pc.Color.WHITE,
+            useInput: true,
+
+        });
+        group.addChild(slider);
+
+        // Slider indicator
+        const sliderIndicator = new pc.Entity('sliderIndicator');
+        sliderIndicator.addComponent('element', {
+            type: 'image',
+            width: sliderIndicatorWidth,
+            height: sliderIndicatorHeight,
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            useInput: true,
+            color: pc.Color.YELLOW // Visual indicator color
+        });
+        slider.addChild(sliderIndicator);
+
+        // Current value of the slider
+        let currentValue = minVal;
+
+        // Update slider position based on currentValue
+        function updateSliderPosition() {
+            const percentage = (currentValue - minVal) / (maxVal - minVal);
+            sliderIndicator.setLocalPosition((percentage * 160) - 80, 0, 0); // Centered on slider
+        }
+
+        const textIndicator = new pc.Entity();
+        textIndicator.addComponent('element', {
+            type: 'text',
+            text: '0',
+            anchor:[0.79,0.5,0.79,0.5],
+            pivot:[0.0,0.5],
+            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+            fontSize : 12,
+            width:80,
+            height:group.element.height,
+            color:pc.Color.BLACK,
+        });
+
+        group.addChild(textIndicator);
+
+        const label = new pc.Entity();
+        label.addComponent('element', {
+            type: 'text',
+            text: labelText,
+            anchor:[0.05,0.9,0.05,0.9],
+            pivot:[0.0,0.5],
+            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+            fontSize : 12,
+            width:80,
+            height:group.element.height,
+            color:pc.Color.BLACK,
+        });
+
+        group.addChild(label);
+ 
+
+        const opts = { 
+            maxVal:maxVal, 
+            group:group,indicatorElement : sliderIndicator.element, 
+            labelElement: label.element,
+            sliderElement:slider.element,
+            textIndicatorElement:textIndicator.element,
+            onChangeFn : onChangeFn,
+            minStep : minStep,
+            precision : precision,
+
+        };
+        const sliderObj = new UISlider(opts);
+
+        return sliderObj;
+    },
+    GetElementDim(element){
+        const x = element.screenCorners[1].x - element.screenCorners[0].x;
+        const y = element.screenCorners[2].y - element.screenCorners[1].y;
+        return new pc.Vec2(x,y);
+    }
+
+}
+
