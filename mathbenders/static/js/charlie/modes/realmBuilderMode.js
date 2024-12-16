@@ -2,11 +2,12 @@
 export default class RealmBuilderMode {
 
     constructor(params) {
-        this.realmBuilder = params.realmBuilder;
+        this.realmEditor = params.realmEditor;
+        console.log("This re:"+params.realmEditor);
     }
 
     onMouseMove() {
-      // console.log('super onMouseMove', this.constructor.name); 
+      console.log('superc onMouseMove', this.constructor.name); 
     }
 
     onMouseUp() {}
@@ -16,11 +17,11 @@ export default class RealmBuilderMode {
     onMouseScroll() {}
 
     onEnter() { 
-//        console.log('preparation code for mode'); 
-        }
+        console.log('preparation code for mode'); 
+    }
 
     onExit() { 
-//        console.log('clean up code to run'); 
-        }
+        console.log('clean up code to run'); 
+    }
 
 }

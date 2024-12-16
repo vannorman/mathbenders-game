@@ -1,5 +1,5 @@
 import modes from "./modes/index.js"; // seeks "index.js" at root to import these
-class RealmEditor {
+class RealmEditor2 {
 
     #isEnabled;
     #realm;
@@ -50,8 +50,6 @@ class RealmEditor {
     // Invoked by a caller, likely current mode or some button onClick,
     // to toggle the current mode
     toggle(mode) {
-        console.log('set:'+mode);
-        console.log(this.#modes);
         // If the 'mode' does not exist, return
         if (!this.#modes.has(mode)) return;
 
@@ -97,18 +95,18 @@ class RealmEditor {
 }
 
 // Created somewhere in the code where it makes sense
-window.realmEditor = new RealmEditor();
+window.realmEditor2 = new RealmEditor2();
 
 
 
 // Example usages
 const onClick = () => {
-    realmEditor.toggle('handpan');
+    realmEditor2.toggle('handpan');
 }
 
 // Perhaps when clicking on some object that listens to mouse events
 // and has this callback assigned
 const onSomeOtherClick = () => {
-    realmEditor.toggle('draggingObject');
+    realmEditor2.toggle('draggingObject');
 }
 

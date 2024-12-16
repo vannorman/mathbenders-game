@@ -133,6 +133,17 @@ var ScriptManager = {
         "/static/js/eytan/modes/handPanRealmBuilderMode2.js",
         "/static/js/eytan/modes/mapScreenRealmBuilderMode.js",
         "/static/js/eytan/modes/realmBuilderMode.js",
+          "/static/js/charlie/realmEditorUI.js", 
+          "/static/js/charlie/realmEditor.js", 
+         "/static/js/charlie/modes/draggingObjectRealmBuilderMode.js",
+        "/static/js/charlie/modes/index.js",
+         "/static/js/charlie/modes/normalRealmBuilderMode.js",
+        "/static/js/charlie/modes/editingItemRealmBuilderMode.js",
+        "/static/js/charlie/modes/loadScreenRealmBuilderMode.js",
+        "/static/js/charlie/modes/orbitRealmBuilderMode.js",
+        "/static/js/charlie/modes/handPanRealmBuilderMode2.js",
+        "/static/js/charlie/modes/mapScreenRealmBuilderMode.js",
+        "/static/js/charlie/modes/realmBuilderMode.js",
         ],
     Init(){
         this.LoadDependencyScripts();

@@ -265,10 +265,8 @@ $(document).ready(function(){
     if (loginWeb.isLoggedIn){
         loginWeb.ShowUser();
     } else if (window.location.href.includes('127') || window.location.href.includes('localhost')){
-        console.log("checkcode");
         loginWeb.CheckForCode();
     } else {
-        console.log("checktokn");
         loginWeb.CheckForAccessToken();
     }
 
