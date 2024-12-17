@@ -3,11 +3,10 @@ export default class RealmBuilderMode {
 
     constructor(params) {
         this.realmEditor = params.realmEditor;
-        console.log("This re:"+params.realmEditor);
     }
 
     onMouseMove() {
-      console.log('superc onMouseMove', this.constructor.name); 
+    //  console.log('superc onMouseMove', this.constructor.name); 
     }
 
     onMouseUp() {}

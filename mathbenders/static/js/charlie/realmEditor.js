@@ -8,7 +8,8 @@ import {
     OrbitRealmBuilderMode
 } from "./modes/index.js";
 
-import RealmEditorUI from './realmEditorUI.js';
+import UI from './ui.js';
+import Camera from './camera.js';
 
 class RealmEditor {
 
@@ -42,15 +43,20 @@ class RealmEditor {
         pc.app.mouse.on(pc.EVENT_MOUSEMOVE, this.onMouseMove, this);
         pc.app.mouse.on(pc.EVENT_MOUSEWHEEL, this.onMouseScroll, this);
         GameManager.subscribe(this,this.onGameStateChange);
+        console.log("sub gametstate new");
 
         // ui constants
-        this.ui = new RealmEditorUI();
-            
+        this.ui = new UI();
+        // First, create the UI including builder panel
+        
+        let camera = new Camera();
+        // Second, create the camera, render texture and assign it to the UI.mapPanel
     }
 
     onGameStateChange(state) {
         switch(state){
         case GameState.RealmBuilder:
+
             // ("enable save/load so we can start worldbuilding.")
             //console.log("Levelbuilder on");
             this.enable();

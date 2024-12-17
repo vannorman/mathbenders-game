@@ -192,6 +192,7 @@ const RealmBuilder = {
 
         pc.app.on('update',function(dt){ RealmBuilder.Update(dt);  });
         GameManager.subscribe(RealmBuilder,RealmBuilder.onGameStateChange);
+        console.log("sub gamesttate old");
         // Happens during game startup    
         // Mostly to set up the UI
         // All UI elements are generated procedurally; most of them in this method.
@@ -223,14 +224,14 @@ const RealmBuilder = {
         pc.app.mouse.on(pc.EVENT_MOUSEMOVE, this.onMouseMove, this);
         pc.app.mouse.on(pc.EVENT_MOUSEWHEEL, this.onMouseScroll, this);
 
-        const debugTextPos = new pc.Vec3(1.0,1.0,-3);
-        const debugText = Utils.AddText({
-            color:new pc.Color(1.0,0,0),
-            text:"debug",
-            parent:Camera.sky.entity,
-            localPos:debugTextPos,
-            scale:0.01});
-        RealmBuilder.debugText = debugText.element;
+//        const debugTextPos = new pc.Vec3(1.0,1.0,-3);
+//        const debugText = Utils.AddText({
+//            color:new pc.Color(1.0,0,0),
+//            text:"debug",
+//            parent:Camera.sky.entity,
+//            localPos:debugTextPos,
+//            scale:0.01});
+//        RealmBuilder.debugText = debugText.element;
 
         this.cameraPivot = new pc.Entity();
         pc.app.root.addChild(this.cameraPivot);
@@ -245,18 +246,18 @@ const RealmBuilder = {
         pc.app.root.addChild(this.cameraPivotTarget); // why using entity? Because i'm lazy and entity.rotate(90) already translates euler to quats
 
         // debug sphere
-        const ds = Utils3.debugSphere({size:10,color:pc.Color.BLUE,autoDestruct:false});
-        this.ds = ds;
-        this.cameraPivot.addChild(ds);
-        ds.setLocalPosition(pc.Vec3.ZERO);
-        ds.addComponent('script');
-        ds.script.create('sinePulsate',{attributes:{pulsateAmount:0.05,startScale:new pc.Vec3(5,5,5)}});
-        const dsf = Utils3.debugSphere({size:5,color:pc.Color.RED,autoDestruct:false});
-        this.dsf = dsf;
-        this.cameraPivot.addChild(dsf);
-        dsf.setLocalPosition(pc.Vec3.FORWARD.clone().mulScalar(15));
-        dsf.addComponent('script');
-        dsf.script.create('sinePulsate',{attributes:{pulsateAmount:0.05,startScale:new pc.Vec3(2,2,2)}});
+//        const ds = Utils3.debugSphere({size:10,color:pc.Color.BLUE,autoDestruct:false});
+//        this.ds = ds;
+//        this.cameraPivot.addChild(ds);
+//        ds.setLocalPosition(pc.Vec3.ZERO);
+//        ds.addComponent('script');
+//        ds.script.create('sinePulsate',{attributes:{pulsateAmount:0.05,startScale:new pc.Vec3(5,5,5)}});
+//        const dsf = Utils3.debugSphere({size:5,color:pc.Color.RED,autoDestruct:false});
+//        this.dsf = dsf;
+//        this.cameraPivot.addChild(dsf);
+//        dsf.setLocalPosition(pc.Vec3.FORWARD.clone().mulScalar(15));
+//        dsf.addComponent('script');
+//        dsf.script.create('sinePulsate',{attributes:{pulsateAmount:0.05,startScale:new pc.Vec3(2,2,2)}});
 
 
         // Create a render target texture
@@ -300,8 +301,6 @@ const RealmBuilder = {
         if (!this.initialized){
             this.initialize();
         }
-        this.ds.enabled=true;
-        this.dsf.enabled=true;
         RealmBuilder.isEnabled = true;
         RealmBuilder.screen.enabled = true;
         AudioManager.play({source:assets.sounds.ui.open}),
@@ -322,8 +321,6 @@ const RealmBuilder = {
         RealmBuilder.LoadJson(realmData);
     },
     disable(){
-        this.ds.enabled=false;
-        this.dsf.enabled=false;
         RealmBuilder.isEnabled = false;
         RealmBuilder.screen.enabled = false;
         AudioManager.play({source:assets.sounds.ui.play}),

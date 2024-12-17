@@ -1,11 +1,11 @@
 console.log('hi');
-export default class RealmEditorUI {
+export default class UI {
     constructor(params={}){
         this.realmEditor = params.realmEditor;
         this.leftMargin = 240;
-        this.createMap() // static? Once only
-        this.createBuilderPanels();
-        this.createMapButtons();
+//        this.createMap() // static? Once only
+//        this.createBuilderPanels();
+//        this.createMapButtons();
     }
 
     isMouseOverMap(){
