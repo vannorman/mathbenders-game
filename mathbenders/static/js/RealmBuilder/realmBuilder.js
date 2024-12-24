@@ -1,6 +1,7 @@
 
 /*
 
+    IN PROGRESS: Migrate RealmBuilder js to realmEditor
 
     # Description
         RealmBuilder is a UI with a separate camera in the sky which allows user to place and edit objects for gameplay.
