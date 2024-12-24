@@ -1,4 +1,5 @@
 class BuilderPanel {
+
     // The left-hand UI of the RealmBuilder has a panel selection for different categories.
     constructor(args = {}) {
         var { 

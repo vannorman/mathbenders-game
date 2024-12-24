@@ -1,8 +1,12 @@
 console.log('hi');
+import BuilderPanel from './builderPanel.js';
+
 export default class UI {
+    
+    #leftMargin = 240;
+    
     constructor(params={}){
         this.realmEditor = params.realmEditor;
-        this.leftMargin = 240;
 //        this.createMap() // static? Once only
 //        this.createBuilderPanels();
 //        this.createMapButtons();
@@ -18,6 +22,10 @@ export default class UI {
         && Mouse.cursorInPage; // got to be a better way ...!
     }
 
+    enable(){
+        // RealmBuilder.screen.enabled = true;
+
+    }
 
 }
 

@@ -8,15 +8,19 @@ import {
     OrbitRealmBuilderMode
 } from "./modes/index.js";
 
-import UI from './ui.js';
+import GUI from './ui/base.js';
 import Camera from './camera.js';
 
 class RealmEditor {
+
+    // 'object', 'entity', 'item' terminology ?
 
     #isEnabled;
     #realm;
     #modes;
     #mode;
+    #RealmData;
+
 
     constructor() {
         this.#isEnabled = false;
@@ -30,23 +34,20 @@ class RealmEditor {
             ['normal', new NormalRealmBuilderMode({realmEditor: this})],
             ['orbit', new OrbitRealmBuilderMode({realmEditor: this})]
         ]);
-        // Keep a reference to the currently active mode. Perhaps the reference should be named
-        // 'activeMode' or 'currentMode' if 'mode' is not clear
-        this.toggle('normal');
-//        this.#mode = this.#modes['normal'];
 
-        this.enable = this.enable.bind(this);
-        this.disable = this.disable.bind(this);
+        this.toggle('normal');
+//        this.enable = this.enable.bind(this);
+//        this.disable = this.disable.bind(this);
 
         pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         pc.app.mouse.on(pc.EVENT_MOUSEMOVE, this.onMouseMove, this);
         pc.app.mouse.on(pc.EVENT_MOUSEWHEEL, this.onMouseScroll, this);
+
         GameManager.subscribe(this,this.onGameStateChange);
-        console.log("sub gametstate new");
 
         // ui constants
-        this.ui = new UI();
+        this.gui = new GUI({realmEditor:this});
         // First, create the UI including builder panel
         
         let camera = new Camera();
@@ -56,13 +57,9 @@ class RealmEditor {
     onGameStateChange(state) {
         switch(state){
         case GameState.RealmBuilder:
-
-            // ("enable save/load so we can start worldbuilding.")
-            //console.log("Levelbuilder on");
             this.enable();
             break;
         case GameState.Playing:
-            //console.log("Levelbuilder off");
             this.disable();
             break;
         }
@@ -70,9 +67,25 @@ class RealmEditor {
 
     enable() {
         this.#isEnabled = true;
+        this.toggle('normal');
+        this.gui.enable();
+        AudioManager.play({source:assets.sounds.ui.open});
+        
+        return;
+
+        
+        this.MoveCamera({source:"enable",targetPivotPos:RealmBuilder.RealmData.Levels[0].terrain.centroid,targetZoomFactor:RealmBuilder.defaultZoomFactor})
+        
+        // To re-load the existing level ..
+        const realmData = JSON.stringify(this.#RealmData); // copy existing realm data
+        this.#RealmData.Clear(); // delete everything
+        this.LoadJson(realmData);
+ 
     }
 
     disable() {
+        AudioManager.play({source:assets.sounds.ui.play}),
+        this.gui.disable();
         this.#isEnabled = false;
     }
 
@@ -163,6 +176,41 @@ class RealmEditor {
         return editableItemUnderCursor;
 
     }
+
+    Save(){
+
+    }
+
+    Load(){
+
+    }
+
+    NewRealm(){
+
+    }
+
+    SetEditableItemMode() {
+        // Eytan - how pass this to the mode? Should only be possible within that mode?
+    }
+
+    BeginDraggingObject(obj) {
+
+    }
+
+    get editingItem(){ 
+        // Eytan - todo - how to extract editing item from that mode? Or call it directly skipping realmEditor
+        return null;
+//        return this.#editingItem;
+
+    }
+
+    RotateEditingItem(deg){
+        // e.g. this.editingItemMode.#editingItem.rotate(-45);}
+
+    }
+
+
+
 
 }
 

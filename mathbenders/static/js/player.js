@@ -94,6 +94,7 @@ class PlayerClass {
         this.entity.enabled = true;
         this.controller.enabled = true;
         this.camera.self.enabled=true;
+        this.unfreeze();
 
     }
 
@@ -102,6 +103,7 @@ class PlayerClass {
         this.entity.enabled = false;
         this.controller.enabled = false;
         this.camera.self.enabled=false;
+        this.freeze();
     }
 
 //    get playerController(){ return  this.entity.getComponentsInChildren('thirdPersonController')[0] }

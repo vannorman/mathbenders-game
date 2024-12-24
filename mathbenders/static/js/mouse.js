@@ -6,13 +6,40 @@ class CursorUpFn {
         this._deleteOnExecution = deleteOnExecution;
     }
 }
-const Mouse = {
-    Init () {
+
+class MouseClass {
+    
+    #isPressed;
+    #x;
+    #y;
+    #cursorInPage = false;
+    #onCursorUpFns = {};
+
+    constructor(){
         pc.app.mouse.on(pc.EVENT_MOUSEMOVE, this.onMouseMove, this);
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
+
+        $(window).on('mouseout', function() {       Mouse.cursorInPage = false; });
+        $(window).on('mouseover', function() {      Mouse.cursorInPage = true;  });
+        window.addEventListener('mouseup', () => {  Mouse.#isPressed = false;    });
+  
+        GameManager.subscribe(this,this.onGameStateChange);
         
-    },
+    }
+
+    onGameStateChange(state){
+        switch(state){
+        case GameState.RealmBuilder:
+            this.UnlockCursor();
+            break;
+        case GameState.Playing:
+            this.LockCursor();
+            break;
+        }
+ 
+    }
+    
     LockCursor(){
         if (Mouse.isMouseOverCanvas()){
             pc.app.mouse.enablePointerLock();
@@ -22,65 +49,62 @@ const Mouse = {
             // Log the stack trace
             //console.log("Call stack:\n", error.stack);
         }
-    },
+    }
     UnlockCursor(){
         pc.app.mouse.disablePointerLock();
-    },
-    isPressed : false,
+    }
+    
 
-    x : 0,
-    y : 0,
     get screenY() {
        return event.y - canvasOffset.top;
-    },
+    }
     onMouseMove (event) {
-        Mouse.UpdateMousePos();
-    },
+        this.UpdateMousePos();
+    }
     onMouseDown(event) {
-        Mouse.UpdateMousePos();
-        Mouse.isPressed = true;
-    },
+        this.UpdateMousePos();
+        this.#isPressed = true;
+    }
+    get x(){ return this.#x; }
+    get y(){ return this.#y; }
     onMouseUp(event){
-        Mouse.isPressed = false;
+        this.#isPressed = false;
         let fnNamesToRemove = [];
-        Object.keys(Mouse.onCursorUpFns).forEach(key=>{
-            Mouse.onCursorUpFns[key]();
-            if (Mouse.onCursorUpFns[key].deleteOnExecution) fnNamesToRemove.push(Mouse.onCursorUpFns[key].name);
+        Object.keys(this.#onCursorUpFns).forEach(key=>{
+            this.#onCursorUpFns[key]();
+            if (this.#onCursorUpFns[key].deleteOnExecution) fnNamesToRemove.push(this.#onCursorUpFns[key].name);
         })
-        fnNamesToRemove.forEach(x=>{delete Mouse.onCursorUpFns[x]});
-    },
+        fnNamesToRemove.forEach(x=>{delete this.#onCursorUpFns[x]});
+    }
+    get isPressed(){
+        return this.#isPressed;
+    }
+
     UpdateMousePos(){
-        Mouse.y = $('#application').height() - (event.y - canvasOffset.top); // dislike - use canvas instead?
-        Mouse.x = event.x - canvasOffset.left;
-    },
-    cursorInPage : false,
-    onCursorUpFns : {}, // like delegates?
+        this.#y = $('#application').height() - (event.y - canvasOffset.top); // dislike - use canvas instead?
+        this.#x = event.x - canvasOffset.left;
+    }
     RegisterFunctionToRunOnCursorUp(obj){
+        // TODO: replace this with subscribe pattern
         // Example on "slider up" (after slider pressed and moved) we want to run something.
         // Do we  .. uh .. de-register these ever?
-        Mouse.onCursorUpFns[obj.name]=obj.fn;
-    },
+        this.#onCursorUpFns[obj.name]=obj.fn;
+    }
+
     isMouseOverEntity(entity){
         const sc = entity.element.screenCorners;
-        if (Mouse.x > sc[0].x && Mouse.x < sc[2].x && Mouse.y > sc[0].y && Mouse.y < sc[2].y){
+        if (this.#x > sc[0].x && this.#x < sc[2].x && this.#y > sc[0].y && this.#y < sc[2].y){
             return true;
         } else {
             // console.log('el:'+entity.name+', mousexy:'+Mouse.x+', '+Mouse.y+', scxy: '+sc[0].x+' -> '+sc[2].x + ', '+sc[0].y+' -> '+sc[2].y)
             return false;
         }
  
-    },
+    }
     isMouseOverCanvas() {
-        return Mouse.y > 0 && Mouse.y < pc.app.graphicsDevice.height 
-            && Mouse.x > 0 && Mouse.x < pc.app.graphicsDevice.width;
-    },
+        return this.#y > 0 && this.#y < pc.app.graphicsDevice.height 
+            && this.#x > 0 && this.#x < pc.app.graphicsDevice.width;
+    }
 }
 
-$(window).on('mouseout', function() {
-    Mouse.cursorInPage = false;
-});
-$(window).on('mouseover', function() {
-    Mouse.cursorInPage = true;
-});
-window.addEventListener('mouseup', () => { Mouse.isPressed = false;});
 

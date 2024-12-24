@@ -15,11 +15,11 @@ var ScriptManager = {
         "/static/lib/playcanvas-stable.js",
         // "https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js",
         "/static/js/playcanvasInitializer.js",
-         "/static/js/mouse.js", 
     ],
     gameManagementScripts : [
         // "Plain" script type
         // These scripts do not live on any entity and are all singletons or utilities
+         "/static/js/mouse.js", 
          "/static/js/animationManager.js", 
 
         "/static/js/playcanvasExtensions/extensions.js", 
@@ -133,7 +133,8 @@ var ScriptManager = {
         "/static/js/eytan/modes/handPanRealmBuilderMode2.js",
         "/static/js/eytan/modes/mapScreenRealmBuilderMode.js",
         "/static/js/eytan/modes/realmBuilderMode.js",
-          "/static/js/charlie/ui.js", 
+          "/static/js/charlie/ui/builderPanel.js", 
+          "/static/js/charlie/ui/base.js", 
           "/static/js/charlie/camera.js", 
           "/static/js/charlie/realmEditor.js", 
          "/static/js/charlie/modes/draggingObjectRealmBuilderMode.js",

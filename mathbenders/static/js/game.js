@@ -43,14 +43,6 @@ var Game = {
         Playing : 'Playing',
         InGameGui : 'InGameGui',
     },
-    mode: null, // Game.Mode.Normal,
-    SetMode(newMode){
-        this.mode = newMode;
-        switch(this.mode){
-            case Game.Mode.Playing: Player.enable();break;
-            case Game.Mode.InGameGui: Player.disable(); break;
-        }
-    },
    sun : null,
     get sunDir() {
         return Game.sun.up;
@@ -72,24 +64,24 @@ var Game = {
 //        Levels.CreateSpaceship();
         pc.app.systems.rigidbody.gravity.set(0, -25, 0); // -20 seems to work better than default -9.8 
 
-        Mouse.Init();
+        // Create core objects
+        window.Mouse = new MouseClass();
         Game.currentState = Game.GameState.Running;
-
+        window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)});
         let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         let skyCam = new RealmBuilderCamera();
-        
-        window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)});
-        // Platform for player to stand.
+        let portalCam = new PortalCam();
+        let axis = new DebugAxis();
+
+        // Bootstrapped starting area (temporary) -- Platform for player to stand.
         let cubeP = new pc.Vec3(0,18,0);
         let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
         ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
  
 
-        let portalCam = new PortalCam();
-        let axis = new DebugAxis();
-
     },
+
     printLoadTime(color,message){
         var loadTime = Date.now() - Game.startTime; 
         console.log("%c LOADED: "+loadTime+" "+message,"color:"+color);
@@ -103,6 +95,8 @@ var Game = {
 
 
 async function CreateTemplates(){
+
+    // TODO Eytan - confusing logic split here bewteen Prefabs and the Templatize funciton, with lots of conditionals for type of asset and features
 
     Game.templatize = function(options={}){
 
@@ -223,14 +217,9 @@ async function CreateTemplates(){
         return colEnt.collision;
     }
 
-
     Prefabs.TemplatizePrefabs(); 
 }
 
-function NumberHoop(pos=pc.Vec3.ZERO,rot=new pc.Vec3(-90,0,0)){
-    const clone = Game.hoop(pos,rot);
-    return clone;
-}
 
 (()=>{ 
     const assetListLoader = new pc.AssetListLoader(

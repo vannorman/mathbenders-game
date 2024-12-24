@@ -377,10 +377,6 @@ $(document).on("keydown", function (e) {
     // Terrain randomization controls?
 //    if (ee == '5'){ Game.organic1.numPoints += 10; Game.organic1.Rebuild(); }
 //    if (ee == 'T'){ Game.organic1.numPoints -= 10; Game.organic1.Rebuild(); }
-    if (ee == 'T'){
-        Game.Instantiate['CastleTurret']({position:Player.droppedPositionGrounded});
-
-    }
 //    if (ee == '6'){ Game.organic1.minPointDist += 0.5; Game.organic1.Rebuild(); }
 //    if (ee == '7'){ Game.organic1.linesPerPointMax += 1; Game.organic1.Rebuild(); }
 //    if (ee == 'U'){ Game.organic1.linesPerPointMax -= 1; Game.organic1.Rebuild(); }
@@ -391,26 +387,9 @@ $(document).on("keydown", function (e) {
     if (ee == 'U'){
         GameManager.setState(GameState.Playing);
     }
-     if (ee == 'H'){
-        const data = {
-            position : Player.droppedPositionGrounded.clone().add(new pc.Vec3(0,-0.5,0)),
-            rotation : new pc.Vec3(270,Player.playerController.eulers.y,0),
-            rigidbodyType : pc.RIGIDBODY_TYPE_KINEMATIC,
-            machineHoop : {
-                fraction : {
-                    numerator:2,
-                    denominator:1
-                }
-            }
-        }
-        Game.h =  Game.Instantiate['NumberHoop'](data);
-    }
-    if (ee == 'J'){
+   if (ee == 'J'){
         cb.rotate(new pc.Vec3(0,45,0)); 
         console.log(cb.forward.trunc()+","+cb.right.trunc()+","+cb.up.trunc());
-    }
-    if (ee == 'T'){
- //       Game.textEnabled = !Game.textEnabled;
     }
     if (ee == ')'){
         

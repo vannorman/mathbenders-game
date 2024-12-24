@@ -177,12 +177,9 @@ const RealmBuilder = {
      onGameStateChange(state) {
         switch(state){
         case GameState.RealmBuilder:
-            // ("enable save/load so we can start worldbuilding.")
-            //console.log("Levelbuilder on");
             this.enable();
             break;
         case GameState.Playing:
-            //console.log("Levelbuilder off");
             this.disable();
             break;
         }
@@ -193,13 +190,7 @@ const RealmBuilder = {
         pc.app.on('update',function(dt){ RealmBuilder.Update(dt);  });
         GameManager.subscribe(RealmBuilder,RealmBuilder.onGameStateChange);
         console.log("sub gamesttate old");
-        // Happens during game startup    
-        // Mostly to set up the UI
-        // All UI elements are generated procedurally; most of them in this method.
-        $(document).on("keydown", function (e) {
-            let ee = String.fromCharCode(e.which);
-       });
-       RealmBuilderUI.BuildUIElements();
+        RealmBuilderUI.BuildUIElements();
    },
 
 
@@ -298,16 +289,14 @@ const RealmBuilder = {
 
     },
     enable(){
+        return;
         if (!this.initialized){
             this.initialize();
         }
         RealmBuilder.isEnabled = true;
         RealmBuilder.screen.enabled = true;
         AudioManager.play({source:assets.sounds.ui.open}),
-        Game.SetMode(Game.Mode.RealmBuilder);
         RealmBuilder.SetMode(RealmBuilderMode.Normal);
-        Player.freeze();
-        Mouse.UnlockCursor();
         Camera.SwitchCurrentCamera(Camera.sky);
         RealmBuilder.BuilderPanels[0].select();
 
@@ -321,14 +310,13 @@ const RealmBuilder = {
         RealmBuilder.LoadJson(realmData);
     },
     disable(){
+        return;
+
         RealmBuilder.isEnabled = false;
         RealmBuilder.screen.enabled = false;
         AudioManager.play({source:assets.sounds.ui.play}),
-        Game.SetMode(Game.Mode.Playing);
 
         Camera.SwitchCurrentCamera(Camera.main);
-        Mouse.LockCursor();
-        Player.unfreeze();
         RealmBuilder.ConnectPortals();
         Game.player.moveTo(RealmBuilder.RealmData.currentLevel.terrain.centroid.clone().add(new pc.Vec3(0,10,0)));
         
