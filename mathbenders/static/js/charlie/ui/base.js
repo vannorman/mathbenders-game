@@ -45,6 +45,7 @@ export default class GUI {
 
     constructor(params={}){
         this.realmEditor = params.realmEditor;
+        console.log('hi');
         this.buildUi({realmEditor:this.realmEditor}); // dislike passing this many times.
 //        this.createMap() // static? Once only
 //        this.createbuilderPanels();
