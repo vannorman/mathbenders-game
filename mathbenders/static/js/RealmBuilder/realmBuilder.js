@@ -941,6 +941,6 @@ const RealmBuilder = {
   
 }
 
-RealmBuilder.Init();
+// RealmBuilder.Init();
 
 // TODO: Move to class.

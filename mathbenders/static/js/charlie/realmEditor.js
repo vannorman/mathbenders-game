@@ -20,8 +20,8 @@ import {
     OrbitRealmBuilderMode
 } from "./modes/index.js";
 
-import GUI from './ui/base.js';
-import Camera from './camera.js';
+import GUI from './gui/base.js';
+import EditorCamera from './camera.js';
 
 class RealmEditor {
 
@@ -58,12 +58,8 @@ class RealmEditor {
 
         GameManager.subscribe(this,this.onGameStateChange);
 
-        // ui constants
-        this.gui = new GUI({realmEditor:this});
-        // First, create the UI including builder panel
-        
-        let camera = new Camera();
-        // Second, create the camera, render texture and assign it to the UI.mapPanel
+        this.camera = new EditorCamera();
+        this.gui = new GUI({ realmEditor:this });
     }
 
     onGameStateChange(state) {
@@ -228,6 +224,8 @@ class RealmEditor {
 
 // Created somewhere in the code where it makes sense
 window.realmEditor = new RealmEditor();
+console.log('re :');
+console.log(realmEditor);
 
 
 

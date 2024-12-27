@@ -124,7 +124,7 @@ class PlayerCamera{
     
 class RealmBuilderCamera {
     constructor(args={}){
-        const skyCam = new pc.Entity("SkyCamera");
+/*        const skyCam = new pc.Entity("SkyCamera");
         skyCam.addComponent("camera", {
             layers: [pc.LAYERID_SKYBOX, pc.LAYERID_DEPTH,  pc.LAYERID_WORLD,  ],
             projection:0,
@@ -140,7 +140,8 @@ class RealmBuilderCamera {
         Camera.sky = skyCam.camera;
         Camera.sky.entity.addComponent('script');
         Camera.sky.enabled = false;
-        pc.app.root.addChild(Camera.sky.entity);
+        pc.app.root.addChild(Camera.sky.entity); */
+
     }
 
 

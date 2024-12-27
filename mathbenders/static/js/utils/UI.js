@@ -247,7 +247,7 @@ const UI = {
         }
         parentEl.addChild(ent);
         UI.HoverColor({element:ent.element,cursor:cursor});
-        ent.element.on('mousedown',function(){ mouseDown(ent); });
+        if (mouseDown) ent.element.on('mousedown',function(){ mouseDown(ent); });
         return ent;
     },
 

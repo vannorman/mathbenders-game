@@ -53,7 +53,7 @@ export default class GUI {
     }
 
     isMouseOverMap(){
-        return Mouse.isMouseOverEntity(this.mapPanel)   // legacy ref. Should be this.mapPanel
+        return Mouse.isMouseOverEntity(this.#mapPanel)   // legacy ref. Should be this.mapPanel
         && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
         && !Mouse.isMouseOverEntity(this.#changeMapBtn)
         && !Mouse.isMouseOverEntity(this.#saveBtn)
@@ -96,6 +96,10 @@ export default class GUI {
         });
 
         gui.addChild(this.#mapPanel);
+
+        // Link render texture from camera to map
+        this.#mapPanel.element.texture = realmEditor.camera.renderTexture; // shows a tiled skybox (broken)
+        this.#mapPanel.on('mouseleave',function(){console.log('breakmap');});
 
 
         // Define panels where the builder icons go.
@@ -471,16 +475,17 @@ export default class GUI {
         this.#changeMapScreen.enabled=false;
 
 
-        this.CreatePopUpEditItemTray();
+        this.popUpEditItemTray = this.CreatePopUpEditItemTray({realmEditor:realmEditor});
         this.#screen.enabled = false;
  
 
     }
     
-    CreatePopUpEditItemTray(){
+    CreatePopUpEditItemTray(args={}){
+        const { realmEditor } = args;
         // Define pop-up gui for editing itmes.
-        this.#editableItemGroup = new pc.Entity('Parent');
-        this.#editableItemGroup.addComponent('element', {
+        const popUpEditItemTray = new pc.Entity('Parent');
+        popUpEditItemTray.addComponent('element', {
             layers: [pc.LAYERID_UI],
             type: 'group',  // This makes it a UI element
             anchor: [0.5,0.5,0.5,0.5],
@@ -489,10 +494,10 @@ export default class GUI {
             width: 320, 
             height: 360, 
         });
-        this.#screen.addChild(this.#editableItemGroup);
-        this.#editableItemGroup.element.margin = new pc.Vec4(this.#leftMargin,0,0,0);
+        this.#screen.addChild(popUpEditItemTray);
+        popUpEditItemTray.element.margin = new pc.Vec4(this.#leftMargin,0,0,0);
 
-        editableItemMenu = new pc.Entity("eidtablemenu");
+        const editableItemMenu = new pc.Entity("eidtablemenu");
         editableItemMenu.addComponent("element", {
             type: pc.ELEMENTTYPE_GROUP,
             layers:[pc.LAYERID_UI],
@@ -515,8 +520,8 @@ export default class GUI {
             textureAsset: assets.textures.ui.builder.editItemBackboard,
         });
 
-        this.#editableItemGroup.addChild(this.#editableItemBackboard);
-        this.#editableItemGroup.addChild(editableItemMenu);
+        popUpEditItemTray.addChild(this.#editableItemBackboard);
+        popUpEditItemTray.addChild(editableItemMenu);
 //        realmEditor.SetEditableItemMode(EditableItemMode.Editing); // TODO: Eytan, how pass thru realmeditor to set this mode?
 
         // Define a circle of buttons for various actions like copy, delete
@@ -532,18 +537,24 @@ export default class GUI {
                 height:50,
                 textureAsset: assets.textures.ui.numberSpherePos,
             })
-            this.#editableItemGroup.addChild(el);
+            popUpEditItemTray.addChild(el);
             this.#circleButtons.push(el);
             const offCenter = 20;
             el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
         });
 
+        
         // Set up MOVE
-        UI.SetUpItemButton({
+        // Pop up tray should be its own class?
+        /// Eytan - this is the example mentioned in realmEditor constructor for new GUI();
+        // need to bind this button to realmEditor.editItemMode.action
+        // this.moveButton.element.on('mousedown',function(){ })
+        this.moveButton = UI.SetUpItemButton({
             parentEl:this.#circleButtons[0],
             width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
             mouseDown:function(){realmEditor.BeginDraggingObject(realmEditor.editingItem);}
         });
+
 
         // Set up Rotate Left button
         UI.SetUpItemButton({
@@ -560,6 +571,9 @@ export default class GUI {
             anchor:[.8,.5,.8,.5],
             mouseDown:function(){realmEditor.RotateEditingItem(45);}
         });
+
+        popUpEditItemTray.enabled = false;
+        return popUpEditItemTray;
 
     }
 
