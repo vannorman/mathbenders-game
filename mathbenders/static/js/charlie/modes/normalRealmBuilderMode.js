@@ -7,14 +7,11 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
     }
 
     onMouseDown(e) {
-        console.log("%c Mousedown w/ mode: Normal",'color:#07f');
+        // console.log("%c Mousedown w/ mode: Normal",'color:#07f');
         if (this.editablItemUnderCursor){
             this.realmEditor.toggle('editingItem');
         } else if (this.realmEditor.gui.isMouseOverMap){
-            .
-
-            // Eytan TODO: implement "hand pan" mode. 
-            console.log('map');
+            this.realmEditor.toggle('handpan');
         }
 
 

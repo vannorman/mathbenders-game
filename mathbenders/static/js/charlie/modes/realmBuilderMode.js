@@ -16,11 +16,11 @@ export default class RealmBuilderMode {
     onMouseScroll() {}
 
     onEnter() { 
-        console.log('preparation code for mode'); 
+//        console.log('preparation code for mode'); 
     }
 
     onExit() { 
-        console.log('clean up code to run'); 
+ //       console.log('clean up code to run'); 
     }
 
 }

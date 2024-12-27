@@ -13,7 +13,7 @@ class GameManagerClass {
     setState(state){}
 
     setState(newState) {
-        //console.log("s:"+newState+", l:"+this.listeners.length);
+        console.log("s:"+newState+", l:"+this.listeners.length);
         if (this.state !== newState) {
             this.state = newState;
             this.notifyListeners();
@@ -21,7 +21,10 @@ class GameManagerClass {
     }
 
     notifyListeners() {
-        this.listeners.forEach(({ listener, callback }) => callback.call(listener, this.state));
+        this.listeners.forEach(({ listener, callback }) => {
+         //   console.log("calling "+callback+" on  "+listener);
+            callback.call(listener, this.state);
+        })
     }
 
     subscribe(listener, callback) {
@@ -34,7 +37,6 @@ class GameManagerClass {
 }
 
 window.GameManager = new GameManagerClass();
-GameManager.state = GameState.Playing;
 
 var myTemplates = {}; // stores prefabs
 var Game = {
@@ -78,7 +80,8 @@ var Game = {
         let cubeP = new pc.Vec3(0,18,0);
         let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
         ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
- 
+
+        GameManager.setState(GameState.Playing);
 
     },
 

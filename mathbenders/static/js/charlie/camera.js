@@ -24,8 +24,8 @@ export default class EditorCamera {
         this.directionMoving = 0;
         this.pivot = new pc.Entity();
         pc.app.root.addChild(this.pivot);
-        this.pivot.moveTo(Game.player.getPosition())
-        this.targetPivot = new pc.Vec3();
+        GameManager.subscribe(this, this.onGameStateChange);
+       this.targetPivot = new pc.Vec3();
         
         // Set up camera and position
         this.entity = new pc.Entity();
@@ -35,6 +35,14 @@ export default class EditorCamera {
         this.entity.setLocalPosition(this.entity.forward.mulScalar(-this.defaultSettings.zoom));
 
         this.renderTexture = this.setUpRenderTexture();
+    }
+
+    onGameStateChange(state){
+        if (state == GameState.RealmBuilder) { 
+            this.pivot.moveTo(Game.player.getPosition())
+            console.log("changestae:"+state);
+        } else {console.log('f');}
+
     }
 
     get cameraComponent(){ return this.entity.camera; }

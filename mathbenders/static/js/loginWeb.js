@@ -59,7 +59,7 @@ class LoginWeb {
             })
               .then((response) => response.json())
               .then((data) => {
-                    console.log(data)
+                    // console.log(data)
                     data.levels.forEach(realm=>{
                     realms.push(realm);
                     // $('#levels').append("<li>Level:"+realm.name);

@@ -1,4 +1,3 @@
-console.log('hi');
 import BuilderPanel from './builderPanel.js';
 
 export default class GUI {
@@ -18,6 +17,7 @@ export default class GUI {
     #mapIcons;
     #changeMapScreen; // parent
     #changeMapScreenLayout; // child
+    #customCursorIcon;
 
     // Navigation of all builder panel modes
     #builderPanels;
@@ -45,21 +45,32 @@ export default class GUI {
 
     constructor(params={}){
         this.realmEditor = params.realmEditor;
-        console.log('hi');
         this.buildUi({realmEditor:this.realmEditor}); // dislike passing this many times.
 //        this.createMap() // static? Once only
 //        this.createbuilderPanels();
 //        this.createMapButtons();
+        GameManager.subscribe(this, this.onGameStateChange);
     }
 
-    get isMouseOverMap() {
-        return Mouse.isMouseOverEntity(this.#mapPanel)   // legacy ref. Should be this.mapPanel
-        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
-        && !Mouse.isMouseOverEntity(this.#changeMapBtn)
-        && !Mouse.isMouseOverEntity(this.#saveBtn)
-        && !Mouse.isMouseOverEntity(this.#loadBtn)
+    onGameStateChange(state){
+        if (state == GameState.RealmBuilder) { 
+            pc.app.on('update',function(dt){realmEditor.gui.update(dt);});
+            GameManager.unsubscribe(realmEditor.gui);
+            console.log("changestae:"+state);
+        } else {console.log('f');}
 
-        && Mouse.cursorInPage; // got to be a better way ...!
+    }
+
+
+    get isMouseOverMap() {
+        const is = Mouse.isMouseOverEntity(this.#mapPanel)   // legacy ref. Should be this.mapPanel
+//        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
+//        && !Mouse.isMouseOverEntity(this.#changeMapBtn)
+//        && !Mouse.isMouseOverEntity(this.#saveBtn)
+//        && !Mouse.isMouseOverEntity(this.#loadBtn)
+//
+//        && Mouse.cursorInPage; // got to be a better way ...!
+        return is;
     }
 
     enable(){
@@ -71,6 +82,7 @@ export default class GUI {
     }
 
     buildUi(args){
+        // chonker function, split?
         const { realmEditor } = args;
         const gui = new pc.Entity("gui");
         this.#screen = gui;
@@ -82,6 +94,18 @@ export default class GUI {
             screenSpace: true,
         });
         pc.app.root.addChild(this.#screen);
+
+        // Set up the cursor.
+        this.#customCursorIcon = new pc.Entity("customcursoce");
+        this.#customCursorIcon.addComponent(
+            'element',{
+            type:'image',
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            }
+        )
+        this.#customCursorIcon.enabled = false;
+
 
         // Add an empty element to the "map" part of the screen. This will let the app know if the mouse cursor is over this part of screen
         this.#mapPanel = new pc.Entity("mappanel");
@@ -477,6 +501,9 @@ export default class GUI {
 
         this.popUpEditItemTray = this.CreatePopUpEditItemTray({realmEditor:realmEditor});
         this.#screen.enabled = false;
+
+        this.#screen.addChild(this.#customCursorIcon); // if I add this too early, it doesn't show up due to hierarchy, overwritten by map
+
  
 
     }
@@ -618,6 +645,23 @@ export default class GUI {
         RealmBuilder.realmNameText = inputGroup.inputText;
 
         return RealmBuilder.realmInfoScreen;
+
+    }
+
+    setHandPanCursor(){
+        this.#customCursorIcon.enabled = true;
+        this.#customCursorIcon.element.textureAsset = assets.textures.ui.icons.hand,
+        this.#customCursorIcon.element.width = 50;
+        this.#customCursorIcon.element.height= 50;
+        pc.app.graphicsDevice.canvas.style.cursor = 'none';
+    }
+
+    update(dt){
+        const canvas = pc.app.graphicsDevice.canvas;
+        let x = Mouse.x/canvas.width;
+        let y = Mouse.y/canvas.height;
+        this.#customCursorIcon.element.anchor = new pc.Vec4(x, y, x, y);
+
 
     }
 

@@ -100,8 +100,6 @@ class RealmEditor {
     // Invoked by a caller, likely current mode or some button onClick,
     // to toggle the current mode
     toggle(mode) {
-        console.log('set:'+mode);
-        console.log(this.#modes);
         // If the 'mode' does not exist, return
         if (!this.#modes.has(mode)) return;
 
@@ -130,7 +128,7 @@ class RealmEditor {
 
         if (e.dx > 100) e.dx = 0;
         if (e.dy > 100) e.dy = 0;
-        this.#mode.onMouseMove();
+        this.#mode.onMouseMove(e);
     }
 
     onMouseScroll(e) {
@@ -184,19 +182,6 @@ class RealmEditor {
 
 // Created somewhere in the code where it makes sense
 window.realmEditor = new RealmEditor();
-console.log('re :');
-console.log(realmEditor);
 
 
-
-// Example usages
-const onClick = () => {
-    realmEditor.toggle('handpan');
-}
-
-// Perhaps when clicking on some object that listens to mouse events
-// and has this callback assigned
-const onSomeOtherClick = () => {
-    realmEditor.toggle('draggingObject');
-}
 
