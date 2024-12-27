@@ -294,6 +294,7 @@ export default class GUI {
 
         this.#builderPanels.forEach(panel=>{
             this.#navList.addChild(panel.navButton); // move to where builderpanel instance is created
+            this.#builderObjectIconsPanel.addChild(panel.panel);
         });
 
         editTerrainPanel.navButton.element.on('click',function(){

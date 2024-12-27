@@ -11,7 +11,7 @@ export default class BuilderPanel {
             realmEditor
         } = args;
 
-        this._name = name;
+        this.name = name;
  
         panel = this.CreateBuilderPanel(name);
         items.forEach(item => {
@@ -24,25 +24,22 @@ export default class BuilderPanel {
         navButton.element.on('click',function(){
             _this.select();
         });
-        this._panel = panel;
-        this._navButton = navButton;
-        this._items = items;
+        this.panel = panel;
+        this.navButton = navButton;
+        this.items = items;
         
    }
 
-    disable() { this.panel.enabled=false;}
-    enable(){ this.panel.enabled=true;}
+    disable() { 
+
+        this.panel.enabled=false;
+    }
+
+    enable(){ 
+        this.panel.enabled=true;
+    }
 
     select(){
-        // RealmBuilder.BuilderPanels.forEach(x=>{x.disable()}); // move to where builderpanel instance is selected
-//        RealmBuilder.navList.children.forEach(x=>{
-//            if (x.element) {
-//                x.element.useInput=true;
-//                x.element.opacity=0;
-//                x.element.isSelected=false;
-//                x.children[1].element.color = pc.Color.WHITE; // awkward text element ref
-//            }
-//        })
         realmEditor.gui.builderPanels.forEach(x=>{x.disable()});
         realmEditor.gui.navList.children.forEach(x=>{
            if (x.element) {
@@ -59,6 +56,7 @@ export default class BuilderPanel {
         button.element.isSelected=true;
         button.children[1].element.color = pc.Color.BLACK; // awkward text element ref
         button.element.opacity=1;
+
     }
 
     CreateBuilderPanel(name){
@@ -187,15 +185,15 @@ export default class BuilderPanel {
  
     }
 
-    get name() { return this._name; }
-    set name(value) { this._name = value; }
-    get items() { return this._items; }
-    set items(newItems) { this._items = newItems; }
-    addItem(templateName, textureAsset) { this._items.push({ templateName, textureAsset }); }
-    get panel() { return this._panel; }
-    set panel(value) { this._panel = value; }
-    get navButton() { return this._navButton; }
-    set navButton(value) { this._navButton = value; }
+//    get name() { return this._name; }
+//    set name(value) { this._name = value; }
+//    get items() { return this._items; }
+//    set items(newItems) { this._items = newItems; }
+//    // addItem(templateName, textureAsset) { this._items.push({ templateName, textureAsset }); }
+//    get panel() { return this._panel; }
+//    set panel(value) { this._panel = value; }
+//    get navButton() { return this._navButton; }
+//    set navButton(value) { this._navButton = value; }
 }
 
 
