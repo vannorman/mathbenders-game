@@ -5,7 +5,7 @@ export default class GUI {
 
     // Note: 'backboard', 'screen', 'panel', 'window' terminology to be merged/truncated
     
-    #leftMargin = 240;
+    get leftMargin() { return 240; }
     #logoPanelWidth = 80;
     #screen; // base entity holding all UI
 
@@ -52,7 +52,7 @@ export default class GUI {
 //        this.createMapButtons();
     }
 
-    isMouseOverMap(){
+    get isMouseOverMap() {
         return Mouse.isMouseOverEntity(this.#mapPanel)   // legacy ref. Should be this.mapPanel
         && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
         && !Mouse.isMouseOverEntity(this.#changeMapBtn)
@@ -91,7 +91,7 @@ export default class GUI {
             pivot: [0, 0],
             width: 1,
             height: 1,
-            margin: [this.#leftMargin, 0, 0, 0],
+            margin: [this.leftMargin, 0, 0, 0],
             opacity:1,
         });
 
@@ -108,7 +108,7 @@ export default class GUI {
             type: "image",
             anchor: [0, 0, 0, 1],    
             pivot: [0, 0.5],         
-            width: this.#leftMargin,               // 
+            width: this.leftMargin,               // 
             height: 1,               
             // color: pc.Color.RED,//new pc.Color(.6,.6,.6),
             textureAsset: assets.textures.ui.builder.orangeFade,
@@ -490,12 +490,12 @@ export default class GUI {
             type: 'group',  // This makes it a UI element
             anchor: [0.5,0.5,0.5,0.5],
             pivot: [0.5, 0.5],
-            margin: [this.#leftMargin, 0, 0, 0],
+            margin: [this.leftMargin, 0, 0, 0],
             width: 320, 
             height: 360, 
         });
         this.#screen.addChild(popUpEditItemTray);
-        popUpEditItemTray.element.margin = new pc.Vec4(this.#leftMargin,0,0,0);
+        popUpEditItemTray.element.margin = new pc.Vec4(this.leftMargin,0,0,0);
 
         const editableItemMenu = new pc.Entity("eidtablemenu");
         editableItemMenu.addComponent("element", {

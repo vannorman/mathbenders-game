@@ -2,12 +2,14 @@
 // we can capture it within a class/object, RealmBuilderCamera, Camera
 export default class EditorCamera {
 
-    constructor() {
+    constructor(args) {
         this.defaultSettings = {
             // height: 25,
             rotation: new pc.Vec3(-45, 45, 0),
             zoom: 35
         }
+        const {realmEditor}=args;
+        this.realmEditor=realmEditor;
         this.degreesRotated = 0;
 
         // Mapping of realm states
@@ -54,7 +56,9 @@ export default class EditorCamera {
 
     get skyCamAspectRatio() { 
         // Since the screen is more narrow in the "Map" area, we adjust the aspect ratio accordingly 
-        return (pc.app.graphicsDevice.width-RealmBuilder.leftMargin-RealmBuilder.logoPanelWidth)/pc.app.graphicsDevice.height;
+        const leftMargin = 80;
+        const logoPanelWidth = 80; 
+        return (pc.app.graphicsDevice.width-leftMargin-logoPanelWidth)/pc.app.graphicsDevice.height;
     }
 
 
@@ -133,6 +137,8 @@ export default class EditorCamera {
 
         }
     }
+
+
 
     update(dt) {
         this.state.onUpdateBy(this);
