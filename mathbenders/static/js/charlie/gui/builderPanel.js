@@ -43,6 +43,16 @@ export default class BuilderPanel {
 //                x.children[1].element.color = pc.Color.WHITE; // awkward text element ref
 //            }
 //        })
+        realmEditor.gui.builderPanels.forEach(x=>{x.disable()});
+        realmEditor.gui.navList.children.forEach(x=>{
+           if (x.element) {
+               x.element.useInput=true;
+               x.element.opacity=0;
+               x.element.isSelected=false;
+               x.children[1].element.color = pc.Color.WHITE; // awkward text element ref
+           }
+       })
+
         this.enable();
         const button = this.navButton;  
         button.element.useInput=false;

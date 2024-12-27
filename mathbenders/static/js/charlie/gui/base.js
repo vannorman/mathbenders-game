@@ -21,9 +21,11 @@ export default class GUI {
 
     // Navigation of all builder panel modes
     #builderPanels;
+    get builderPanels(){return this.#builderPanels; }
     #builderObjectIconsPanel;
     #realmInfoScreen; // first panel
     #navList;
+    get navList() {return this.#navList;}
   
     // Terrain
     #editTerrainScreen;
@@ -292,7 +294,6 @@ export default class GUI {
 
         this.#builderPanels.forEach(panel=>{
             this.#navList.addChild(panel.navButton); // move to where builderpanel instance is created
-
         });
 
         editTerrainPanel.navButton.element.on('click',function(){
