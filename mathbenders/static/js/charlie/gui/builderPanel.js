@@ -19,6 +19,7 @@ export default class BuilderPanel {
             panel.addChild(itemIcon);
         });
         navButton = this.AddNav({text:name,width:logoPanelWidth});
+
         const _this = this;
         navButton.element.on('click',function(){
             _this.select();
@@ -142,7 +143,6 @@ export default class BuilderPanel {
     }
 
     AddNav(options={}){
-        console.log("add:"+options);
         const { text, width } = options;
         const navA = new pc.Entity("nava"); // button
         navA.addComponent('element', {
@@ -172,7 +172,6 @@ export default class BuilderPanel {
         navA.element.on('mouseenter',function(){if (!navA.element.isSelected) textA.element.color=pc.Color.BLACK;})
         navA.element.on('mouseleave',function(){if (!navA.element.isSelected) textA.element.color=pc.Color.WHITE;})
         navA.addChild(textA); 
-        // RealmBuilder.navList.addChild(navA); // move to where builderpanel instance is created
         textA.element.pivot=[0.5,0.5];
         return navA;
  

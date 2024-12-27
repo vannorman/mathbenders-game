@@ -290,6 +290,11 @@ export default class GUI {
         editTerrainPanel.panel.addChild(this.#editTerrainScreen);
         this.#builderPanels.push(editTerrainPanel);
 
+        this.#builderPanels.forEach(panel=>{
+            this.#navList.addChild(panel.navButton); // move to where builderpanel instance is created
+
+        });
+
         editTerrainPanel.navButton.element.on('click',function(){
             // TODO: Move outside of UI?
             /*
