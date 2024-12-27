@@ -6,6 +6,9 @@ export default class HandPanRealmBuilderMode extends RealmBuilderMode {
         this.realmEditor.gui.setHandPanCursor();
 
     }
+    onExit(){
+        this.realmEditor.gui.setNormalCursor();
+    }
     onMouseMove(e) {
         
         super.onMouseMove(e);

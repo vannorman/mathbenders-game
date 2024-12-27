@@ -142,6 +142,7 @@ export default class BuilderPanel {
     }
 
     AddNav(options={}){
+        console.log("add:"+options);
         const { text, width } = options;
         const navA = new pc.Entity("nava"); // button
         navA.addComponent('element', {

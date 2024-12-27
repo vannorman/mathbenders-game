@@ -60,6 +60,7 @@ class RealmEditor {
 
         this.camera = new EditorCamera({realmEditor:this});
         this.gui = new GUI({ realmEditor:this });
+
     }
 
     onGameStateChange(state) {
@@ -133,8 +134,7 @@ class RealmEditor {
 
     onMouseScroll(e) {
         if (!this.#isEnabled) return;
-
-        this.#mode.onMouseScroll();
+        this.#mode.onMouseScroll(e);
     }
 
     update(dt) {

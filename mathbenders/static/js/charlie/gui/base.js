@@ -45,20 +45,20 @@ export default class GUI {
 
     constructor(params={}){
         this.realmEditor = params.realmEditor;
-        this.buildUi({realmEditor:this.realmEditor}); // dislike passing this many times.
+        this.buildUi();
 //        this.createMap() // static? Once only
 //        this.createbuilderPanels();
 //        this.createMapButtons();
         GameManager.subscribe(this, this.onGameStateChange);
     }
 
+    #updateInitialized=false;
     onGameStateChange(state){
-        if (state == GameState.RealmBuilder) { 
+        // @Eytan; I can't understand why but cursor won't appear if i initialize update in constructor, so i wait for game to start
+        if (!this.#updateInitialized && state == GameState.RealmBuilder) { 
             pc.app.on('update',function(dt){realmEditor.gui.update(dt);});
-            GameManager.unsubscribe(realmEditor.gui);
-            console.log("changestae:"+state);
-        } else {console.log('f');}
-
+            this.#updateInitialized=true;
+        }
     }
 
 
@@ -81,9 +81,8 @@ export default class GUI {
         this.#screen.enabled = false;
     }
 
-    buildUi(args){
+    buildUi(){
         // chonker function, split?
-        const { realmEditor } = args;
         const gui = new pc.Entity("gui");
         this.#screen = gui;
         gui.addComponent("screen", {
@@ -122,7 +121,7 @@ export default class GUI {
         gui.addChild(this.#mapPanel);
 
         // Link render texture from camera to map
-        this.#mapPanel.element.texture = realmEditor.camera.renderTexture; // shows a tiled skybox (broken)
+        this.#mapPanel.element.texture = this.realmEditor.camera.renderTexture; // shows a tiled skybox (broken)
         this.#mapPanel.on('mouseleave',function(){console.log('breakmap');});
 
 
@@ -140,6 +139,7 @@ export default class GUI {
         });
 
         gui.addChild(builderPanel);
+        this.builderPanel=builderPanel;
 
         // Create the second image (positioned 160px from the left, 80px wide, 100% height)
         this.#builderObjectIconsPanel = new pc.Entity("builerobjectsiconpanl");
@@ -263,30 +263,30 @@ export default class GUI {
         }); 
         
         this.#builderPanels = []
-        const realmInfoPanel = new BuilderPanel({ realmEditor: realmEditor,  name:"Realm Info"});
+        const realmInfoPanel = new BuilderPanel({ realmEditor: this.realmEditor,  name:"Realm Info"});
         const realmInfoScreen = this.CreateRealmInfoScreen();
         realmInfoPanel.panel.addChild(realmInfoScreen);
         this.#builderPanels.push(realmInfoPanel);
-        this.#builderPanels.push(new BuilderPanel({ realmEditor: realmEditor,  name:"Player", items : [
+        this.#builderPanels.push(new BuilderPanel({ realmEditor: this.realmEditor,  name:"Player", items : [
                     { templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
                     { templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
-            new BuilderPanel({ realmEditor: realmEditor,  name:"Machines", items : [
+            new BuilderPanel({ realmEditor: this.realmEditor,  name:"Machines", items : [
                     { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
                     { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
                     { templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(
-            new BuilderPanel({ realmEditor: realmEditor,  name:"Numbers", items : [
+            new BuilderPanel({ realmEditor: this.realmEditor,  name:"Numbers", items : [
                     { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
                     { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
-        this.#builderPanels.push(new BuilderPanel({ realmEditor: realmEditor,  name:"Castle", items : [
+        this.#builderPanels.push(new BuilderPanel({ realmEditor: this.realmEditor,  name:"Castle", items : [
                     { templateName:Constants.Templates.CastleTurret,textureAsset:assets.textures.ui.icons.turret1 },
                     { templateName:Constants.Templates.CastleWall,textureAsset:assets.textures.ui.icons.wall, },
             ],}));
-        const editTerrainPanel = new BuilderPanel({ realmEditor: realmEditor,  name:"Terrain"});
+        const editTerrainPanel = new BuilderPanel({ realmEditor: this.realmEditor,  name:"Terrain"});
         editTerrainPanel.panel.addChild(this.#editTerrainScreen);
         this.#builderPanels.push(editTerrainPanel);
 
@@ -499,7 +499,7 @@ export default class GUI {
         this.#changeMapScreen.enabled=false;
 
 
-        this.popUpEditItemTray = this.CreatePopUpEditItemTray({realmEditor:realmEditor});
+        this.popUpEditItemTray = this.CreatePopUpEditItemTray({realmEditor:this.realmEditor});
         this.#screen.enabled = false;
 
         this.#screen.addChild(this.#customCursorIcon); // if I add this too early, it doesn't show up due to hierarchy, overwritten by map
@@ -654,6 +654,12 @@ export default class GUI {
         this.#customCursorIcon.element.width = 50;
         this.#customCursorIcon.element.height= 50;
         pc.app.graphicsDevice.canvas.style.cursor = 'none';
+    }
+
+    setNormalCursor(){
+       this.#customCursorIcon.enabled = false;
+       pc.app.graphicsDevice.canvas.style.cursor = 'auto';
+
     }
 
     update(dt){

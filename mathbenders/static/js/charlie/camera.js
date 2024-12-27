@@ -40,9 +40,7 @@ export default class EditorCamera {
     onGameStateChange(state){
         if (state == GameState.RealmBuilder) { 
             this.pivot.moveTo(Game.player.getPosition())
-            console.log("changestae:"+state);
-        } else {console.log('f');}
-
+        }
     }
 
     get cameraComponent(){ return this.entity.camera; }
