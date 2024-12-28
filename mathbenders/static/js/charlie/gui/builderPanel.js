@@ -8,14 +8,15 @@ export default class BuilderPanel {
             panel = null, 
             navButton = null,
             logoPanelWidth = 80,
-            realmEditor
+            realmEditor,
+            gui
         } = args;
 
         this.name = name;
- 
+        this.gui = gui; // Needed for first "select()" call, called in base.js line 300, since this is all kicked off by the constructor of realmeditor, so a global realmeditor has not resolved yet.. awkward 
         panel = this.CreateBuilderPanel(name);
         items.forEach(item => {
-            const itemIcon = this.CreateBuilderObjectIcon({realmEditor:realmEditor,templateName:item.templateName,textureAsset:item.textureAsset})
+            const itemIcon = this.CreateBuilderObjectIcon({realmEditor:gui.realmEditor,templateName:item.templateName,textureAsset:item.textureAsset})
             panel.addChild(itemIcon);
         });
         navButton = this.AddNav({text:name,width:logoPanelWidth});
@@ -40,8 +41,8 @@ export default class BuilderPanel {
     }
 
     select(){
-        realmEditor.gui.builderPanels.forEach(x=>{x.disable()});
-        realmEditor.gui.navList.children.forEach(x=>{
+        this.gui.builderPanels.forEach(x=>{x.disable()});
+        this.gui.navList.children.forEach(x=>{
            if (x.element) {
                x.element.useInput=true;
                x.element.opacity=0;

@@ -736,7 +736,7 @@ const RealmBuilder = {
         }
     },
     BeginDraggingObject(item){
-       this.SetMode(RealmBuilderMode.DraggingObject);
+        this.SetMode(RealmBuilderMode.DraggingObject);
         this.draggingItem = item;
         this.draggingItem.getComponentsInChildren('collision').forEach(x=>{x.enabled=false;});
         this.SetDraggingMode({mode:DraggingMode.PostInstantiation});

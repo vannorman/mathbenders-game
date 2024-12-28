@@ -162,7 +162,30 @@ class RealmEditor {
     BeginDraggingObject(obj) {
 
     }
+    BeginDraggingObject(item){
+        this.SetMode(RealmBuilderMode.DraggingObject);
+        this.draggingItem = item;
+        this.draggingItem.getComponentsInChildren('collision').forEach(x=>{x.enabled=false;});
+        this.SetDraggingMode({mode:DraggingMode.PostInstantiation});
+    }
+    BeginDraggingNewObject(options={}){
+        const { templateName, iconTextureAsset, width=80, height=80 } = options;
+        this.lastIconTextureAsset = iconTextureAsset;
+        // Note, currently if you drag an item onto empty space (not on top of a terrain), it will still exist! 
+        this.toggle('draggingObject');
+        // Todo: Eytan help? "drag object" functionality
+        this.#mode.SetData({
+            mode:DraggingMode.PreInstantiation,
+            iconTextureAsset:iconTextureAsset,
+            width:width,
+            height:height,
+            templateName:templateName
+        });
 
+//        this.SetDraggingMode({mode:DraggingMode.PreInstantiation,iconTextureAsset:iconTextureAsset,width:width,height:height});
+//        this.draggingTemplateNameToInstantiate = templateName;
+    }
+ 
     get editingItem(){ 
         // Eytan - todo - how to extract editing item from that mode? Or call it directly skipping realmEditor
         return null;
@@ -175,7 +198,9 @@ class RealmEditor {
 
     }
 
-
+    UpdateData(data){
+        console.log("todo: update data:"+JSON.stringify(data));
+    }
 
 
 }

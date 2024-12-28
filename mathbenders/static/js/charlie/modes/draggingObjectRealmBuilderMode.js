@@ -2,6 +2,7 @@ import RealmBuilderMode from "./realmBuilderMode.js";
 
 export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
+    // Todo: Eytan help? Pass relevant data from gui button press -> realmEditor -> set drag mode -> get data for obj and begin drag behavior
     #instantiationModes;
     #instantiationMode;
 

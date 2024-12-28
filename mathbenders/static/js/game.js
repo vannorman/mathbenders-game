@@ -13,7 +13,6 @@ class GameManagerClass {
     setState(state){}
 
     setState(newState) {
-        console.log("s:"+newState+", l:"+this.listeners.length);
         if (this.state !== newState) {
             this.state = newState;
             this.notifyListeners();

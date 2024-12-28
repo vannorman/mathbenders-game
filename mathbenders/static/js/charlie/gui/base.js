@@ -265,37 +265,39 @@ export default class GUI {
         }); 
         
         this.#builderPanels = []
-        const realmInfoPanel = new BuilderPanel({ realmEditor: this.realmEditor,  name:"Realm Info"});
-        const realmInfoScreen = this.CreateRealmInfoScreen();
-        realmInfoPanel.panel.addChild(realmInfoScreen);
+        const realmInfoPanel = new BuilderPanel({ gui:this,  name:"Realm Info"});
+        this.realmInfoScreen = this.CreateRealmInfoScreen();
+        realmInfoPanel.panel.addChild(this.realmInfoScreen);
         this.#builderPanels.push(realmInfoPanel);
-        this.#builderPanels.push(new BuilderPanel({ realmEditor: this.realmEditor,  name:"Player", items : [
+        this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Player", items : [
                     { templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
                     { templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
-            new BuilderPanel({ realmEditor: this.realmEditor,  name:"Machines", items : [
+            new BuilderPanel({ gui:this,  name:"Machines", items : [
                     { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
                     { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
                     { templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(
-            new BuilderPanel({ realmEditor: this.realmEditor,  name:"Numbers", items : [
+            new BuilderPanel({ gui:this,  name:"Numbers", items : [
                     { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
                     { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
-        this.#builderPanels.push(new BuilderPanel({ realmEditor: this.realmEditor,  name:"Castle", items : [
+        this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
                     { templateName:Constants.Templates.CastleTurret,textureAsset:assets.textures.ui.icons.turret1 },
                     { templateName:Constants.Templates.CastleWall,textureAsset:assets.textures.ui.icons.wall, },
             ],}));
-        const editTerrainPanel = new BuilderPanel({ realmEditor: this.realmEditor,  name:"Terrain"});
+        const editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
         editTerrainPanel.panel.addChild(this.#editTerrainScreen);
         this.#builderPanels.push(editTerrainPanel);
 
+        // Now that each builder panel was created, add it to the hierarcy.
         this.#builderPanels.forEach(panel=>{
-            this.#navList.addChild(panel.navButton); // move to where builderpanel instance is created
+            this.#navList.addChild(panel.navButton); 
             this.#builderObjectIconsPanel.addChild(panel.panel);
         });
+        this.#builderPanels[0].select();
 
         editTerrainPanel.navButton.element.on('click',function(){
             // TODO: Move outside of UI?
@@ -625,8 +627,8 @@ export default class GUI {
 
     CreateRealmInfoScreen(){
         // Add (custom) Terrain builder panel screen
-        RealmBuilder.realmInfoScreen = new pc.Entity();
-        RealmBuilder.realmInfoScreen.addComponent('element',{
+        const realmInfoScreen = new pc.Entity();
+        realmInfoScreen.addComponent('element',{
             type:'image',
             anchor:[0.5,0.5,0.5,0.5],
             pivot:[0.5,1],
@@ -635,7 +637,7 @@ export default class GUI {
             opacity:0.5,
             color:pc.Color.BLUE,
         }); 
-        RealmBuilder.realmInfoScreen.addComponent("layoutgroup", {
+        realmInfoScreen.addComponent("layoutgroup", {
             orientation: pc.ORIENTATION_VERTICAL,
             spacing: new pc.Vec2(-20, 0),
             alignment: [0.5,1],
@@ -645,13 +647,13 @@ export default class GUI {
 
         
         const inputGroup = UI.createInputWithLabel({text:"Name:",onChangeFn:(val)=>{
-            RealmBuilder.RealmData.name=val;
+            this.realmEditor.UpdateData({'name':val});
         }});
 
-        RealmBuilder.realmInfoScreen.addChild(inputGroup.root);
-        RealmBuilder.realmNameText = inputGroup.inputText;
+        realmInfoScreen.addChild(inputGroup.root);
+        //        RealmBuilder.realmNameText = inputGroup.inputText; // why?
 
-        return RealmBuilder.realmInfoScreen;
+        return realmInfoScreen;
 
     }
 
