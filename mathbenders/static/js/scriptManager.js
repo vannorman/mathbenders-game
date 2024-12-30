@@ -126,6 +126,7 @@ var ScriptManager = {
           "/static/js/charlie/gui/builderPanel.js", 
           "/static/js/charlie/gui/base.js", 
           "/static/js/charlie/camera.js", 
+          "/static/js/charlie/placedItem.js", 
           "/static/js/charlie/realmEditor.js", 
          "/static/js/charlie/modes/draggingObjectRealmBuilderMode.js",
         "/static/js/charlie/modes/index.js",

@@ -22,6 +22,7 @@ import {
 
 import GUI from './gui/base.js';
 import EditorCamera from './camera.js';
+import PlacedItem from './placedItem.js';
 
 class RealmEditor {
 
@@ -170,20 +171,12 @@ class RealmEditor {
     }
     BeginDraggingNewObject(options={}){
         const { templateName, iconTextureAsset, width=80, height=80 } = options;
-        this.lastIconTextureAsset = iconTextureAsset;
-        // Note, currently if you drag an item onto empty space (not on top of a terrain), it will still exist! 
+        console.log('begin drag:'+templateName);
         this.toggle('draggingObject');
         // Todo: Eytan help? "drag object" functionality
-        this.#mode.SetData({
-            mode:DraggingMode.PreInstantiation,
-            iconTextureAsset:iconTextureAsset,
-            width:width,
-            height:height,
-            templateName:templateName
-        });
-
-//        this.SetDraggingMode({mode:DraggingMode.PreInstantiation,iconTextureAsset:iconTextureAsset,width:width,height:height});
-//        this.draggingTemplateNameToInstantiate = templateName;
+        const dragMode = 'pre';
+        const args = { dragMode:dragMode,templateName:templateName,iconTextureAsset:iconTextureAsset }
+        this.#mode.toggle(args);
     }
  
     get editingItem(){ 
@@ -202,6 +195,19 @@ class RealmEditor {
         console.log("todo: update data:"+JSON.stringify(data));
     }
 
+    InstantiateItem(args){
+        console.log("Inst:"+args.toString());
+        const {templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO} = args;
+        const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
+
+        const placedObject = new PlacedItem({
+            entity : entity,
+            templateName : templateName,
+            // level : level
+        })
+        // level.placedObjects.push(placedObject);
+        return entity;
+    }
 
 }
 
