@@ -94,16 +94,17 @@ export default class GUI {
         } else {
             let wc = new pc.Vec3()
             this.realmEditor.camera.cameraComponent.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
-            worldPointUnderCursor = wc.add(this.realmEditor.camera.entity.forward.mulScalar(this.#lastCameraDistance));
+            const dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.x-adjust,Mouse.y);
+            worldPointUnderCursor = wc.add(dir.mulScalar(this.#lastCameraDistance));
         }
 
         return worldPointUnderCursor;
     }
 
 
-get editableItemUnderCursor () {
+    get editableEntityUnderCursor () {
         // was:  UpdateWorldPointUnderCursor(){
-        const editableItemUnderCursor = null;
+        var editableEntityUnderCursor = null;
 
         // Bit of annoying math to adjust for the fact that the MapPanel is only 560 x 500, while the Camera's viewport size is 800 x 500
         // I couldn't figure out how to make the camera's viewport etc be correct so I just adjust based on the app width and left margin
@@ -114,21 +115,20 @@ get editableItemUnderCursor () {
         let mx = (Mouse.x - leftMargin);
         let ww = w - leftMargin;
         let adjust = leftMargin*(ww - mx)/ww;
-        let raycastResult = this.cameraComponent.screenPointToRay(Mouse.x-adjust,Mouse.y);
+        let raycastResult = realmEditor.camera.cameraComponent.screenPointToRay(Mouse.x-adjust,Mouse.y);
         // Whew ok bs math is over
         if (raycastResult) {
             if (raycastResult.entity) {
-                this.worldPointUnderCursor = raycastResult.point;
-                this.lastCameraDistance = pc.Vec3.distance(this.worldPointUnderCursor,Camera.sky.entity.getPosition());
                 // editable item under cursor? while in normal mode?
                 // editable item may be a "parent" with no colliders, so go upstream until we find it
                 const parentDepthSearch = 5;
                 let par = raycastResult.entity;
-
+                console.log('par:'+par.name);
+                console.log('tags:'+par.tags._list.toString());
                 for(i=0;i<parentDepthSearch;i++){
                     if (par.tags._list.includes(Constants.Tags.BuilderItem)){
-                        editableItemUnderCursor = par;
-                        return;
+                        editableEntityUnderCursor = par;
+                        return editableEntityUnderCursor;
                     } else {
                     //    if (par.name == "NumberHoop") console.log('not found:'+par.name+","+par.getGuid()+" vs "+item.obj.getGuid());
                         par = par.parent ? par.parent : par;
@@ -138,10 +138,9 @@ get editableItemUnderCursor () {
         } else {
             let wc = new pc.Vec3()
             Camera.sky.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
-            this.worldPointUnderCursor = wc.add(Camera.sky.entity.forward.mulScalar(this.lastCameraDistance));
         }
 
-        return editablItemUnderCursor;
+        return null;
     }
 
 

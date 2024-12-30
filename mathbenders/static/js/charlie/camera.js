@@ -131,15 +131,17 @@ export default class EditorCamera {
         const {
             targetPivotPosition,
             targetZoomFactor = 35,
-            shouldLerp = true,
+            shouldLerp = false,
             shouldSnapToDefaultRotation = false
         } = parameters;
+            console.log('move to:'+targetPivotPosition);
         if (shouldSnapToDefaultRotation) {
             // then do so
         }
         if (shouldLerp) {
             this.state.name = 'lerping';
         } else {
+            this.pivot.moveTo(targetPivotPosition);
 
         }
     }

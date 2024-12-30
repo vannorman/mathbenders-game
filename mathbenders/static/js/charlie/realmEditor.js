@@ -200,15 +200,23 @@ class RealmEditor {
         const {templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO} = args;
         const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
-        const placedObject = new PlacedItem({
+        const placedItem = new PlacedItem({
             entity : entity,
             templateName : templateName,
             // level : level
         })
         // level.placedObjects.push(placedObject);
-        return entity;
+        return placedItem;
     }
-
+    
+    beginEditingItemUnderCursor(){
+        const entity = this.gui.editableEntityUnderCursor;
+        console.log('edit:'+entity.name)
+        if (entity){
+            this.toggle('editingItem');
+            this.#mode.setEntity(entity);
+        }
+    }
 }
 
 // Created somewhere in the code where it makes sense

@@ -11,12 +11,33 @@ export default class PlacedItem {
        entity.on('destroy',function(){
             console.log('item was destroyed; did we update the save data model in realmEditor?');
         })
+        this.colliders = new Map();
+        entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
+            this.colliders.set(collisionComponent,collisionComponent.enabled);
+        });
+
+        this.disableColliders();
  
+    }
+
+    
+
+    enableColliders(){
+        for (const [colliderComponent, activeState] of this.colliders) {
+            if (activeState) colliderComponent.enabled = true;
+        }
+    }
+
+    disableColliders(){
+        for (const [colliderComponent, activeState] of this.colliders) {
+            if (activeState) colliderComponent.enabled = false;
+        }
     }
 
     get position(){return this._entity.getPosition().sub(this._level.terrain.centroid).trunc();}
     get rotation(){return this._entity.getRotation().trunc();}
     get templateName(){ return this._templateName; }
+    get entity() {return this._entity; } 
     
 
     toJSON(){

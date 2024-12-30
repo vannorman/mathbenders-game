@@ -68,7 +68,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     onMouseUp(e) {
         super.onMouseUp(e);
         this.#instantiationMode.onMouseUp(e);
-        this.realmEditor.toggle('normal')
     }
 
     onExit(){
@@ -107,6 +106,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
         }
     }
     onMouseUp(e){
+        this.realmEditor.toggle('normal')
         
     }
 }
@@ -121,18 +121,19 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
             templateName : this.draggingObjectRealmBuilderMode.templateName,
         }
         this.#instantiatedItem = realmEditor.InstantiateItem(data);
+        this.#instantiatedItem.disableColliders();
     }
     
     onExit(){
         console.log('post exit');
-        if (this.#instantiatedItem) this.#instantiatedItem.destroy();    
+        if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();    
     }
 
     onMouseMove(e){
         if (realmEditor.gui.isMouseOverMap){
             if (this.#instantiatedItem){
                 const p = realmEditor.gui.worldPointUnderCursor;
-                this.#instantiatedItem.moveTo(p);
+                this.#instantiatedItem.entity.moveTo(p);
             } else {
                 console.log("but this shouldn't BE!!");
             }
@@ -144,7 +145,10 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
         }
     }
     onMouseUp(e){
+        this.#instantiatedItem.enableColliders();
         this.#instantiatedItem = null;
+        realmEditor.toggle('normal')
+        realmEditor.beginEditingItemUnderCursor();
     }
  
  }

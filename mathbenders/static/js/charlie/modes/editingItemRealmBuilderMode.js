@@ -8,12 +8,18 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     constructor(params) {
         super(params);
         this.#modes = new Map([
-            ['editing', new EditingMode()],
-            ['normal', new NormalMode()],
-            ['poppingIn', new PoppingInMode()],
-            ['poppingOut', new PoppingOutMode()],
+            ['editing', new EditingMode(this)],
+            ['normal', new NormalMode(this)],
+            ['poppingIn', new PoppingInMode(this)],
+            ['poppingOut', new PoppingOutMode(this)],
         ]);
         this.#mode = this.#modes.get('editing');
+    }
+
+    setEntity(entity){
+        this.entity = entity;
+        realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
+        this.toggle('poppingIn');
     }
 
     toggle(editMode) {
@@ -53,14 +59,60 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         super.onMouseDown(e);
     }
 
+
+    update(dt){
+        this.#mode.update(dt);
+    }
+
+    onExit(){
+        
+
+    }
 }
 
 class EditMode {
+    constructor(superMode){
+        this.superMode = superMode;
+    }
     onEnter() {}
     onExit() {}
+    update(dt){}
 }
 
 class EditingMode extends EditMode {}
 class NormalMode extends EditMode {}
-class PoppingInMode extends EditMode {}
-class PoppingOutMode extends EditMode {}
+class PoppingInMode extends EditMode {
+    onEnter(){
+        realmEditor.gui.popUpEditItemTray.enabled=true;
+        
+    }
+    update(dt){
+        if (realmEditor.gui.popUpEditItemTray.localScale.x < 1.0-fudge) {
+            const popInSpeed = 1000;
+            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,1.0,dt * popInSpeed);
+            realmEditor.gui.popUpEditItemTray.setLocalScale(d,d,d);
+        } else {
+            this.superMode.toggle('editing');
+        }
+    }
+}
+class PoppingOutMode extends EditMode {
+
+    update(dt){
+        const minScale = 0.5;
+        if (realmEditor.gui.popUpEditItemTray.localScale.x > minScale + fudge) {
+            const popInSpeed = 1000;
+            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,minScale,dt * popInSpeed);
+            realmEditor.gui.popUpEditItemTray.setLocalScale(d,d,d);
+        } else {
+            this.superMode.toggle('normal');
+            this.superMode.realmEditor.toggle('normal');
+        }
+
+    }
+
+    onExit(){
+        realmEditor.gui.popUpEditItemTray.enabled=false;
+
+    }
+}
