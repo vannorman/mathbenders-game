@@ -4,6 +4,7 @@ export default class PlacedItem {
 
     constructor(args={}){
         const { entity, templateName, level } = args;
+        console.log("new item. tn:"+templateName);
        this._entity = args.entity; 
        this._templateName = templateName;
        this._level = level;
@@ -41,10 +42,11 @@ export default class PlacedItem {
     
 
     toJSON(){
+        
         return {
             position : this._entity.getPosition().sub(this._level.terrain.centroid).trunc(),
             rotation : this._entity.getRotation().trunc(),
-            template : this._template
+            templateName : this._templateName
         }
     }
 }

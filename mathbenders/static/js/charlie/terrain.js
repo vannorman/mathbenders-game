@@ -1,4 +1,3 @@
-import TerrainCentroidManager from './terrainCentroidManager.js';
 export default class Terrain {
 
     // TODO :Remove references to centroid here. use getPosition(). ref centroid only when you generate()
@@ -24,7 +23,6 @@ export default class Terrain {
         });
         this._data = data;
         this.placeTreeFn = null;
-        this.terrainCentroidManager = new TerrainCentroidManager();
     }
 
     placeTrees() {
@@ -86,7 +84,7 @@ export default class Terrain {
     set entity(value){ this._entity = value; }
     get centroid() {
         if (!this._data.centroid){
-            this._data.centroid = this.terrainCentroidManager.getCentroid();
+            this._data.centroid = terrainCentroidManager.getCentroid();
         }
         return this._data.centroid;
     }
@@ -113,11 +111,11 @@ export default class Terrain {
         this.regenerateTimeoutFn = setTimeout(function(){
             $this.Regenerate({realmEditor:realmEditor}); 
         },delay)
-        console.log("reg del");
+//        console.log("reg del");
     }
 
     Regenerate(args){
-        console.log("regen ter");
+        // console.log("regen ter");
         const {realmEditor} = args;
         this.entity.destroy();
         this.clearTimeouts();
@@ -133,7 +131,7 @@ export default class Terrain {
     }
 
     destroy(){
-        this.terrainCentroidManager.relinquishCentroid(this._data.centroid);
+        terrainCentroidManager.relinquishCentroid(this._data.centroid);
         this.clearTimeouts();
         this.entity.destroy();
 

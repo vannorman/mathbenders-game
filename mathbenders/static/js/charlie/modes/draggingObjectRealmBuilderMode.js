@@ -22,7 +22,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     toggle(args) {
         var {dragMode, templateName, iconTextureAsset} = args; // not happy with storing this.templateName for swapping modes
-        console.log('toggle:'+dragMode);
         if (!dragMode) return;
         if (!this.#instantiationModes.has(dragMode)) return;
 
@@ -41,7 +40,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     onStartDrag(data){
         const { iconTextureAsset, width=80, height=80, templateName } = data;
-        console.log('this mode drag:'+this.#instantiationMode);
 /*
         switch(this.#instantiationMode){
             case 
@@ -89,13 +87,11 @@ class InstantiationDraggingMode {
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
     onEnter(args){
-        console.log('enter pre');
         const { gui,templateName,iconTextureAsset} = args;
         this.draggingObjectRealmBuilderMode.templateName = templateName;
         realmEditor.gui.setCustomCusror(iconTextureAsset);
     }
     onExit(){
-        console.log('pre exit');
         realmEditor.gui.setNormalCursor();
     }
     onMouseMove(e){
@@ -115,17 +111,16 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
     #instantiatedItem;
    
     onEnter(args){
-        console.log('enter post');
         realmEditor.gui.setNormalCursor();
         const data = {
             templateName : this.draggingObjectRealmBuilderMode.templateName,
+            level : realmEditor.RealmData.currentLevel,
         }
         this.#instantiatedItem = realmEditor.InstantiateItem(data);
         this.#instantiatedItem.disableColliders();
     }
     
     onExit(){
-        console.log('post exit');
         if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();    
     }
 

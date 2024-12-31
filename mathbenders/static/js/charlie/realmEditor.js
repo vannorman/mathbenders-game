@@ -25,7 +25,8 @@ import EditorCamera from './camera.js';
 import PlacedItem from './placedItem.js';
 import Level from './level.js';
 import RealmData from './realmData.js';
-import Terrain from './terrainManager.js';
+import TerrainCentroidManager from './terrainCentroidManager.js';
+import Terrain from './terrain.js';
 
 class RealmEditor {
 
@@ -65,6 +66,10 @@ class RealmEditor {
 
         this.camera = new EditorCamera({realmEditor:this});
         this.gui = new GUI({ realmEditor:this });
+
+        window.terrainCentroidManager = new TerrainCentroidManager(); // awkward as fuck to create this global thing here .. :) 
+        // BUT, if I don't, I run into dependency loops which to resolve I have to pass references everywhere
+
         this.#RealmData = new RealmData();
 
     }
@@ -85,12 +90,7 @@ class RealmEditor {
         this.toggle('normal');
         this.gui.enable();
         AudioManager.play({source:assets.sounds.ui.open});
-        
-        return;
-
-        
-        this.MoveCamera({source:"enable",targetPivotPos:RealmBuilder.RealmData.Levels[0].terrain.centroid,targetZoomFactor:RealmBuilder.defaultZoomFactor})
-        
+        this.camera.translate({source:"enable",targetPivotPosition:this.RealmData.currentLevel.terrain.centroid});
         // To re-load the existing level ..
         const realmData = JSON.stringify(this.#RealmData); // copy existing realm data
         this.#RealmData.Clear(); // delete everything
@@ -149,34 +149,71 @@ class RealmEditor {
     }
 
 
+    LoadData(realmData){
+        realmData.Levels.forEach(level => {
+            levelJson._placedItems.forEach(x=>{
+                let obj = this.InstantiateItem({level:level,templateName:x.templateName});
+                obj.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+            })
+ 
+        });
+    }
+    
+    LoadJson(realmJson){
+        realmJson = Utils.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
+
+        const levels = [];
+        realmJson.Levels.forEach(levelJson => {
+            let thisLevel = new Level({skipTerrainGen:true});
+            levels.push(thisLevel);
+
+            let terrainData = levelJson._terrain;
+            terrainData.centroid = terrainCentroidManager.getCentroid();
+            thisLevel.terrain = new Terrain(terrainData);
+            const $this = this;
+            thisLevel.terrain.generate("foreach json for "+realmJson.name);
+            console.log("level load:")
+            console.log(levelJson);
+ 
+            levelJson._placedItems.forEach(x=>{
+                let obj = this.InstantiateItem({level:thisLevel,templateName:x.templateName});
+                obj.entity.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+            })
+       });
+        const loadedRealmGuid = realmJson.guid; 
+        this.#RealmData = new RealmData({levels:levels,guid:loadedRealmGuid,name:realmJson.name});
+        this.gui.CloseLoadRealmUI();
+
+        const zoomFactor = 100;
+        const newTerrainPos = this.RealmData.currentLevel.terrain.entity.getPosition();
+        this.camera.translate({source:"terrain",targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
+        this.gui.realmNameText.text=this.RealmData.name;
+    }
     Save(){
-
-    }
-
-    Load(){
-
-    }
-
-    NewRealm(){
-
+        if (this.blockSavetimer > 0){
+            return;
+        }
+        
+        const name = this.RealmData.name;
+        
+        const callbackSuccess = function(){alert('Saved!');}
+        const callbackFail = function(){alert('Fail to  Saved!');}
+        const realmData = JSON.stringify(this.RealmData);
+        const id = this.RealmData.guid; 
+        loginWeb.SaveRealmData({
+            realmData:realmData,
+            name:name,
+            id:id,
+            callbackSuccess:callbackSuccess,
+            callbackFail:callbackFail});
     }
 
     SetEditableItemMode() {
         // Eytan - how pass this to the mode? Should only be possible within that mode?
     }
 
-    BeginDraggingObject(obj) {
-
-    }
-    BeginDraggingObject(item){
-        this.SetMode(RealmBuilderMode.DraggingObject);
-        this.draggingItem = item;
-        this.draggingItem.getComponentsInChildren('collision').forEach(x=>{x.enabled=false;});
-        this.SetDraggingMode({mode:DraggingMode.PostInstantiation});
-    }
     BeginDraggingNewObject(options={}){
         const { templateName, iconTextureAsset, width=80, height=80 } = options;
-        console.log('begin drag:'+templateName);
         this.toggle('draggingObject');
         // Todo: Eytan help? "drag object" functionality
         const dragMode = 'pre';
@@ -197,20 +234,22 @@ class RealmEditor {
     }
 
     UpdateData(data){
-        console.log("todo: update data:"+JSON.stringify(data));
+        this.RealmData.name = data['name'];
+        // console.log("todo: update data:"+JSON.stringify(data));
     }
 
     InstantiateItem(args){
-        console.log("Inst:"+args.toString());
-        const {templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO} = args;
+        // is "level" needed here?
+        // console.log("Inst:"+args.toString());
+        const {level, templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO} = args;
         const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
         const placedItem = new PlacedItem({
             entity : entity,
             templateName : templateName,
-            // level : level
+            level : level
         })
-        // level.placedObjects.push(placedObject);
+        level.registerPlacedItem(placedItem);
         return placedItem;
     }
     

@@ -24,7 +24,6 @@ export default class EditorCamera {
         this.directionMoving = 0;
         this.pivot = new pc.Entity();
         pc.app.root.addChild(this.pivot);
-        GameManager.subscribe(this, this.onGameStateChange);
        this.targetPivot = new pc.Vec3();
         
         // Set up camera and position
@@ -37,11 +36,6 @@ export default class EditorCamera {
         this.renderTexture = this.setUpRenderTexture();
     }
 
-    onGameStateChange(state){
-        if (state == GameState.RealmBuilder) { 
-            this.pivot.moveTo(Game.player.getPosition())
-        }
-    }
 
     get cameraComponent(){ return this.entity.camera; }
 
@@ -134,7 +128,7 @@ export default class EditorCamera {
             shouldLerp = false,
             shouldSnapToDefaultRotation = false
         } = parameters;
-            console.log('move to:'+targetPivotPosition);
+        // console.log('move to:'+targetPivotPosition);
         if (shouldSnapToDefaultRotation) {
             // then do so
         }

@@ -18,6 +18,7 @@ export default class GUI {
     #changeMapScreen; // parent
     #changeMapScreenLayout; // child
     #customCursorIcon;
+    get customCursorIcon(){return this.#customCursorIcon;}
 
     // Navigation of all builder panel modes
     #builderPanels;
@@ -123,8 +124,11 @@ export default class GUI {
                 // editable item may be a "parent" with no colliders, so go upstream until we find it
                 const parentDepthSearch = 5;
                 let par = raycastResult.entity;
-                console.log('par:'+par.name);
-                console.log('tags:'+par.tags._list.toString());
+
+                // This is returning null even tho we're hitting a placedItem?
+                // console.log('par:'+par.name);
+                // console.log('tags:'+par.tags._list.toString());
+
                 for(i=0;i<parentDepthSearch;i++){
                     if (par.tags._list.includes(Constants.Tags.BuilderItem)){
                         editableEntityUnderCursor = par;
@@ -155,6 +159,7 @@ export default class GUI {
 
     buildUi(){
         // chonker function, split?
+        const $this = this; // to avoid referencing realmEditor.gui in this on('click') which loses "this" context
         const gui = new pc.Entity("gui");
         this.#screen = gui;
         gui.addComponent("screen", {
@@ -369,10 +374,9 @@ export default class GUI {
         });
         this.#builderPanels[0].select();
 
-        const $this = this; // to avoid referencing realmEditor.gui in this on('click') which loses "this" context
         editTerrainPanel.navButton.element.on('click',function(){
             // TODO: Move outside of UI?
-            console.log("select terrain 1");
+            // console.log("select terrain 1");
             const terrainPos = realmEditor.RealmData.currentLevel.terrain.entity.getPosition();
             const terrainScale = realmEditor.RealmData.currentLevel.terrain.scale;
             realmEditor.camera.translate({source:"click ter",targetPivotPosition:terrainPos, targetZoomFactor:terrainScale * 2.2});
@@ -461,7 +465,7 @@ export default class GUI {
             width:60,height:60,
             anchor:[0.885, 0.76, 0.925, 0.8],
             pivot:[0.5,0],
-            mouseDown:function(){this.OpenLoadRealmUI();}, //console.log("Save");},//this.#SetMode(RealmBuilderMode.MapScreen);},
+            mouseDown:function(){$this.OpenLoadRealmUI();}, //console.log("Save");},//this.#SetMode(RealmBuilderMode.MapScreen);},
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.load,
         });
@@ -482,7 +486,7 @@ export default class GUI {
         this.#screen.addChild(this.#loadRealmScreen);
         this.#loadRealmScreen.addChild(loadLevelBackboard);
         this.#loadRealmScreen.enabled=false;
-        loadLevelBackboard.element.on('mousedown',function(){ this.CloseLoadRealmUI(); }); // Close screen if click background
+        loadLevelBackboard.element.on('mousedown',function(){ $this.CloseLoadRealmUI(); }); // Close screen if click background
         
         this.#loadRealmWindow = new pc.Entity();
         this.#loadRealmWindow.addComponent('element',{
@@ -498,7 +502,7 @@ export default class GUI {
 
         UI.AddCloseWindowButton({
             parentEl:this.#loadRealmWindow,
-            onClickFn:function(){this.CloseLoadRealmUI();}});
+            onClickFn:function(){$this.CloseLoadRealmUI();}});
 
 
         const newText = new pc.Entity();
@@ -521,7 +525,7 @@ export default class GUI {
             textureAsset:assets.textures.ui.builder.newRealm,
             anchor:[0.56, 0.9, 0.56, 0.9],
             cursor:'pointer',
-            mouseDown:function(){this.CloseLoadRealmUI();realmEditor.NewRealm();}
+            mouseDown:function(){$this.CloseLoadRealmUI();realmEditor.NewRealm();}
         }).element;
 
 
@@ -590,7 +594,7 @@ export default class GUI {
     }
 
     UpdateTerrainToolValues(source="non"){
-        console.log('update ter val from:'+source);
+        // console.log('update ter val from:'+source);
         const td = realmEditor.RealmData.currentLevel.terrain.data;
         Object.keys(this.#TerrainTools).forEach(key=>{
             // relies on terrain tools keys having same name as terrain data keys
@@ -698,15 +702,75 @@ export default class GUI {
     }
 
     OpenLoadRealmUI(){
-//        this.SetMode(RealmBuilderMode.LoadRealmScreen);
-//        callback = (realms)=>{RealmBuilder.PopulateRealmList(realms)};
-//        loginWeb.GetLevels(callback);
+        this.realmEditor.toggle('loadScreen');
+        const callback = (realms)=>{realmEditor.gui.PopulateRealmList(realms)};
+        loginWeb.GetLevels(callback);
 
+    }
+    
+    PopulateRealmList(realms){
+        const $this = this;
+        if ( this.loadRealmsList) this.loadRealmsList.destroy();
+        function realmListItem(args){
+            // TODO move this to RealmBuilderUI
+            // Each loaded level has the same background and list item format.
+            const {name,realmId}=args;
+             var listItem = new pc.Entity();
+            listItem.addComponent('element',{
+                type:'image',
+                anchor:[0.5,0.5,0.5,0.5],
+                pivot:[0.5,0.5],
+                color:pc.Color.BLUE,
+                width:300,
+                height:30,
+                opacity:1,
+                useInput:true,
+            });
+            var txt = new pc.Entity('textlevel');
+            listItem.addChild(txt);
+             txt.addComponent('element', {
+                type: 'text',
+                text: name,
+                anchor:[0.02,0,0.02,0],
+                pivot:[0,0.5],
+                fontAsset: assets.fonts.montserrat,
+                fontSize : 12,
+                color:pc.Color.BLACK,
+            });
+            listItem.element.on('mousedown',function(){
+                // Bind Click on this level to Load this level.
+                const callback = (realmData)=>{
+                    $this.realmEditor.RealmData.Clear();
+                    $this.realmEditor.LoadJson(realmData.json_data)
+                };
+                loginWeb.LoadRealmData({realmId:realmId,callback:callback});
+            });
+            UI.HoverColor({
+                element:listItem.element,
+                colorOn:new pc.Color(1,0.5,0),
+                colorOff:new pc.Color(1,0.4,0),
+                opacityOn:1,
+                opacityOff:0.9,
+                cursor:'pointer',});
+            return listItem; 
+ 
+        }
+    
+        const realmList  = [];
+        realms.forEach(realm=>{
+            const realmItem = realmListItem({name:realm.name,realmId:realm.realm_id}); 
+            realmList.push(realmItem);
+        });
+       
+        this.loadRealmsList = UI.CreateScrollableLayoutGroup({screen:this.#loadRealmWindow,itemList:realmList});
+        this.#loadRealmScreen.enabled=true;
+    }
+    CloseLoadRealmUI(){
+        // this.blockSavetimer=0.5;
+        this.realmEditor.toggle('normal');
+        this.#loadRealmScreen.enabled=false;
     }
  
-    CloseLoadRealmUI(){
-
-    }
 
 
     CreateRealmInfoScreen(){
@@ -735,7 +799,8 @@ export default class GUI {
         }});
 
         realmInfoScreen.addChild(inputGroup.root);
-        //        RealmBuilder.realmNameText = inputGroup.inputText; // why?
+        this.realmNameText = inputGroup.inputText; // why?
+
 
         return realmInfoScreen;
 
