@@ -936,8 +936,6 @@ const RealmBuilder = {
                 break;            //RealmBuilder.guiButtons[0].entity.element.anchor =  new pc.Vec4(x, y, x, y);
         }
     },
-
-   
   
 }
 

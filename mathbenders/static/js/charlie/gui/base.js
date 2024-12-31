@@ -369,16 +369,15 @@ export default class GUI {
         });
         this.#builderPanels[0].select();
 
+        const $this = this; // to avoid referencing realmEditor.gui in this on('click') which loses "this" context
         editTerrainPanel.navButton.element.on('click',function(){
             // TODO: Move outside of UI?
-            /*
             console.log("select terrain 1");
-            const terrainPos = this.#RealmData.currentLevel.terrain.entity.getPosition();
-            const terrainScale = this.#RealmData.currentLevel.terrain.scale;
-            this.#MoveCamera({source:"click ter",targetPivotPos:terrainPos, targetZoomFactor:terrainScale * 2.2});
-            editTerrainPanel.select();
-            this.UpdateTerrainToolValues();
-           */ 
+            const terrainPos = realmEditor.RealmData.currentLevel.terrain.entity.getPosition();
+            const terrainScale = realmEditor.RealmData.currentLevel.terrain.scale;
+            realmEditor.camera.translate({source:"click ter",targetPivotPosition:terrainPos, targetZoomFactor:terrainScale * 2.2});
+//            editTerrainPanel.select();
+            $this.UpdateTerrainToolValues('navoncl');
 
         });
 
@@ -389,6 +388,10 @@ export default class GUI {
             widthFitting: pc.FITTING_NONE,
             heightFitting: pc.FITTING_NONE,
         });
+
+
+        //const realmData = realmEditor.RealmData; 
+        // @Eytan is it better to pass realmEditor or realmData reference around rather than acces the global?
 
         function CreateTerrainEditingslider(args){
             const slider = UI.createSlider({
@@ -402,10 +405,9 @@ export default class GUI {
                 minStep:args.minStep,
                 precision:args.precision || 2,
                 onChangeFn:(val)=>{
-                    // TODO: Post transition to new architecture, reconnect terrain links 
-                    // const curTer = this.#RealmData.currentLevel.terrain;
-//                    curTer.data[args.key] = val;
-//                    curTer.RegenerateWithDelay();
+                    const curTer = realmEditor.RealmData.currentLevel.terrain;
+                    curTer.data[args.key] = val;
+                    curTer.RegenerateWithDelay({realmEditor:realmEditor});
                },
             });
             return slider;
@@ -586,6 +588,18 @@ export default class GUI {
  
 
     }
+
+    UpdateTerrainToolValues(source="non"){
+        console.log('update ter val from:'+source);
+        const td = realmEditor.RealmData.currentLevel.terrain.data;
+        Object.keys(this.#TerrainTools).forEach(key=>{
+            // relies on terrain tools keys having same name as terrain data keys
+            if (td[key]){
+                const val = td[key] / this.#TerrainTools[key]._maxVal; 
+                this.#TerrainTools[key].SetVal({resultX:val,fireOnChangeFn:false});
+            }
+        });
+    } 
     
     CreatePopUpEditItemTray(args={}){
         const { realmEditor } = args;

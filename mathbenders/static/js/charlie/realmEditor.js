@@ -23,6 +23,9 @@ import {
 import GUI from './gui/base.js';
 import EditorCamera from './camera.js';
 import PlacedItem from './placedItem.js';
+import Level from './level.js';
+import RealmData from './realmData.js';
+import Terrain from './terrainManager.js';
 
 class RealmEditor {
 
@@ -34,6 +37,9 @@ class RealmEditor {
     #mode;
     #RealmData;
 
+    get RealmData(){
+        return this.#RealmData;
+    }
 
     constructor() {
         this.#isEnabled = false;
@@ -49,8 +55,6 @@ class RealmEditor {
         ]);
 
         this.toggle('normal');
-//        this.enable = this.enable.bind(this);
-//        this.disable = this.disable.bind(this);
 
         pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
@@ -61,6 +65,7 @@ class RealmEditor {
 
         this.camera = new EditorCamera({realmEditor:this});
         this.gui = new GUI({ realmEditor:this });
+        this.#RealmData = new RealmData();
 
     }
 
@@ -211,12 +216,13 @@ class RealmEditor {
     
     beginEditingItemUnderCursor(){
         const entity = this.gui.editableEntityUnderCursor;
-        console.log('edit:'+entity.name)
         if (entity){
             this.toggle('editingItem');
             this.#mode.setEntity(entity);
         }
     }
+
+
 }
 
 // Created somewhere in the code where it makes sense

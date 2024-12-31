@@ -206,24 +206,6 @@ class Terrain {
             thisInstance.placeTreeFn = placeTreeFn;
         },100);
 
-        // Raycast down method
-        /*
-         var { positions = [], TerrainEntity = null, treeCount = 20000 } = options;
-            const verts = reshape(positions); // create a 2d array
-            extents = findExtents(verts);
-            extents = extents.map(x => x.add(TerrainEntity.getPosition())); // world coords
-    
-        let p = getRandomVec3WithinExtents(extents);
-            if (pc.Vec3.distance(p,pc.Vec3.ZERO) < 15) continue;
-            p.add(new pc.Vec3(0,100,0));
-            var results = pc.app.systems.rigidbody.raycastAll(p, p.clone().add(new pc.Vec3(0,-300,0)));
-            for (let j=0;j<results.length;j++){
-                let result = results[j];
-                if (result.entity == TerrainEntity){
-                    setTimeout(function(){TerrainGenerator.Tree({position:result.point,TerrainEntity:TerrainEntity})},i);
-                }
-            }
-        */
 
     }
     postGenerationFunction() { 
@@ -303,7 +285,6 @@ class Terrain {
 /*     Define States      */
 /* ********************** */
 
-
 const EditableItemMode = Object.freeze({
     // When the user Drags-and-drops an item onto the level, enter this mode.
     Editing : 'Editing',
@@ -331,6 +312,5 @@ const RealmBuilderMode =  Object.freeze({
         MapScreen : 'MapScreen',
         LoadRealmScreen : 'LoadRealmScreen',
 })
-
 
 
