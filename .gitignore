@@ -19,3 +19,5 @@ clipboard
 *.sh
 *.env
 mathbreakers.db
+*/mathbreakers.db
+*.db
