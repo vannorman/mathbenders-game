@@ -27,7 +27,6 @@ export default class EditorCamera {
         // Set a default mode
         this.toggle('normal');
 
-        this.directionMoving = 0;
         this.pivot = new pc.Entity();
         pc.app.root.addChild(this.pivot);
 
@@ -115,12 +114,11 @@ export default class EditorCamera {
     }
 
     rotate(degToRotate) {
-        console.log('rot');
         if (this.#mode.name === 'rotating') return;
 
         this.targetPivot.rotate(-degToRotate);
         this.toggle('rotating');
-        this.#mode.directionMoving = degToRotate > 0 ? 1 : -1;
+        this.#mode.directionMoving = degToRotate > 0 ? -1 : 1;
     }
 
     // MoveCamera(opts = {})

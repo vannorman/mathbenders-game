@@ -92,11 +92,28 @@ class RealmEditor {
             }
             break;
         case GameState.Playing:
+            this.ConnectPortals();
             this.disable();
             break;
         }
     }
 
+    ConnectPortals(){
+        // Arbitrary portal logic that should be pushed to the Portal / placedItem data
+        let portals = [];
+        pc.app.root.getComponentsInChildren('portal').forEach(portal=>{
+            if (portal)  {
+                portals.push(portal);
+            }
+        });
+
+        // now we have a list of portals; connect every 2 of them
+        for (let i=0;i<portals.length-1;i+=2){
+            portals[i].ConnectTo(portals[i+1]);
+            portals[i+1].ConnectTo(portals[i]);
+        }
+    }
+ 
     enable() {
         this.#isEnabled = true;
         this.toggle('normal');

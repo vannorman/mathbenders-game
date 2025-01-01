@@ -7,18 +7,49 @@ NumberFaucet.prototype.initialize = function(){
     }
     this.lastDripTime = -5000;
     this.drippedNumbers = []
+    GameManager.subscribe(this,this.onGameStateChange);
+    this.isEnabled=false;
+    this.disable();
+
 }
 
+NumberFaucet.prototype.enable = function(){
+    this.isEnabled=true;
+}
+NumberFaucet.prototype.disable = function(){
+    this.isEnabled=false;
+}
+NumberFaucet.prototype.onGameStateChange = function(state){
+    switch(state){
+    case GameState.RealmBuilder:
+        this.disable();
+        break;
+    case GameState.Playing:
+        this.enable();
+        break;
+    }
+ 
+}
 NumberFaucet.prototype.update = function(dt){
     // Eytan : Instead of checking in each behavior that is part of GameMode Normal, we should have this object belong to a category of Normal and only execute all those objects during Normal mode (avoid checks in each obj's update)
-    if (Game.mode != Game.Mode.Playing) return;
+    if (!this.isEnabled) return;
     const timeSinceDrip = pc.now() - this.lastDripTime;
     
 
     if (timeSinceDrip > 5000 && this.drippedNumbers.length < 6 && !this.drippedNumberIsNear()) {
         this.lastDripTime = pc.now();
         const dripPosition = this.entity.getPosition().add(this.entity.left).add(new pc.Vec3(0,1.5,0));
-        const n = Game.Instantiate.NumberSphere({numberInfo:{fraction:this.fraction},position:dripPosition})
+        const options = {
+            position : dripPosition,
+            numberInfo : {
+                fraction : {
+                    numerator:this.fraction.numerator,
+                    denominator:this.fraction.demoninator
+                },
+            }
+        } 
+        const n = Game.Instantiate['NumberSphere']({numberInfo:{fraction:this.fraction},position:dripPosition})
+
         const faucet = this;
         n.on('destroy', function() {
             for (let i=0;i<faucet.drippedNumbers.length;i++){
