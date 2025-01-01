@@ -8,12 +8,21 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
 
     onMouseDown(e) {
         // console.log("%c Mousedown w/ mode: Normal",'color:#07f');
-        if (this.editablItemUnderCursor){
-            this.realmEditor.toggle('editingItem');
+        const itemIsUnderCursor = this.realmEditor.gui.editableItemUnderCursor != null;
+        if (itemIsUnderCursor){
+            // pass
         } else if (this.realmEditor.gui.isMouseOverMap){
             this.realmEditor.toggle('handpan');
         }
         super.onMouseDown(e);
+    }
+    
+    onMouseUp(e) {
+        const itemToEdit = this.realmEditor.gui.editableItemUnderCursor;
+        if (itemToEdit != null){
+            realmEditor.editItem(this.realmEditor.gui.editableItemUnderCursor);
+        }
+        super.onMouseUp(e);
     }
 
     onMouseScroll(e){
@@ -46,8 +55,5 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
 
 
 
-    onMouseUp(e) {
-        super.onMouseUp(e);
-    }
 
 }

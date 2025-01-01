@@ -37,6 +37,9 @@ class RealmEditor {
     #modes;
     #mode;
     #RealmData;
+    #UpdateInitialized=false;
+
+    get mode(){return this.#mode}
 
     get RealmData(){
         return this.#RealmData;
@@ -72,12 +75,21 @@ class RealmEditor {
 
         this.#RealmData = new RealmData();
 
+        // but this creates infintie?
+        // pc.app.on('update',this.update);
+
     }
+
 
     onGameStateChange(state) {
         switch(state){
         case GameState.RealmBuilder:
             this.enable();
+            if (!this.#UpdateInitialized){
+                this.#UpdateInitialized=true;
+                pc.app.on('update',function(dt){realmEditor.update(dt);}); // weird; if I use "this" it loops infinite
+                
+            }
             break;
         case GameState.Playing:
             this.disable();
@@ -144,8 +156,9 @@ class RealmEditor {
     }
 
     update(dt) {
-    //    console.log("update new");
-        if (!this.#isEnabled) return;
+        // console.log("update new");
+        if (this.mode ) this.mode.update(dt);
+        this.camera.update(dt);
     }
 
 
@@ -172,8 +185,6 @@ class RealmEditor {
             thisLevel.terrain = new Terrain(terrainData);
             const $this = this;
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
-            console.log("level load:")
-            console.log(levelJson);
  
             levelJson._placedItems.forEach(x=>{
                 let obj = this.InstantiateItem({level:thisLevel,templateName:x.templateName});
@@ -213,12 +224,28 @@ class RealmEditor {
     }
 
     BeginDraggingNewObject(options={}){
+
         const { templateName, iconTextureAsset, width=80, height=80 } = options;
+
         this.toggle('draggingObject');
         // Todo: Eytan help? "drag object" functionality
-        const dragMode = 'pre';
-        const args = { dragMode:dragMode,templateName:templateName,iconTextureAsset:iconTextureAsset }
-        this.#mode.toggle(args);
+        const data = { level:this.currentLevel, templateName:templateName,iconTextureAsset:iconTextureAsset }
+        this.#mode.setData(data);
+        this.#mode.toggle('pre');
+    }
+
+    BeginDraggingEditedObject(){
+        if (this.#mode != this.#modes.get('editingItem')){
+            console.log('cant begin dragging edited item if no item being edited.');
+            console.log("mode:"+typeof(this.#mode));
+        }
+        const entity = this.#mode.entity;
+        const item = this.RealmData.currentLevel.getPlacedItemByEntity(entity);
+        this.toggle('draggingObject');
+        const data = { templateName:item.templateName,iconTextureAsset:assets.textures.ui.trash }
+        this.#mode.setData(data);
+        this.#mode.startDraggingExistingItem(item);
+
     }
  
     get editingItem(){ 
@@ -230,7 +257,9 @@ class RealmEditor {
 
     RotateEditingItem(deg){
         // e.g. this.editingItemMode.#editingItem.rotate(-45);}
-
+        if (this.#mode === this.#modes.get('editingItem')){
+            this.#mode.entity.rotate(deg);
+        }
     }
 
     UpdateData(data){
@@ -241,23 +270,30 @@ class RealmEditor {
     InstantiateItem(args){
         // is "level" needed here?
         // console.log("Inst:"+args.toString());
-        const {level, templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO} = args;
+        // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
+        // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
+        const {level=this.RealmData.currentLevel, templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO, iconTextureAsset} = args;
         const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
         const placedItem = new PlacedItem({
             entity : entity,
             templateName : templateName,
-            level : level
+            level : level,
+            iconTextureAsset
         })
         level.registerPlacedItem(placedItem);
+        placedItem.entity.on('destroy',function(){
+            level.deRegisterPlacedItem(placedItem);
+        })
         return placedItem;
     }
     
-    beginEditingItemUnderCursor(){
-        const entity = this.gui.editableEntityUnderCursor;
+    editItem(entity){
         if (entity){
             this.toggle('editingItem');
             this.#mode.setEntity(entity);
+        } else {
+            this.toggle('normal');
         }
     }
 

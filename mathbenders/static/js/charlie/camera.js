@@ -2,6 +2,13 @@
 // we can capture it within a class/object, RealmBuilderCamera, Camera
 export default class EditorCamera {
 
+    #mode;
+    #modes;
+    targetPivotPosition;
+    targetZoomFactor;
+    degreesRotated;
+    targetPivot; // for rotation, it's easier and more straightforward to have a dummy entity snap to rotation then lerp to that rotation
+    
     constructor(args) {
         this.defaultSettings = {
             // height: 25,
@@ -10,22 +17,22 @@ export default class EditorCamera {
         }
         const {realmEditor}=args;
         this.realmEditor=realmEditor;
-        this.degreesRotated = 0;
 
-        // Mapping of realm states
-        this.states = {
-            'lerping': new LerpingCameraState(),
-            'rotating': new RotatingCameraState(),
-            'idling': new IdlingCameraState()
-        }
-        // Set a default state
-        this.state = this.states['idling'];
+        // Mapping modes.. locally defined, "Normal" in this context applies to this class only
+        this.#modes = new Map([
+            ['normal',new Normal(this)],
+            ['lerping', new Lerping(this)],
+            ['rotating', new Rotating(this)],
+        ]);
+        // Set a default mode
+        this.toggle('normal');
 
         this.directionMoving = 0;
         this.pivot = new pc.Entity();
         pc.app.root.addChild(this.pivot);
-       this.targetPivot = new pc.Vec3();
-        
+
+        this.targetPivot = new pc.Entity();
+
         // Set up camera and position
         this.entity = new pc.Entity();
         this.createCameraComponent();
@@ -95,16 +102,11 @@ export default class EditorCamera {
 
     }
 
-    // Use to switch between camera states
-    switchTo(stateName) {
-        // Camera exit the current state
-        this.state?.onExitBy(this);
-
-        // Point to desired camera state
-        this.state = this.states[stateName];
-
-        // Camera enter the new current state
-        this.state.onEnterBy(this);
+    // Use to switch between camera modes
+    switchTo(modeName) {
+        this.#mode?.onExit(this);
+        this.#mode = this.#modes.get(modeName);
+        this.#mode.onEnter(this);
     }
 
     zoom(amount) {
@@ -112,12 +114,13 @@ export default class EditorCamera {
         this.entity.moveTo(this.pivot.getPosition().add(dir.mulScalar(amount)));
     }
 
-    rotate(direction = 1) {
-        if (this.state.name === 'rotating') return;
+    rotate(degToRotate) {
+        console.log('rot');
+        if (this.#mode.name === 'rotating') return;
 
-        this.degreesRotated = 0;
-        this.directionMoving = direction;
-        this.targetPivot.rotate(90 * -direction);
+        this.targetPivot.rotate(-degToRotate);
+        this.toggle('rotating');
+        this.#mode.directionMoving = degToRotate > 0 ? 1 : -1;
     }
 
     // MoveCamera(opts = {})
@@ -125,7 +128,7 @@ export default class EditorCamera {
         const {
             targetPivotPosition,
             targetZoomFactor = 35,
-            shouldLerp = false,
+            shouldLerp = true,
             shouldSnapToDefaultRotation = false
         } = parameters;
         // console.log('move to:'+targetPivotPosition);
@@ -133,59 +136,73 @@ export default class EditorCamera {
             // then do so
         }
         if (shouldLerp) {
-            this.state.name = 'lerping';
+            this.targetPivotPosition = targetPivotPosition;
+            this.targetZoomFactor = targetZoomFactor;
+            this.toggle('lerping');
         } else {
             this.pivot.moveTo(targetPivotPosition);
 
         }
     }
 
+    toggle(mode) {
+        // If the 'mode' does not exist, return
+        if (!this.#modes.has(mode)) return;
+
+        // Exit the current mode (if there is one)
+        // Point to the mode to use
+        // Enter the new current mode
+        if (this.#mode) this.#mode.onExit();
+        this.#mode = this.#modes.get(mode);
+        this.#mode.onEnter();
+    }
+
 
 
     update(dt) {
-        this.state.onUpdateBy(this);
+        this.#mode.onUpdate(dt);
     }
 
 }
 
-// Usage of the State design pattern
-// 1. State.onEnterBy(entity) => setup code to run when the owner of the state wants to enter/make it active
-// 2. State.onUpdateBy(entity) => code that runs every frame when this is the active state
-// 3. State.onExitBy(entity) => cleanup code to run by the owner of the state before entering the next state
-class State {
-    onEnterBy(entity) {}
-    onUpdateBy(entity) {}
-    onExitBy(entity) {}
+// Locally accessible classes only, since this file is only accesible outside by the "export"ed class.
+class Mode {
+    constructor(cam){
+        this.cam = cam;
+    }
+    onEnter(e) {}
+    onUpdate(dt) {}
+    onExit(e) {}
 }
 
-class LerpingCameraState extends State {
-    onUpdateBy(camera) {
-        super.onUpdateBy(camera);
-
+class Lerping extends Mode {
+    onUpdate(dt) {
+        // super.onUpdate(camera);
+        const camera = this.cam;
         const lerpSpeed = 10.0;
-        const lerpPos = new pc.Vec3().lerp(this.pivot.getPosition(),this.targetPivotPos,lerpSpeed*dt);
+        const lerpPos = new pc.Vec3().lerp(camera.pivot.getPosition(),camera.targetPivotPosition,lerpSpeed*dt);
        
         // Lerp  zoom.
         const lerpZoomSpeed = 10;
-        const targetLocalCamPos = new pc.Vec3(1,1.414,1).mulScalar(this.targetZoomFactor);
-        const lerpZoomPos = new pc.Vec3().lerp(this.entity.getLocalPosition(),targetLocalCamPos,lerpZoomSpeed*dt);
+        const targetLocalCamPos = new pc.Vec3(1,1.414,1).mulScalar(camera.targetZoomFactor);
+        const lerpZoomPos = new pc.Vec3().lerp(camera.entity.getLocalPosition(),targetLocalCamPos,lerpZoomSpeed*dt);
 
         // Finished both?
-        const distToTargetPos = pc.Vec3.distance(lerpPos,this.targetPivotPos);
-        const distToTargetZoom = pc.Vec3.distance(targetLocalCamPos,this.entity.getLocalPosition());
+        const distToTargetPos = pc.Vec3.distance(lerpPos,camera.targetPivotPosition);
+        const distToTargetZoom = pc.Vec3.distance(targetLocalCamPos,camera.entity.getLocalPosition());
        
         const finishedLerpPos = distToTargetPos < 0.2;
         const finishedLerpZoomPos = distToTargetZoom < 0.2;
         
         if (finishedLerpPos && finishedLerpZoomPos) {
             // Lerp finished
-            camera.switchTo('idling');
-            camera.pivot.moveTo(this.targetPivotPos)
-            camera.camera.entity.setLocalPosition(targetLocalCamPos); // awkward camera(instance).camera(component).entity
+            camera.switchTo('normal');
+            camera.pivot.moveTo(camera.targetPivotPosition)
+            camera.entity.setLocalPosition(targetLocalCamPos); // awkward camera(instance).camera(component).entity
         } else {
             // Lerping
-            this.pivot.moveTo(lerpPos);
-            this.entity.setLocalPosition(lerpZoomPos);
+            camera.pivot.moveTo(lerpPos);
+            camera.entity.setLocalPosition(lerpZoomPos);
         }
 
         /*
@@ -193,7 +210,7 @@ class LerpingCameraState extends State {
         const lerpPosition = new pc.Vec3().lerp(camera.pivot.getPosition(), camera.targetPivot, lerpSpeed * dt);
         const currentZoom = this.entity.getLocalPosition().length();
         const zoomLerpSpeed = 500;
-        const zoomLerpedPosition = Math.lerp(currentZoom, camera.targetZoomFactor,zoomLerpSpeed * dt);
+        const zoomLerpedPosition = Math.lerp(currentZoom, camera.#targetZoomFactor,zoomLerpSpeed * dt);
         const d = pc.Vec3.distance(lerpPosition, camera.targetPivot);
         const z = Math.abs(camera.targetZoomFactor - currentZoom);
         if (d < .2 && z < 0.2) {
@@ -208,30 +225,32 @@ class LerpingCameraState extends State {
     }
 }
 
-class RotatingCameraState extends State {
-    onUpdateBy(camera) {
-        super.onUpdateBy(camera);
+class Rotating extends Mode {
+    directionMoving;
+    #degreesRotated;
+    onEnter(){
+        this.degreesRotated=0;
+    }
+        
+    onUpdate(dt) {
+        // super.onUpdate(camera);
         const degreesToRotate = 200 * dt;
         this.degreesRotated += degreesToRotate;
-        const angleBetweenPivotPoints = new pc.Vec3().angle(camera.pivot.forward, camera.targetPivot.forward);
-        if (angleBetweenPivotPoints < 1 || camera.degreesRotated > 90) {
-            camera.pivot.setRotation(camera.targetPivot.getRotation());
+        const angleBetweenPivotPoints = new pc.Vec3().angle(this.cam.pivot.forward, this.cam.targetPivot.forward);
+        if (angleBetweenPivotPoints < 1 || this.degreesRotated > 90) {
+            // Done, snap to final
+            this.cam.pivot.setRotation(this.cam.targetPivot.getRotation());
         }
         else {
-            camera.pivot.rotate(camera.directionMoving * degreesToRotate)
+            // Step
+            this.cam.pivot.rotate(this.directionMoving * degreesToRotate)
         }
     }
 }
 
-// A 'default' state if you will, where nothing happens
-class IdlingCameraState extends State {
+// A 'default' mode if you will, where nothing happens
+class Normal extends Mode {
 }
 
 
-// Example usage
-//const realmBuilderCamera = new RealmBuilderCamera();
-//realmBuilderCamera.switchTo('lerping');
-//realmBuilderCamera.switchTo('rotating');
-//
-//realmBuilderCamera.zoom(3);
-//realmBuilderCamera.rotate(30)
+

@@ -23,4 +23,7 @@ export default class RealmBuilderMode {
  //       console.log('clean up code to run'); 
     }
 
+    update(dt){
+
+    }
 }

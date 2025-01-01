@@ -6,79 +6,73 @@ import RealmBuilderMode from "./realmBuilderMode.js";
 export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     // Todo: Eytan help? Pass relevant data from gui button press -> realmEditor -> set drag mode -> get data for obj and begin drag behavior
-    #instantiationModes;
-    #instantiationMode;
+    modes;
+    mode;
+
     templateName;
-    #iconTextureAsset;
+    iconTextureAsset;
 
     constructor(params) {
         super(params);
-        this.#instantiationModes = new Map([
+        this.modes = new Map([
             ['pre', new PreInstantiationDragMode(this)],
             ['post', new PostInstantiationDragMode(this)]
         ]);
-        this.#instantiationMode = null;
+        this.mode = null;
     }
 
-    toggle(args) {
-        var {dragMode, templateName, iconTextureAsset} = args; // not happy with storing this.templateName for swapping modes
-        if (!dragMode) return;
-        if (!this.#instantiationModes.has(dragMode)) return;
-
-        // Sometimes template name WAS saved, sometimes it NEEDS to be saved .. awkward
-        if (templateName) this.templateName = templateName;
-        else if (this.templateName) templateName = this.templateName;
-        if (iconTextureAsset) this.#iconTextureAsset = iconTextureAsset;
-        else if (this.#iconTextureAsset) iconTextureAsset = this.#iconTextureAsset;
-
-
-        if (this.#instantiationMode) this.#instantiationMode.onExit();
-        this.#instantiationMode = this.#instantiationModes.get(dragMode);
-        const data = { gui : this.realmEditor.gui, templateName : templateName, iconTextureAsset:iconTextureAsset}
-        this.#instantiationMode.onEnter(data);
+    
+    setData(data){
+        const {
+            // draggingEntity, 
+            templateName, 
+            iconTextureAsset
+        } = data;
+        this.templateName = templateName;
+        this.iconTextureAsset = iconTextureAsset;
     }
 
-    onStartDrag(data){
-        const { iconTextureAsset, width=80, height=80, templateName } = data;
-/*
-        switch(this.#instantiationMode){
-            case 
-        }        case DraggingMode.PreInstantiation:
-            this.customCursorIcon.enabled = true;
-            this.customCursorIcon.element.textureAsset = iconTextureAsset;
-            this.customCursorIcon.element.width = width;
-            this.customCursorIcon.element.height = height;
-        break;
-        case DraggingMode.PostInstantiation:
-            pc.app.graphicsDevice.canvas.style.cursor = 'auto';
-            this.customCursorIcon.enabled = false;
-            break;
-*/
- 
+    startDraggingExistingItem(item){
+        item.disableColliders();
+        this.toggle('post');
+        this.mode.setDraggingItem(item);
+    }
+    
+    toggle(mode) {
+        // Awkward because sometimes this is toggled internally (drag mouse between map and not-map)
+        // Whereas other times it's called externally (as from realmEditor.mode.toggle())
         
+        if (!mode) return;
+        if (!this.modes.has(mode)) return;
+        if (this.mode) this.mode.onExit();
+        this.mode = this.modes.get(mode);
+        this.mode.onEnter();
+
     }
+
+        
 
     onMouseMove(e) {
         super.onMouseMove(e);
-        this.#instantiationMode.onMouseMove(e);
+        this.mode?.onMouseMove(e);
     }
 
     onMouseUp(e) {
         super.onMouseUp(e);
-        this.#instantiationMode.onMouseUp(e);
+        this.mode?.onMouseUp(e);
     }
 
     onExit(){
-        this.#instantiationMode.onExit();
+        this.mode?.onExit();
     }
 }
 
 // Abstract
 class InstantiationDraggingMode {
-    constructor(draggingObjectRealmBuilderMode) {
-        this.draggingObjectRealmBuilderMode = draggingObjectRealmBuilderMode;
+    constructor(dragger) {
+        this.dragger = dragger;
     } 
-    onEnter(args) {}
+    onEnter() {}
     onExit() {}
     onMouseMove(e) {}
     onMouseUp(e){}
@@ -86,39 +80,45 @@ class InstantiationDraggingMode {
 }
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
-    onEnter(args){
-        const { gui,templateName,iconTextureAsset} = args;
-        this.draggingObjectRealmBuilderMode.templateName = templateName;
-        realmEditor.gui.setCustomCusror(iconTextureAsset);
+    onEnter(){
+        this.dragger.realmEditor.gui.setCustomCusror(this.dragger.iconTextureAsset);
     }
     onExit(){
         realmEditor.gui.setNormalCursor();
     }
     onMouseMove(e){
         if (realmEditor.gui.isMouseOverMap){
-            const dragMode = 'post';
-            const args = { dragMode:dragMode }
-            this.draggingObjectRealmBuilderMode.toggle(args);
-        }
+            this.instantiateItem();
+       }
     }
     onMouseUp(e){
-        this.realmEditor.toggle('normal')
+        realmEditor.toggle('normal')
         
     }
+
+    instantiateItem(){
+        const instantiatedItem = realmEditor.InstantiateItem({templateName:this.dragger.templateName});
+            console.log('inst.');
+        instantiatedItem.disableColliders();
+        this.dragger.toggle('post');
+        this.dragger.mode.setDraggingItem(instantiatedItem);
+
+    }
+    
+    
 }
+
 
 class PostInstantiationDragMode extends InstantiationDraggingMode {
     #instantiatedItem;
-   
-    onEnter(args){
-        realmEditor.gui.setNormalCursor();
-        const data = {
-            templateName : this.draggingObjectRealmBuilderMode.templateName,
-            level : realmEditor.RealmData.currentLevel,
-        }
-        this.#instantiatedItem = realmEditor.InstantiateItem(data);
-        this.#instantiatedItem.disableColliders();
+
+    setDraggingItem(item){
+        this.#instantiatedItem = item;
     }
+   
+    onEnter(){
+        realmEditor.gui.setNormalCursor();
+   }
     
     onExit(){
         if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();    
@@ -134,16 +134,19 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
             }
         }
         if (!realmEditor.gui.isMouseOverMap){
-            const dragMode = 'pre';
-            const args = { dragMode:dragMode }
-            this.draggingObjectRealmBuilderMode.toggle(args);
+            this.dragger.toggle('pre');
         }
     }
+
     onMouseUp(e){
+        this.placeItem();
+   }
+    
+    placeItem(){
+        const entity = this.#instantiatedItem.entity;
         this.#instantiatedItem.enableColliders();
         this.#instantiatedItem = null;
-        realmEditor.toggle('normal')
-        realmEditor.beginEditingItemUnderCursor();
+        this.dragger.realmEditor.editItem(entity);
     }
  
- }
+}

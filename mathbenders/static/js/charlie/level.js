@@ -19,21 +19,37 @@ export default class Level {
     get placedItems() { return this._placedItems;}
     set placedItems(value) { this._placedItems=value;}
    
+    deRegisterPlacedItem(item){
+        const index = this.placedItems.indexOf(item);
+        if (index > -1) { // only splice array when item is found
+            this.placedItems.splice(index,1);
+        } else {
+            console.log("Oh dear!~ An entity was destroyed and deRegister was called, but that item wasn't found in level!!");
+        }
+    }
+
     registerPlacedItem(item){
         this.placedItems.push(item);
     }
 
     ClearPlacedItems(){
-        console.log("clearing?");
         this._placedItems.forEach(x=>{
-            console.log("Clear! x ent;"+x._entity.name);
-            console.log(x);
             x._entity.destroy();
-
-        })
+        });
 
         //this._placedItems = [];
     }
+
+
+    getPlacedItemByEntity(entity){
+        const g = entity.getGuid();
+        
+        // console.log('checking by:'+g+' across '+this.placedItems.length+' items');
+        const matches = this.placedItems.filter((x)=>{return x.entity.getGuid()===g});
+        if (matches.length > 0) return matches[0];
+        else return null;
+    }
+ 
 
     RemoveEntityFromPlacedItems(entity){
         const matched = this._placedItems.filter((x)=>x._entity.getGuid()==entity.getGuid())[0]

@@ -39,6 +39,7 @@ export default class GUI {
     // Edit item on map
     #editableItemGroup; 
     #editableItemBackboard; 
+    get editableItemBackboard(){return this.#editableItemBackboard;}
     #circleButtons;
 
     // why?
@@ -66,7 +67,8 @@ export default class GUI {
 
     // Move to RealmEditorMouse?
     get isMouseOverMap() {
-        const is = Mouse.isMouseOverEntity(this.#mapPanel)   // legacy ref. Should be this.mapPanel
+        const is = Mouse.isMouseOverEntity(this.#mapPanel) 
+
 //        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
 //        && !Mouse.isMouseOverEntity(this.#changeMapBtn)
 //        && !Mouse.isMouseOverEntity(this.#saveBtn)
@@ -103,9 +105,9 @@ export default class GUI {
     }
 
 
-    get editableEntityUnderCursor () {
+    get editableItemUnderCursor () {
         // was:  UpdateWorldPointUnderCursor(){
-        var editableEntityUnderCursor = null;
+        var editableItemUnderCursor = null;
 
         // Bit of annoying math to adjust for the fact that the MapPanel is only 560 x 500, while the Camera's viewport size is 800 x 500
         // I couldn't figure out how to make the camera's viewport etc be correct so I just adjust based on the app width and left margin
@@ -131,24 +133,20 @@ export default class GUI {
 
                 for(i=0;i<parentDepthSearch;i++){
                     if (par.tags._list.includes(Constants.Tags.BuilderItem)){
-                        editableEntityUnderCursor = par;
-                        return editableEntityUnderCursor;
+                        editableItemUnderCursor = par;
+                        // return getEditableItemByEntity(editableItemUnderCursor);
+                        return editableItemUnderCursor; // Actually an entity ..
                     } else {
                     //    if (par.name == "NumberHoop") console.log('not found:'+par.name+","+par.getGuid()+" vs "+item.obj.getGuid());
                         par = par.parent ? par.parent : par;
                     }
                 }
             }
-        } else {
-            let wc = new pc.Vec3()
-            Camera.sky.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
         }
 
         return null;
     }
-
-
- 
+    
     enable(){
         this.#screen.enabled = true;
     }
@@ -315,7 +313,7 @@ export default class GUI {
             parentEl:this.#mapControlPanel,
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
             anchor:[.2,.5,.2,.5],
-            mouseDown:function(){Camera.sky.RotateCameraRight()},
+            mouseDown:function(){realmEditor.camera.rotate(90)},
             cursor:'pointer',
         });
 
@@ -324,7 +322,7 @@ export default class GUI {
             parentEl:this.#mapControlPanel,
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
             anchor:[.8,.5,.8,.5],
-            mouseDown:function(){Camera.sky.RotateCameraLeft()}, // TODO: Move to RealmBuilderCamera class.
+            mouseDown:function(){realmEditor.camera.rotate(-90)},
             cursor:'pointer',
         });
 
@@ -673,10 +671,14 @@ export default class GUI {
         /// Eytan - this is the example mentioned in realmEditor constructor for new GUI();
         // need to bind this button to realmEditor.editItemMode.action
         // this.moveButton.element.on('mousedown',function(){ })
+
+        // Awkward because these need to be set up in the realmBuilderModeEditingItemMode class
+        // But, they require references to this gui base
+        // So, should we move the entire popUpEditItemTray logic to realmBuilderEditingMode?
         this.moveButton = UI.SetUpItemButton({
             parentEl:this.#circleButtons[0],
             width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
-            mouseDown:function(){realmEditor.BeginDraggingObject(realmEditor.editingItem);}
+            mouseDown:function(){realmEditor.BeginDraggingEditedObject();}
         });
 
 
@@ -685,7 +687,7 @@ export default class GUI {
             parentEl:this.#circleButtons[3],
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
             anchor:[.2,.5,.2,.5],
-            mouseDown:function(){realmEditor.RotateEditingItem(-45);}
+            mouseDown:function(){realmEditor.RotateEditingItem(45);}
         });
 
         // Set up Rotate Right button
@@ -693,7 +695,7 @@ export default class GUI {
             parentEl:this.#circleButtons[3],
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
             anchor:[.8,.5,.8,.5],
-            mouseDown:function(){realmEditor.RotateEditingItem(45);}
+            mouseDown:function(){realmEditor.RotateEditingItem(-45);}
         });
 
         popUpEditItemTray.enabled = false;

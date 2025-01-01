@@ -51,6 +51,12 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     */
 
+    onMouseUp(e){
+        if (this.realmEditor.gui.isMouseOverMap && !Mouse.isMouseOverEntity(this.realmEditor.gui.editableItemBackboard)) {
+            this.toggle('poppingOut');
+        }
+    }
+
     onMouseMove(e) {
         super.onMouseMove(e);
     }
@@ -65,7 +71,8 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     }
 
     onExit(){
-        
+        realmEditor.gui.popUpEditItemTray.enabled=false; // Eytan; I'd like this to "shrink away" as I swtich to dragging mode.
+        // But, that requires a "lingering" update here while drag mode is already enabled (meaning this mode, and thus its update, is disabled, so it can't shrink.)
 
     }
 }
@@ -83,10 +90,12 @@ class EditingMode extends EditMode {}
 class NormalMode extends EditMode {}
 class PoppingInMode extends EditMode {
     onEnter(){
+        realmEditor.gui.popUpEditItemTray.setLocalScale(0.1,0.1,0.1);
         realmEditor.gui.popUpEditItemTray.enabled=true;
         
     }
     update(dt){
+        const fudge = 0.01;
         if (realmEditor.gui.popUpEditItemTray.localScale.x < 1.0-fudge) {
             const popInSpeed = 1000;
             const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,1.0,dt * popInSpeed);
@@ -99,12 +108,14 @@ class PoppingInMode extends EditMode {
 class PoppingOutMode extends EditMode {
 
     update(dt){
-        const minScale = 0.5;
+        const fudge = 0.01;
+        const minScale = 0.2;
         if (realmEditor.gui.popUpEditItemTray.localScale.x > minScale + fudge) {
             const popInSpeed = 1000;
-            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,minScale,dt * popInSpeed);
+            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,0,dt * popInSpeed);
             realmEditor.gui.popUpEditItemTray.setLocalScale(d,d,d);
         } else {
+            realmEditor.gui.popUpEditItemTray.enabled=true;
             this.superMode.toggle('normal');
             this.superMode.realmEditor.toggle('normal');
         }

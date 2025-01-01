@@ -3,21 +3,17 @@ export default class PlacedItem {
     // has a corresponding PlacedEntity object stored in memory.
 
     constructor(args={}){
-        const { entity, templateName, level } = args;
-        console.log("new item. tn:"+templateName);
+        const { entity, templateName, level, iconTextureAsset } = args;
        this._entity = args.entity; 
        this._templateName = templateName;
        this._level = level;
+       //this.iconTextureAsset = iconTextureAsset;
        entity.tags.add(Constants.Tags.BuilderItem);
-       entity.on('destroy',function(){
-            console.log('item was destroyed; did we update the save data model in realmEditor?');
-        })
         this.colliders = new Map();
         entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
             this.colliders.set(collisionComponent,collisionComponent.enabled);
         });
 
-        this.disableColliders();
  
     }
 

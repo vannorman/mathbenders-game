@@ -100,6 +100,7 @@ const Constants = {
         Terrain : 'Terrain',
     },
     Templates : {
+        // Hmm.. would rather define these as new PlacedItem(name:CastleWall,props:...) inside Prefabs - @Eytan
         CastleWall : 'CastleWall',
         NumberHoop : 'NumberHoop',
         CastleTurret : 'CastleTurret',
