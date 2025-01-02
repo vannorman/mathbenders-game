@@ -1,6 +1,12 @@
 var m;
 var Prefabs = {
-    // Note: Duplicated functionality in Prefabs.SomeFuncToCreateItem and Game.Instantiate[someTemplate] // Network.Insatnatite
+    // @Eytan - this will be a key area of next architectural evolution
+    // All prefabs should inherit from a superclass (or interface?) 
+    // Prefabs are often a collection of multiple entities and scripts
+    // Prefabs need to have (serializable/JSONifiable) definitions for getproperties() and setproperties() for level save/load
+    // Probably prefer to have one prefab file with multiple classes, or, could have one giant class with many class extends, or ..?
+    // Note: Some functionality is added or defined via if/then inside the Game.Instantiate method
+
    TemplatizePrefabs () {
         // NOTE: These are for (mostly) single/sole assets only and not groups/combinations of assets.
 
