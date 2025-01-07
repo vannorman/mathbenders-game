@@ -112,7 +112,7 @@ class RealmEditor {
             portals[i].ConnectTo(portals[i+1]);
             portals[i+1].ConnectTo(portals[i]);
         }
-    
+   } 
  
     enable() {
         this.#isEnabled = true;
