@@ -14,7 +14,6 @@ var ScriptManager = {
     dependencyScripts : [
         "/static/lib/playcanvas-stable.js",
         // "https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js",
-        "/static/js/playcanvasInitializer.js",
     ],
     gameManagementScripts : [
         // "Plain" script type
@@ -57,6 +56,7 @@ var ScriptManager = {
          "/static/js/assetRegistry.js", 
         "/static/js/constants.js",
         "/static/js/utils/util.js",
+         "/static/js/prefabs/prefabs.js", 
          "/static/js/prefabs.js", 
          "/static/js/shaders/groundFogShader.js",
          "/static/js/cameras.js", 
@@ -127,7 +127,7 @@ var ScriptManager = {
 //          "/static/js/charlie/gui/base.js", 
 //          "/static/js/charlie/camera.js", 
 //          "/static/js/charlie/placedItem.js", 
-          "/static/js/charlie/realmEditor.js", 
+          "/static/js/realmEditor/realmEditor.js", 
 //         "/static/js/charlie/modes/draggingObjectRealmBuilderMode.js",
 //        "/static/js/charlie/modes/index.js",
 //         "/static/js/charlie/modes/normalRealmBuilderMode.js",
@@ -138,9 +138,13 @@ var ScriptManager = {
 //        "/static/js/charlie/modes/mapScreenRealmBuilderMode.js",
 //        "/static/js/charlie/modes/realmBuilderMode.js",
         ],
+    loaderScripts : [
+        "/static/js/startup/applicationLoader.js",
+    ],
     Init(){
         this.LoadDependencyScripts();
-        ScriptManager.loadNext();
+        this.LoadApplicationLoader();
+        this.loadNext();
     },
     LoadDependencyScripts(){
         ScriptManager.dependencyScripts.forEach(x => this.addScript(x,ScriptManager.ScriptType.Plain));
@@ -153,6 +157,10 @@ var ScriptManager = {
     },
     LoadModules(){
         ScriptManager.moduleScripts.forEach(x => this.addScript(x,ScriptManager.ScriptType.Module));
+    },
+    LoadApplicationLoader(){
+        ScriptManager.loaderScripts.forEach(x => this.addScript(x,ScriptManager.ScriptType.Module));
+
     },
     queue: [],
     addScript: function(path,scriptType=ScriptManager.ScriptType.Plain) {
