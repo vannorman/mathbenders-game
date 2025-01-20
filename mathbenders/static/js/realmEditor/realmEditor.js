@@ -1,15 +1,3 @@
-/*
-
-    Q for Eytan
-        - Can I avoid passing realmeditor multiple times (this => gui => builderpanel)?
-        - How to access sub-states of modes, e.g. EditingItemRealmBuilderMode which has local vars that need to be bound via UI?
-            - old way was within UI script to set SubMode() within BeginDrag or BeginEdit passing RealmBuilder.someObject
-            - now, I need to bind these (when UI is created) and I need to reference current items; 
-            - additionally I need to call setMode on the substate from the gui object
-            - within Gui, can i do realmEditor.currentState.setState()? And it will fail if not in correct mode? I don't think the state behavior / instance is accessible this way?
-
-*/
-
 import {
     DraggingObjectRealmBuilderMode,
     EditingItemRealmBuilderMode,
@@ -20,13 +8,15 @@ import {
     OrbitRealmBuilderMode
 } from "./modes/index.js";
 
-import GUI from './gui/base.js';
-import EditorCamera from './camera.js';
-import PlacedItem from './placedItem.js';
-import Level from './level.js';
-import RealmData from './realmData.js';
-import TerrainCentroidManager from './terrainCentroidManager.js';
-import Terrain from './terrain.js';
+import {
+    GUI,
+    EditorCamera,
+    PlacedItem,
+    Level,
+    RealmData,
+    TerrainCentroidManager,
+    Terrain
+} from  "./index.js";
 
 class RealmEditor {
 

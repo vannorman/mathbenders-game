@@ -130,6 +130,7 @@ const assets = {
             numberSpherePos: new pc.Asset("numberSpherePos", "texture", { url: "/static/assets/textures/ui/numberSpherePos.png", }),
             numberSphereNeg: new pc.Asset("numberSphereNeg", "texture", { url: "/static/assets/textures/ui/numberSphereNeg.png", }),
             icons : {
+                fraction : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/fraction.jpg", }),
                 bow : new pc.Asset("iconBow", "texture", { url: "/static/assets/textures/ui/iconBow.png", }),
                 sword : new pc.Asset("iconSword", "texture", { url: "/static/assets/textures/ui/iconSword.png", }),
                 multiblaster : new pc.Asset("iconMultiblaster", "texture", { url: "/static/assets/textures/ui/iconMultiblaster.png", }),

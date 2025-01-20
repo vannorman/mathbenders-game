@@ -1,41 +1,89 @@
 class Attribute {
-    #editIcon;
+    icon;
+    tray;
     #editOptions;
     #editEffects;
 
-    constructor(){}
+    constructor(template){}
 
     getAttributesFromItem(){}
 
     setAttributesFromUI(){}
 
     buildUi(){
+        // Pass in the Editor Pop Up Item Tray as ui parent?
+        const p = realmEditor.gui.popUpEditItemTray;
+        const $this = this;
+        UI.SetUpItemButton({
+            parentEl:p,
+            width:30,height:30,
+            textureAsset:this.icon,
+            anchor:[.5,.2,.5,.2],
+            mouseDown:function(){   $this.show();   },
+            cursor:'pointer',
+        });
+
         // get icon from subclass
         // populate ui pop up tray with that icon
         // create a pop-up attribute editing panel, bind its "x" to close that same panel
         // bind the click of the icon to the enable of the editing panel
     }
+
+    show(){
+        this.tray.enable();
+    }
 }
 
 class FractionAttribute extends Attribute {
-    #fraction = new Fraction(1,1);
+    #numberInfo;
+    get #fraction() {return this.#numberInfo.fraction } 
+    constructor(template){
+        super(template);
+        this.#numberInfo = this.template.entity.getComponentsInChildren('numberInfo')[0]; // weak, awkward
+        this.icon = assets.textures.ui.icons.fraction; 
+
+        this.tray = this.buildUiTray();
+        this.tray.disable()
+    }
     get value(){
         return this.#fraction; 
     }
     set value(value){
         this.#fraction = value;
     }
-    get icon(){
-        return assets.textures.ui.icons.hoop; 
+
+    // Don't want this to be carried in memory everywhere until needed!
+    // But, NumberFaucet *does* need an SavedAttributeValues.forEach(x=>{this.modifier[x].setValue(x.value)}){}
+    buildUiTray(){
+        const tray = new pc.Entity();
+        tray.addComponent("element", {
+            type: "image",
+            anchor: [0.5, .5, .5, .5],   
+            pivot: [0.5,0.5],
+            width: 70,
+            height: 120,
+            opacity:1,
+            useInput:true
+        });
+        const $this = this;
+        UI.SetUpItemButton({
+            parentEl:tray,
+            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
+            anchor:[.5,.2,.5,.2],
+            mouseDown:function(){   $this.modifyNumerator(1);   },
+            cursor:'pointer',
+        });
+        return tray;
     }
 
-    get uiTray(){
-
+    modifyNumerator(amount){
+        const numberInfo = this.#numberInfo; // correct this, since its called from outside (onmousedown)?
+        numberInfo.setFraction(new Fraction(numberInfo.fraction.numerator+1,numberInfo.denominator));;
     }
 }
 
 
-class Prefab {
+class Template {
 
     name;
     icon;
@@ -78,7 +126,7 @@ class Prefab {
 
 }
 
-class NumberHoop extends Prefab {
+class NumberHoop extends Template {
   
     // I don't need Instance of NumberHoop to know about the templateName?
 
