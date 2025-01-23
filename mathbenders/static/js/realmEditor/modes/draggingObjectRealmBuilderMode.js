@@ -3,7 +3,7 @@ import RealmBuilderMode from "./realmBuilderMode.js";
 // Dislike / awkward how sometimes i call realmEditor.gui from the global object instead of something passed here
 // Also dislike passing realmEditor instance from class to class down this hierarchy. Perhaps it's best
 
-// Bug - on second initiate drag of existing item via Move button on popUpItem interface, the templateName is lost.
+// Bug - on second initiate drag of existing item via Move button on popUpItem interface, the ItemTemplate is lost.
 
 export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
@@ -11,8 +11,7 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     modes;
     mode;
 
-    templateName;
-    iconTextureAsset;
+    ItemTemplate;
 
     constructor(params) {
         super(params);
@@ -27,11 +26,9 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     setData(data){
         const {
             // draggingEntity, 
-            templateName, 
-            iconTextureAsset
+            ItemTemplate, 
         } = data;
-        this.templateName = templateName;
-        this.iconTextureAsset = iconTextureAsset;
+        this.ItemTemplate = ItemTemplate;
     }
 
     startDraggingExistingItem(item){
@@ -83,7 +80,7 @@ class InstantiationDraggingMode {
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
     onEnter(){
-        this.dragger.realmEditor.gui.setCustomCusror(this.dragger.iconTextureAsset);
+        this.dragger.realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon);
     }
     onExit(){
         realmEditor.gui.setNormalCursor();
@@ -99,8 +96,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
     }
 
     instantiateItem(){
-        const instantiatedItem = realmEditor.InstantiateItem({templateName:this.dragger.templateName});
-            console.log('inst.');
+        const instantiatedItem = realmEditor.InstantiateItem({ItemTemplate:this.dragger.ItemTemplate});
         instantiatedItem.disableColliders();
         this.dragger.toggle('post');
         this.dragger.mode.setDraggingItem(instantiatedItem);

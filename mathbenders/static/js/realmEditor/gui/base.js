@@ -40,7 +40,8 @@ export default class GUI {
     #editableItemGroup; 
     #editableItemBackboard; 
     get editableItemBackboard(){return this.#editableItemBackboard;}
-    #circleButtons;
+
+    circleButtons; // the one ring to rule them all
 
     // why?
     #guiButtons=[];
@@ -343,14 +344,17 @@ export default class GUI {
         realmInfoPanel.panel.addChild(this.realmInfoScreen);
         this.#builderPanels.push(realmInfoPanel);
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Player", items : [
-                    { templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
+                    //{ templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
+                    { ItemTemplate : PlayerStart },
                     { templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Machines", items : [
-                    { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
-                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
-                    { templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
+//                    { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
+//                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
+                    { ItemTemplate:NumberFaucet },
+                    { ItemTemplate:NumberHoop } ,
+                    // templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Numbers", items : [
@@ -648,7 +652,7 @@ export default class GUI {
 
         // Define a circle of buttons for various actions like copy, delete
         let points = Utils.GetCircleOfPoints({degreesToComplete:360,radius:100,scale:100});
-        this.#circleButtons = []; // we'll access RealmBuilder by index later.
+        this.circleButtons = []; // we'll access RealmBuilder by index later.
         points.forEach(point=>{
             const el = new pc.Entity("el");
             el.addComponent('element',{
@@ -660,7 +664,7 @@ export default class GUI {
                 textureAsset: assets.textures.ui.numberSpherePos,
             })
             popUpEditItemTray.addChild(el);
-            this.#circleButtons.push(el);
+            this.circleButtons.push(el);
             const offCenter = 20;
             el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
         });
@@ -676,7 +680,7 @@ export default class GUI {
         // But, they require references to this gui base
         // So, should we move the entire popUpEditItemTray logic to realmBuilderEditingMode?
         this.moveButton = UI.SetUpItemButton({
-            parentEl:this.#circleButtons[0],
+            parentEl:this.circleButtons[0],
             width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
             mouseDown:function(){realmEditor.BeginDraggingEditedObject();}
         });
@@ -684,7 +688,7 @@ export default class GUI {
 
         // Set up Rotate Left button
         UI.SetUpItemButton({
-            parentEl:this.#circleButtons[3],
+            parentEl:this.circleButtons[3],
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
             anchor:[.2,.5,.2,.5],
             mouseDown:function(){realmEditor.RotateEditingItem(45);}
@@ -692,7 +696,7 @@ export default class GUI {
 
         // Set up Rotate Right button
         UI.SetUpItemButton({
-            parentEl:this.#circleButtons[3],
+            parentEl:this.circleButtons[3],
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
             anchor:[.8,.5,.8,.5],
             mouseDown:function(){realmEditor.RotateEditingItem(-45);}

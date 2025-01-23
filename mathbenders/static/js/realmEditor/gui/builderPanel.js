@@ -16,7 +16,7 @@ export default class BuilderPanel {
         this.gui = gui; // Needed for first "select()" call, called in base.js line 300, since this is all kicked off by the constructor of realmeditor, so a global realmeditor has not resolved yet.. awkward 
         panel = this.CreateBuilderPanel(name);
         items.forEach(item => {
-            const itemIcon = this.CreateBuilderObjectIcon({realmEditor:gui.realmEditor,templateName:item.templateName,textureAsset:item.textureAsset})
+            const itemIcon = this.CreateBuilderObjectIcon({ItemTemplate:item.ItemTemplate});
             panel.addChild(itemIcon);
         });
         navButton = this.AddNav({text:name,width:logoPanelWidth});
@@ -84,7 +84,8 @@ export default class BuilderPanel {
 
     CreateBuilderObjectIcon(options){
         // UI Helper Method
-        const {realmEditor, textureAsset, templateName, text} = options;
+        // const {realmEditor, textureAsset, templateName, text} = options;
+        const {ItemTemplate=NumberHoop} = options;
 
         // create a ui square
         const child = new pc.Entity("childe");
@@ -105,16 +106,13 @@ export default class BuilderPanel {
         // add a child image with the texture asset for this icon
         const childImage = new pc.Entity("ui child");
         let i=0;
-        const r = Math.sin(i * 0.6) * 0.5 + 0.5;
-        const g = Math.sin(i * 0.6 + 2.094) * 0.5 + 0.5;
-        const b =  Math.sin(i * 0.6 + 4.188) * 0.5 + 0.5;
         childImage.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
             pivot: [0.5, 0.5],
             width:64,
             height:64,
             type: 'image',
-            textureAsset: textureAsset,
+            textureAsset: ItemTemplate.icon,
             useInput: true,
             layer: pc.LAYERID_UI,
         });
@@ -122,31 +120,28 @@ export default class BuilderPanel {
         UI.HoverColor({element:childImage.element});
 
         // add a text element
-        const textElement = new pc.Entity('Text');
-        textElement.addComponent('element', {
-            type: 'text',
-            text: text,
-            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
-            autoFitWidth:true, // not work
-            autoFitHeight:true, // not work
-            fontSize : 12,
-            color: new pc.Color(0,0,0), // 
-            width: 50,
-            height: 100,
-            pivot: new pc.Vec2(0.5, 2.0), // Center pivot
-            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5), // Center anchor
-        });
-        childImage.addChild(textElement);
+//        const textElement = new pc.Entity('Text');
+//        textElement.addComponent('element', {
+//            type: 'text',
+//            text: text,
+//            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
+//            autoFitWidth:true, // not work
+//            autoFitHeight:true, // not work
+//            fontSize : 12,
+//            color: new pc.Color(0,0,0), // 
+//            width: 50,
+//            height: 100,
+//            pivot: new pc.Vec2(0.5, 2.0), // Center pivot
+//            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5), // Center anchor
+//        });
+//        childImage.addChild(textElement);
         
         childImage.element.on('mousedown',function(){
-            realmEditor.BeginDraggingNewObject({templateName:templateName,iconTextureAsset:textureAsset});
-            // pass in realmeditor as instance 
-        }); 
-        childImage.name = "child image:"+templateName;
+            //realmEditor.BeginDraggingNewObject({templateName:templateName,iconTextureAsset:textureAsset});
+            realmEditor.BeginDraggingNewObject({ItemTemplate:ItemTemplate});//,iconTextureAsset:textureAsset});
 
-        // save it for later
-        const guiItemProperties = {entity:childImage,textElement:textElement,templateName:templateName,textureAsset:textureAsset};
-//        realmEditor.gui.guiButtons.push(guiItemProperties); // why?
+        }); 
+        // childImage.name = "child image:"+templateName;
 
         return child; 
     }

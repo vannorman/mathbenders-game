@@ -194,7 +194,7 @@ class RealmEditor {
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
  
             levelJson._placedItems.forEach(x=>{
-                let obj = this.InstantiateItem({level:thisLevel,templateName:x.templateName});
+                let obj = this.InstantiateItem({level:thisLevel,ItemTemplate:templateNameMap[x.templateName]});
                 obj.entity.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
        });
@@ -232,11 +232,11 @@ class RealmEditor {
 
     BeginDraggingNewObject(options={}){
 
-        const { templateName, iconTextureAsset, width=80, height=80 } = options;
+        const { ItemTemplate, width=80, height=80 } = options;
 
         this.toggle('draggingObject');
         // Todo: Eytan help? "drag object" functionality
-        const data = { level:this.currentLevel, templateName:templateName,iconTextureAsset:iconTextureAsset }
+        const data = { level:this.currentLevel, ItemTemplate:ItemTemplate };
         this.#mode.setData(data);
         this.#mode.toggle('pre');
     }
@@ -279,12 +279,18 @@ class RealmEditor {
         // console.log("Inst:"+args.toString());
         // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
         // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
-        const {level=this.RealmData.currentLevel, templateName, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO, iconTextureAsset} = args;
-        const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
+        const {level=this.RealmData.currentLevel, ItemTemplate, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO, iconTextureAsset} = args;
+        function isConstructor(ref) {
+          return typeof ref === 'function' && ref.prototype && ref.prototype.constructor === ref;
+        }
+        if (!isConstructor(ItemTemplate)){ console.log("Not constructor:");console.log(ItemTemplate);return;}
+        const instance = new ItemTemplate();
+        const entity = instance.entity;
+        //const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
         const placedItem = new PlacedItem({
             entity : entity,
-            templateName : templateName,
+            ItemTemplate : ItemTemplate,
             level : level,
             iconTextureAsset
         })
@@ -299,6 +305,7 @@ class RealmEditor {
         if (entity){
             this.toggle('editingItem');
             this.#mode.setEntity(entity);
+//            this.#mode.setItemTemplate(ItemTemplate)
         } else {
             this.toggle('normal');
         }

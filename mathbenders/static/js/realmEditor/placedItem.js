@@ -3,9 +3,9 @@ export default class PlacedItem {
     // has a corresponding PlacedEntity object stored in memory.
 
     constructor(args={}){
-        const { entity, templateName, level, iconTextureAsset } = args;
+        const { entity, ItemTemplate, level, iconTextureAsset } = args;
        this._entity = args.entity; 
-       this._templateName = templateName;
+       this._templateName = ItemTemplate.name;
        this._level = level;
        //this.iconTextureAsset = iconTextureAsset;
        entity.tags.add(Constants.Tags.BuilderItem);

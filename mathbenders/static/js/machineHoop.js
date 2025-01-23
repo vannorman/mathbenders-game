@@ -20,6 +20,7 @@ MachineHoop.prototype.init = function () {
     // Note: We rely on assets.hoop which is a parent with two child meshes, a "doorway plane" and an "arch"
     const doorway = this.entity.children[0];
     doorway.addComponent('script');
+    doorway.addComponent('collision',{type:'mesh',renderAsset:assets.numberHoop.resource.renders[0]}); 
     doorway.script.create('machineCrossingDetector',{attributes:{
         // let machineCrossingDetector know "when an object triggers, what behaviors/qualities are required to fire an event"
         requiredFn: (x) => { 
@@ -34,7 +35,6 @@ MachineHoop.prototype.init = function () {
 
     const arch = this.entity.children[1];
 
-    doorway.addComponent('collision',{type:'mesh',renderAsset:assets.numberHoop.resource.renders[0]}); 
 
     // If we apply textures simultaneously to both the hoop archway and the hoop doorway, one of them will appear as a grey texture. 
     // Current workaround is to setTimeout for the 2nd texture

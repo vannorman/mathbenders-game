@@ -20,9 +20,25 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         this.#mode = this.#modes.get('editing');
     }
 
+
     setEntity(entity){
         this.entity = entity;
+        this.ItemTemplate = templateNameMap[entity.script.itemTemplateReference.itemTemplate];
         realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
+        
+        // Note that positions "0" and "3" around the cirlce are already taken.
+        let i=1;
+        this.ItemTemplate.editablePropertiesMap.forEach(x => {
+            const ui = x.property.buildUi(); 
+            ui.enabled=false;
+            const openPropertyBtn = UI.SetUpItemButton({
+                parentEl:realmEditor.gui.circleButtons[i],
+                width:30,height:30,
+                textureAsset:x.property.icon,
+                mouseDown:function(){ui.enabled=true;},
+            });
+            realmEditor.gui.circleButtons[i].addChild(ui);
+        });
         this.toggle('poppingIn');
     }
 

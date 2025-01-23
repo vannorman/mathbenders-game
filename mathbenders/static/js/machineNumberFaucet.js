@@ -1,7 +1,7 @@
-var NumberFaucet = pc.createScript('numberFaucet');
-NumberFaucet.attributes.add('fraction', { type: 'object', default: {'numerator':2,'denominator':1} });
+var MachineNumberFaucet = pc.createScript('machineNumberFaucet');
+MachineNumberFaucet.attributes.add('fraction', { type: 'object', default: {'numerator':2,'denominator':1} });
 
-NumberFaucet.prototype.initialize = function(){
+MachineNumberFaucet.prototype.initialize = function(){
     if (this.fraction == undefined){
         this.fraction = new Fraction(-1,1);
     }
@@ -11,15 +11,16 @@ NumberFaucet.prototype.initialize = function(){
     this.isEnabled=false;
     this.disable();
 
+
 }
 
-NumberFaucet.prototype.enable = function(){
+MachineNumberFaucet.prototype.enable = function(){
     this.isEnabled=true;
 }
-NumberFaucet.prototype.disable = function(){
+MachineNumberFaucet.prototype.disable = function(){
     this.isEnabled=false;
 }
-NumberFaucet.prototype.onGameStateChange = function(state){
+MachineNumberFaucet.prototype.onGameStateChange = function(state){
     switch(state){
     case GameState.RealmBuilder:
         this.disable();
@@ -30,7 +31,7 @@ NumberFaucet.prototype.onGameStateChange = function(state){
     }
  
 }
-NumberFaucet.prototype.update = function(dt){
+MachineNumberFaucet.prototype.update = function(dt){
     // Eytan : Instead of checking in each behavior that is part of GameMode Normal, we should have this object belong to a category of Normal and only execute all those objects during Normal mode (avoid checks in each obj's update)
     if (!this.isEnabled) return;
     const timeSinceDrip = pc.now() - this.lastDripTime;
@@ -62,7 +63,7 @@ NumberFaucet.prototype.update = function(dt){
     }
 }
 
-NumberFaucet.prototype.drippedNumberIsNear = function() {
+MachineNumberFaucet.prototype.drippedNumberIsNear = function() {
     const nearDist = 2;
     for(let i=0;i<this.drippedNumbers.length;i++){
         const x = this.drippedNumbers[i];
