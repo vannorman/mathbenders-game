@@ -2,7 +2,7 @@ class Template {
 
     static name="TemplateSuper";
     static icon;
-    static editablePropertiesMap;
+    static editablePropertiesMap=[];
 
     entity; // stores scale, position, and rotation;
 
@@ -14,7 +14,7 @@ class Template {
         this.entity.moveTo(position,rotation);
         //globalThis[this.constructor.name] = this.constructor;
         this.entity.addComponent('script');
-        this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this.constructor.name}});
+        this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this.constructor}});
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
         console.log("This name:"+this.constructor.name);
@@ -73,7 +73,8 @@ class NumberFaucet extends Template {
     static icon = assets.textures.ui.icons.faucet;
     static editablePropertiesMap = [
          {  property : FractionProperty, 
-            onChangeFn : (value) => { this.entity.script.machineNumberFaucet.setFraction(value); } 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberFaucet')[0].setFraction(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberFaucet')[0].fraction },
          },
 
     ]
@@ -171,4 +172,6 @@ const templateNameMap = {
     "PlayerStart" : PlayerStart,
 }
 
-
+function getTemplateByName(name){
+    return templateNameMap[name];
+}

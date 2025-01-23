@@ -23,13 +23,15 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     setEntity(entity){
         this.entity = entity;
-        this.ItemTemplate = templateNameMap[entity.script.itemTemplateReference.itemTemplate];
+        this.ItemTemplate = entity.script.itemTemplateReference.itemTemplate;
         realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
         
         // Note that positions "0" and "3" around the cirlce are already taken.
         let i=1;
         this.ItemTemplate.editablePropertiesMap.forEach(x => {
-            const ui = x.property.buildUi(); 
+
+            const editableProperty = new x.property({entity:entity});
+            const ui = editableProperty.buildUi(x.onChangeFn,x.getCurValFn); 
             ui.enabled=false;
             const openPropertyBtn = UI.SetUpItemButton({
                 parentEl:realmEditor.gui.circleButtons[i],
@@ -38,6 +40,13 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
                 mouseDown:function(){ui.enabled=true;},
             });
             realmEditor.gui.circleButtons[i].addChild(ui);
+            const editablePropertyInstance = new x.property();
+            // how to link the value change to the onchange fn?
+            // how to avoid Property instance being created in the template.. oh because we don't new Prop() we just do Prop : 
+
+            editablePropertyInstance.onChangeFn = x.onChangeFn
+            i++;
+            if (i==3) i++; // 3 is taken lol .. by default in editor gui circlebuttons setup. Need to fix this
         });
         this.toggle('poppingIn');
     }
@@ -72,9 +81,13 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     */
 
     onMouseUp(e){
-        if (this.realmEditor.gui.isMouseOverMap && !Mouse.isMouseOverEntity(this.realmEditor.gui.editableItemBackboard)) {
-            this.toggle('poppingOut');
-        }
+//        if (this.realmEditor.gui.isMouseOverMap && !Mouse.isMouseOverEntity(this.realmEditor.gui.editableItemBackboard)) {
+//            this.toggle('poppingOut');
+//        }
+    }
+
+    mapClicked(){
+        this.toggle('poppingOut');
     }
 
     onMouseMove(e) {

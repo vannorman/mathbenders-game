@@ -32,6 +32,11 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     }
 
     startDraggingExistingItem(item){
+        console.log("Start dragging."); 
+        console.log(item);
+        this.ItemTemplate = item.template; 
+        console.log("This item template:");
+        console.log(this.ItemTemplate);
         item.disableColliders();
         this.toggle('post');
         this.mode.setDraggingItem(item);
@@ -80,6 +85,9 @@ class InstantiationDraggingMode {
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
     onEnter(){
+        //let icon = assets.textures.ui.trash;
+        //if (this.dragger?.ItemTemplate) icon = this.dragger.ItemTemplate.icon;
+        // this.dragger.realmEditor.gui.setCustomCusror(icon);
         this.dragger.realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon);
     }
     onExit(){
@@ -96,6 +104,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
     }
 
     instantiateItem(){
+        console.log("instancing w dragger:"+this.dragger+" and itemtemplate:"+this.dragger.ItemTemplate?.name);
         const instantiatedItem = realmEditor.InstantiateItem({ItemTemplate:this.dragger.ItemTemplate});
         instantiatedItem.disableColliders();
         this.dragger.toggle('post');
@@ -111,7 +120,10 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
     #instantiatedItem;
 
     setDraggingItem(item){
+        console.log("Set drag item");
+        console.log(item);
         this.#instantiatedItem = item;
+        this.dragger.ItemTemplate = item.template; 
     }
    
     onEnter(){
@@ -119,7 +131,7 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
    }
     
     onExit(){
-        if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();    
+        if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();     // does this not destroy the ItemTemplate? @Eytan
     }
 
     onMouseMove(e){

@@ -26,4 +26,6 @@ export default class RealmBuilderMode {
     update(dt){
 
     }
+
+    mapClicked(){}
 }

@@ -192,7 +192,9 @@ export default class GUI {
             height: 1,
             margin: [this.leftMargin, 0, 0, 0],
             opacity:1,
+            useInput : true,
         });
+        this.#mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()})
 
         gui.addChild(this.#mapPanel);
 
@@ -642,6 +644,7 @@ export default class GUI {
             type: 'image',
             width: 320,
             height: 360,
+            useInput: true,
 
             textureAsset: assets.textures.ui.builder.editItemBackboard,
         });

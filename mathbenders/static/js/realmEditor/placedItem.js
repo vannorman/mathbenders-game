@@ -13,7 +13,7 @@ export default class PlacedItem {
         entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
             this.colliders.set(collisionComponent,collisionComponent.enabled);
         });
-
+        this.template = this._entity.script.itemTemplateReference.itemTemplate;
  
     }
 
