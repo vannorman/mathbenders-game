@@ -23,7 +23,6 @@ export default class RealmData {
             this.Levels.forEach(level=>{
                 level.Clear({deleteLevelObjects:deleteLevelObjects});
             });
-
         }
     }
 

@@ -1,6 +1,6 @@
 var SinePopIn = pc.createScript('sinePopIn');
-SinePopIn.attributes.add('popAmount', { type: 'number', default: 0.2 });
-SinePopIn.attributes.add('popTime', { type: 'number', default: 0.35 });
+SinePopIn.attributes.add('popAmount', { type: 'number', default: 0.1 });
+SinePopIn.attributes.add('popTime', { type: 'number', default: 0.15 });
 
 SinePopIn.prototype.initialize = function(){
     this.startTime = Date.now();
@@ -8,6 +8,7 @@ SinePopIn.prototype.initialize = function(){
     //this.entity.setLocalScale(0,0,0);
     // dislike but, special case for numberinfo ..
     // alternative strategy is to simply have the numberinfo have its own sinepop fn..
+    this.on('enable',function(){this.startTime = Date.now();});
 };
 
 

@@ -52,11 +52,12 @@ MachineHoop.prototype.init = function () {
 };
 
 MachineHoop.prototype.setFraction = function(frac){
-    this.fraction = frac;
+    this.fraction = Fraction.ReduceOverIntegers(frac);
     this.updateText();
 };
 
 MachineHoop.prototype.updateText = function(){
+    this.entity.getComponentsInChildren('element').forEach(x=>{x.entity.destroy();})
     Utils.AddText({
         color:pc.Color.WHITE, 
         text:"x"+this.fraction.asString(),

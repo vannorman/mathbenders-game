@@ -9,6 +9,12 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     #modes;
     #mode;
 
+    // these gui things are populated in gui.circleButtons appear when object is placed
+    // Destroy them on close.
+    #guiButtonEntities=[];
+    #guiElementEntities=[];
+    #propertyInstances=[];
+
     constructor(params) {
         super(params);
         this.#modes = new Map([
@@ -23,11 +29,12 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     setEntity(entity){
         this.entity = entity;
-        this.ItemTemplate = entity.script.itemTemplateReference.itemTemplate;
+        this.ItemTemplate = entity.script.itemTemplateReference.itemTemplate.constructor;
         realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
         
         // Note that positions "0" and "3" around the cirlce are already taken.
         let i=1;
+        const $this=this;
         this.ItemTemplate.editablePropertiesMap.forEach(x => {
 
             const editableProperty = new x.property({entity:entity});
@@ -37,16 +44,27 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
                 parentEl:realmEditor.gui.circleButtons[i],
                 width:30,height:30,
                 textureAsset:x.property.icon,
-                mouseDown:function(){ui.enabled=true;},
+                mouseDown:function(){
+                    $this.#guiElementEntities.forEach(x=>{x.enabled=false;})
+                    ui.enabled=true;
+                },
             });
-            realmEditor.gui.circleButtons[i].addChild(ui);
-            const editablePropertyInstance = new x.property();
-            // how to link the value change to the onchange fn?
-            // how to avoid Property instance being created in the template.. oh because we don't new Prop() we just do Prop : 
+            // realmEditor.gui.circleButtons[i].addChild(ui); // this puts it underneath siblings
 
-            editablePropertyInstance.onChangeFn = x.onChangeFn
+            // put it above siblings by reparenting it up one parent in hierarchy while maintaining local position
+            let pare = realmEditor.gui.circleButtons[i];
+            let p1 = pare.getLocalPosition();
+            pare.parent.addChild(ui);
+            ui.setLocalPosition(p1);
+
             i++;
             if (i==3) i++; // 3 is taken lol .. by default in editor gui circlebuttons setup. Need to fix this
+           
+            this.#guiButtonEntities.push(openPropertyBtn);
+            this.#guiElementEntities.push(ui);
+            this.#propertyInstances.push(editableProperty)
+            Game.ui = ui;
+
         });
         this.toggle('poppingIn');
     }
@@ -62,28 +80,6 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         // iterate through placed entity editable features
         // foreach feature create a button
         // TODO: for placed Entity UI / data / behavior, document what is needed / and one specific example : Eytan
-    }
-
-    /*
-
-    placedEntity schema
-    {
-        name
-        pos
-        rot
-        editableFeatures{
-            fraction
-            wallDimension
-            connectedPortal
-        }
-    }
-
-    */
-
-    onMouseUp(e){
-//        if (this.realmEditor.gui.isMouseOverMap && !Mouse.isMouseOverEntity(this.realmEditor.gui.editableItemBackboard)) {
-//            this.toggle('poppingOut');
-//        }
     }
 
     mapClicked(){
@@ -106,7 +102,9 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     onExit(){
         realmEditor.gui.popUpEditItemTray.enabled=false; // Eytan; I'd like this to "shrink away" as I swtich to dragging mode.
         // But, that requires a "lingering" update here while drag mode is already enabled (meaning this mode, and thus its update, is disabled, so it can't shrink.)
-
+        this.#guiButtonEntities.forEach(x=>{x.destroy();});
+        this.#guiElementEntities.forEach(x=>{x.destroy();});
+        this.#propertyInstances.forEach(x=>{x=null;});
     }
 }
 

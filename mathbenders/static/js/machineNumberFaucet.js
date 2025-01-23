@@ -15,7 +15,7 @@ MachineNumberFaucet.prototype.initialize = function(){
 }
 
 MachineNumberFaucet.prototype.setFraction = function(frac){
-    this.fraction = frac;
+    this.fraction = Fraction.ReduceOverIntegers(frac);
 };
 MachineNumberFaucet.prototype.enable = function(){
     this.isEnabled=true;

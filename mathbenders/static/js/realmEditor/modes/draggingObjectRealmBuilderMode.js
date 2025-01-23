@@ -31,15 +31,11 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
         this.ItemTemplate = ItemTemplate;
     }
 
-    startDraggingExistingItem(item){
-        console.log("Start dragging."); 
-        console.log(item);
-        this.ItemTemplate = item.template; 
-        console.log("This item template:");
-        console.log(this.ItemTemplate);
-        item.disableColliders();
+    startDraggingExistingItem(itemTemplate){
+        this.ItemTemplate = itemTemplate.constructor;
+        itemTemplate.disableColliders();
         this.toggle('post');
-        this.mode.setDraggingItem(item);
+        this.mode.setDraggingItem(itemTemplate);
     }
     
     toggle(mode) {
@@ -85,10 +81,7 @@ class InstantiationDraggingMode {
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
     onEnter(){
-        //let icon = assets.textures.ui.trash;
-        //if (this.dragger?.ItemTemplate) icon = this.dragger.ItemTemplate.icon;
-        // this.dragger.realmEditor.gui.setCustomCusror(icon);
-        this.dragger.realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon);
+        realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon);
     }
     onExit(){
         realmEditor.gui.setNormalCursor();
@@ -104,8 +97,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
     }
 
     instantiateItem(){
-        console.log("instancing w dragger:"+this.dragger+" and itemtemplate:"+this.dragger.ItemTemplate?.name);
-        const instantiatedItem = realmEditor.InstantiateItem({ItemTemplate:this.dragger.ItemTemplate});
+        const instantiatedItem = realmEditor.InstantiateTemplate({ItemTemplate:this.dragger.ItemTemplate});
         instantiatedItem.disableColliders();
         this.dragger.toggle('post');
         this.dragger.mode.setDraggingItem(instantiatedItem);
@@ -119,11 +111,9 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
 class PostInstantiationDragMode extends InstantiationDraggingMode {
     #instantiatedItem;
 
-    setDraggingItem(item){
-        console.log("Set drag item");
-        console.log(item);
-        this.#instantiatedItem = item;
-        this.dragger.ItemTemplate = item.template; 
+    setDraggingItem(templateInstance){
+        this.#instantiatedItem = templateInstance;
+        this.dragger.ItemTemplate = templateInstance.constructor; 
     }
    
     onEnter(){

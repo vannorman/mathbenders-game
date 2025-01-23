@@ -11,7 +11,7 @@ import {
 import {
     GUI,
     EditorCamera,
-    PlacedItem,
+    //PlacedItem,
     Level,
     RealmData,
     TerrainCentroidManager,
@@ -89,7 +89,7 @@ class RealmEditor {
     }
 
     ConnectPortals(){
-        // Arbitrary portal logic that should be pushed to the Portal / placedItem data
+        // Arbitrary portal logic that should be pushed to the Portal / 
         let portals = [];
         pc.app.root.getComponentsInChildren('portal').forEach(portal=>{
             if (portal)  {
@@ -113,6 +113,7 @@ class RealmEditor {
         // To re-load the existing level ..
         const realmData = JSON.stringify(this.#RealmData); // copy existing realm data
         this.#RealmData.Clear(); // delete everything
+        pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{x.entity.destroy();}); // clean up extraneous numbers
         this.LoadJson(realmData);
  
     }
@@ -171,8 +172,10 @@ class RealmEditor {
 
     LoadData(realmData){
         realmData.Levels.forEach(level => {
-            levelJson._placedItems.forEach(x=>{
-                let obj = this.InstantiateItem({level:level,templateName:x.templateName});
+//            levelJson._placedItems.forEach(x=>{
+            levelJson.templateInstances.forEach(x=>{
+
+                let obj = this.InstantiateTemplate({level:level,ItemTemplate:getTemplateByName(x.templateName)});
                 obj.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
  
@@ -181,20 +184,20 @@ class RealmEditor {
     
     LoadJson(realmJson){
         realmJson = Utils.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
-
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true});
             levels.push(thisLevel);
-
-            let terrainData = levelJson._terrain;
+            
+            let terrainData = levelJson.terrain;
             terrainData.centroid = terrainCentroidManager.getCentroid();
             thisLevel.terrain = new Terrain(terrainData);
             const $this = this;
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
  
-            levelJson._placedItems.forEach(x=>{
-                let obj = this.InstantiateItem({level:thisLevel,ItemTemplate:templateNameMap[x.templateName]});
+//            levelJson._placedItems.forEach(x=>{
+            levelJson.templateInstances.forEach(x=>{
+                let obj = this.InstantiateTemplate({level:thisLevel,ItemTemplate:templateNameMap[x.templateName],properties:x.properties});
                 obj.entity.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
        });
@@ -247,11 +250,13 @@ class RealmEditor {
             console.log("mode:"+typeof(this.#mode));
         }
         const entity = this.#mode.entity;
-        const item = this.RealmData.currentLevel.getPlacedItemByEntity(entity);
+        // const item = this.RealmData.currentLevel.getPlacedItemByEntity(entity);
+        // const ItemTemplate = entity.script.itemTemplateReference.itemTemplate.constructor;
+        const itemTemplate = entity.script.itemTemplateReference.itemTemplate;
         this.toggle('draggingObject');
-        const data = { templateName:item.templateName,iconTextureAsset:assets.textures.ui.trash }
+        const data = { templateName:itemTemplate.constructor.name};
         this.#mode.setData(data);
-        this.#mode.startDraggingExistingItem(item);
+        this.#mode.startDraggingExistingItem(itemTemplate);
 
     }
 
@@ -278,31 +283,39 @@ class RealmEditor {
         // console.log("todo: update data:"+JSON.stringify(data));
     }
 
-    InstantiateItem(args){
+    InstantiateTemplate(args){
         // is "level" needed here?
         // console.log("Inst:"+args.toString());
         // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
         // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
-        const {level=this.RealmData.currentLevel, ItemTemplate, position=pc.Vec3.ZERO, rotation=pc.Vec3.ZERO, iconTextureAsset} = args;
-        function isConstructor(ref) {
-          return typeof ref === 'function' && ref.prototype && ref.prototype.constructor === ref;
-        }
-        if (!isConstructor(ItemTemplate)){ console.log("Not constructor:");console.log(ItemTemplate);return;}
+        const {
+            level=this.RealmData.currentLevel, 
+            ItemTemplate, 
+            position=pc.Vec3.ZERO, 
+            rotation=pc.Vec3.ZERO, 
+            properties={},
+            } = args;
+
         const instance = new ItemTemplate();
+        instance.setProperties(properties);
         const entity = instance.entity;
         //const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
-        const placedItem = new PlacedItem({
-            entity : entity,
-            ItemTemplate : ItemTemplate,
-            level : level,
-            iconTextureAsset
+//        const placedItem = new PlacedItem({
+//            entity : entity,
+//            ItemTemplate : ItemTemplate,
+//            level : level,
+//        })
+//        level.registerPlacedItem(placedItem);
+//        placedItem.entity.on('destroy',function(){
+        level.registerPlacedTemplateInstance(instance);
+        instance.entity.on('destroy',function(){
+            level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
+
+            //level.deRegisterPlacedItem(placedItem);
         })
-        level.registerPlacedItem(placedItem);
-        placedItem.entity.on('destroy',function(){
-            level.deRegisterPlacedItem(placedItem);
-        })
-        return placedItem;
+        return instance;
+//        return placedItem;
     }
     
     editItem(entity){

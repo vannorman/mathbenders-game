@@ -6,24 +6,79 @@ class Template {
 
     entity; // stores scale, position, and rotation;
 
-    constructor(args) {
+    constructor(args={}) {
         const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO}=args;
-        // Container entity
         this.entity = new pc.Entity();
         pc.app.root.addChild(this.entity);
         this.entity.moveTo(position,rotation);
-        //globalThis[this.constructor.name] = this.constructor;
         this.entity.addComponent('script');
-        this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this.constructor}});
+        this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this}});
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
-        console.log("This name:"+this.constructor.name);
+        this.entity.tags.add(Constants.Tags.BuilderItem);
     }
 
+    updateColliderMap(){
+        this.colliders = new Map();
+        this.entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
+            this.colliders.set(collisionComponent,collisionComponent.enabled);
+        });
+    }
+
+    enableColliders(){
+        for (const [colliderComponent, activeState] of this.colliders) {
+            if (activeState) colliderComponent.enabled = true;
+        }
+    }
+
+    disableColliders(){
+        for (const [colliderComponent, activeState] of this.colliders) {
+            if (activeState) colliderComponent.enabled = false;
+        }
+    }
+
+    get properties() {
+        const props = {};
+        this.constructor.editablePropertiesMap.forEach(x=>{
+           props[x.name] = x.getCurValFn(this.entity) 
+        });
+        return props;
+    }
+
+    setProperties(properties) {
+        // Note that all data here is stored in the *game entity* not in the template instance.
+        this.constructor.editablePropertiesMap.forEach(x=>{
+            if (properties[x.name] !== undefined){
+                const val = properties[x.name];
+                x.onChangeFn(this.entity,val);
+            }
+        })
+    }
+
+//    toJSON(){
+    // Handle this in Level.toJson()?
+//
+//        return {
+//            position : this.entity.getPosition().sub(this.level.terrain.centroid).trunc(), // I hate how this is here
+//            rotation : this.entity.getEulerAngles().trunc(),
+//            templateName : this.constructor.name,
+//            properties : this.properties,
+//        }
+//    }
 }
 
 class NumberHoop extends Template {
- 
+    static editablePropertiesMap = [
+         {  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : "NumberHoop",
+            property : FractionProperty, 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineHoop')[0].setFraction(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineHoop')[0].fraction },
+         },
+
+    ]
+  
     static icon = assets.textures.ui.icons.hoop;
     constructor(args={}){
         super(args);
@@ -36,6 +91,7 @@ class NumberHoop extends Template {
         const childOffset = new pc.Vec3(0,0,2);
         this.renderEntity.setLocalPosition(childOffset);
         this.setup(); 
+        this.updateColliderMap();
         const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO}=args;
         //this.entity.moveTo(position,rotation);
     }
@@ -57,22 +113,16 @@ class NumberHoop extends Template {
         hoop.script.machineHoop.init();
 
     }
-
-    get properties() {
-//        return new PropertiesGroup(){
-//            new FractionProperty(this),
-//
-//        }
-    }
-    set properties(properties) {}
-    toJSON(){}
 }
 
 class NumberFaucet extends Template {
 
     static icon = assets.textures.ui.icons.faucet;
     static editablePropertiesMap = [
-         {  property : FractionProperty, 
+         {  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : "Fraction",
+            property : FractionProperty, 
             onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberFaucet')[0].setFraction(value); },
             getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberFaucet')[0].fraction },
          },
@@ -89,6 +139,7 @@ class NumberFaucet extends Template {
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
         this.fraction = new Fraction(1,2);
         this.setup();    
+        this.updateColliderMap();
     }
 
     setup(){
@@ -110,13 +161,6 @@ class NumberFaucet extends Template {
  
     }
 
-    get properties() {
-//        return new PropertiesGroup(){
-//            new FractionProperty(this),
-//
-//        }
-    }
-    set properties(properties) {}
     toJSON(){}
 
 }
@@ -130,12 +174,13 @@ class PlayerStart extends Template {
         const childOffset = new pc.Vec3(0,0,0.5)
         const scale = 1.5
         
-            this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(6,6,6)});
-            this.entity.addComponent('render', { type: 'sphere'  });
-            this.entity.render.material = Materials.green;
-            this.entity.setLocalScale(6,6,6);
+        this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(6,6,6)});
+        this.entity.addComponent('render', { type: 'sphere'  });
+        this.entity.render.material = Materials.green;
+        this.entity.setLocalScale(6,6,6);
 
-            this.setup();
+        this.setup();
+        this.updateColliderMap();
 
     }            
 
@@ -166,10 +211,71 @@ class PlayerStart extends Template {
 
 }
 
+class NumberWall extends Template {
+    static icon = assets.textures.ui.icons.numberWall;
+    static editablePropertiesMap = [
+         {  
+            name : "Fraction1",
+            property : FractionProperty, 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setFraction1(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].fraction1 },
+         },
+
+         {  
+            name : "Fraction2",
+            property : FractionProperty, 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setFraction2(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].fraction2 },
+         },
+         {  
+            name : "Size",
+            property : SizeProperty, 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setSize(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].size },
+         },
+    ]
+
+    constructor(args){
+        super(args);
+        this.setup();
+        this.updateColliderMap();
+
+    }
+
+    setup(){
+        this.entity.addComponent('script'); 
+        this.entity.script.create('machineNumberWall');
+        // @Eytan, I have a PlacedItem problem here. PlacedItem 
+        const $this = this;
+        this.entity.script.machineNumberWall.onChangeFn = function(){$this.updateColliderMap(); }
+        this.entity.script.machineNumberWall.rebuildWall();
+    }
+ 
+}
+
+class PlayerPortal extends Template {
+    static icon = assets.textures.ui.builder.portal;
+    constructor(args){
+        super(args);
+        this.setup();
+        this.updateColliderMap();
+    }
+
+    setup(){
+        let p = Portal.CreatePortal();
+        this.entity.addChild(p);
+        const childOffset = new pc.Vec3(-2.75,-1,0.75)
+        p.setLocalPosition(childOffset);
+ 
+    }
+}
+
 const templateNameMap = {
     "NumberHoop" : NumberHoop,
     "NumberFaucet" : NumberFaucet,
+    "NumberWall" : NumberWall,
     "PlayerStart" : PlayerStart,
+    "PlayerPortal" : PlayerPortal,
 }
 
 function getTemplateByName(name){

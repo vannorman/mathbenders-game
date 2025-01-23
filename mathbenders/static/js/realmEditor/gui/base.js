@@ -348,20 +348,22 @@ export default class GUI {
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Player", items : [
                     //{ templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
                     { ItemTemplate : PlayerStart },
-                    { templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
+                    { ItemTemplate : PlayerPortal },
+                    //{ templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Machines", items : [
 //                    { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
 //                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
-                    { ItemTemplate:NumberFaucet },
                     { ItemTemplate:NumberHoop } ,
                     // templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Numbers", items : [
-                    { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
-                    { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
+                    { ItemTemplate:NumberFaucet },
+                    { ItemTemplate:NumberWall },
+                   // { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
+                   //  { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
                     { templateName:Constants.Templates.CastleTurret,textureAsset:assets.textures.ui.icons.turret1 },
