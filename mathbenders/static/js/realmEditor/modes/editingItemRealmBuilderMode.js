@@ -35,37 +35,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         // Note that positions "0" and "3" around the cirlce are already taken.
         let i=1;
         const $this=this;
-        this.ItemTemplate.editablePropertiesMap.forEach(x => {
-
-            const editableProperty = new x.property({entity:entity});
-            const ui = editableProperty.buildUi(x.onChangeFn,x.getCurValFn); 
-            ui.enabled=false;
-            const openPropertyBtn = UI.SetUpItemButton({
-                parentEl:realmEditor.gui.circleButtons[i],
-                width:30,height:30,
-                textureAsset:x.property.icon,
-                mouseDown:function(){
-                    $this.#guiElementEntities.forEach(x=>{x.enabled=false;})
-                    ui.enabled=true;
-                },
-            });
-            // realmEditor.gui.circleButtons[i].addChild(ui); // this puts it underneath siblings
-
-            // put it above siblings by reparenting it up one parent in hierarchy while maintaining local position
-            let pare = realmEditor.gui.circleButtons[i];
-            let p1 = pare.getLocalPosition();
-            pare.parent.addChild(ui);
-            ui.setLocalPosition(p1);
-
-            i++;
-            if (i==3) i++; // 3 is taken lol .. by default in editor gui circlebuttons setup. Need to fix this
-           
-            this.#guiButtonEntities.push(openPropertyBtn);
-            this.#guiElementEntities.push(ui);
-            this.#propertyInstances.push(editableProperty)
-            Game.ui = ui;
-
-        });
+        realmEditor.gui.editItemTray.buildUiForItem({ItemTemplate:this.ItemTemplate,entity:entity});
         this.toggle('poppingIn');
     }
 
@@ -100,7 +70,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     }
 
     onExit(){
-        realmEditor.gui.popUpEditItemTray.enabled=false; // Eytan; I'd like this to "shrink away" as I swtich to dragging mode.
+        realmEditor.gui.editItemTray.entity.enabled=false; // Eytan; I'd like this to "shrink away" as I swtich to dragging mode.
         // But, that requires a "lingering" update here while drag mode is already enabled (meaning this mode, and thus its update, is disabled, so it can't shrink.)
         this.#guiButtonEntities.forEach(x=>{x.destroy();});
         this.#guiElementEntities.forEach(x=>{x.destroy();});
@@ -121,16 +91,16 @@ class EditingMode extends EditMode {}
 class NormalMode extends EditMode {}
 class PoppingInMode extends EditMode {
     onEnter(){
-        realmEditor.gui.popUpEditItemTray.setLocalScale(0.1,0.1,0.1);
-        realmEditor.gui.popUpEditItemTray.enabled=true;
+        realmEditor.gui.editItemTray.entity.setLocalScale(0.1,0.1,0.1);
+        realmEditor.gui.editItemTray.entity.enabled=true;
         
     }
     update(dt){
         const fudge = 0.01;
-        if (realmEditor.gui.popUpEditItemTray.localScale.x < 1.0-fudge) {
+        if (realmEditor.gui.editItemTray.entity.localScale.x < 1.0-fudge) {
             const popInSpeed = 1000;
-            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,1.0,dt * popInSpeed);
-            realmEditor.gui.popUpEditItemTray.setLocalScale(d,d,d);
+            const d = Math.lerp(realmEditor.gui.editItemTray.entity.localScale.x,1.0,dt * popInSpeed);
+            realmEditor.gui.editItemTray.entity.setLocalScale(d,d,d);
         } else {
             this.superMode.toggle('editing');
         }
@@ -141,12 +111,12 @@ class PoppingOutMode extends EditMode {
     update(dt){
         const fudge = 0.01;
         const minScale = 0.2;
-        if (realmEditor.gui.popUpEditItemTray.localScale.x > minScale + fudge) {
+        if (realmEditor.gui.editItemTray.entity.localScale.x > minScale + fudge) {
             const popInSpeed = 1000;
-            const d = Math.lerp(realmEditor.gui.popUpEditItemTray.localScale.x,0,dt * popInSpeed);
-            realmEditor.gui.popUpEditItemTray.setLocalScale(d,d,d);
+            const d = Math.lerp(realmEditor.gui.editItemTray.entity.localScale.x,0,dt * popInSpeed);
+            realmEditor.gui.editItemTray.entity.setLocalScale(d,d,d);
         } else {
-            realmEditor.gui.popUpEditItemTray.enabled=true;
+            realmEditor.gui.editItemTray.entity.enabled=true;
             this.superMode.toggle('normal');
             this.superMode.realmEditor.toggle('normal');
         }
@@ -154,7 +124,7 @@ class PoppingOutMode extends EditMode {
     }
 
     onExit(){
-        realmEditor.gui.popUpEditItemTray.enabled=false;
+        realmEditor.gui.editItemTray.entity.enabled=false;
 
     }
 }

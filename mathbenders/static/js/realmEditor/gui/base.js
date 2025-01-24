@@ -1,5 +1,5 @@
 import BuilderPanel from './builderPanel.js';
-
+import EditItemTray from './editItemTray.js';
 export default class GUI {
 
     // Note: 'backboard', 'screen', 'panel', 'window' terminology to be merged/truncated
@@ -590,7 +590,9 @@ export default class GUI {
         this.#changeMapScreen.enabled=false;
 
 
-        this.popUpEditItemTray = this.CreatePopUpEditItemTray({realmEditor:this.realmEditor});
+        this.editItemTray = new EditItemTray({leftMargin:this.leftMargin});
+        this.#screen.addChild(this.editItemTray.entity);
+        // this.CreatePopUpEditItemTray({realmEditor:this.realmEditor});
         this.#screen.enabled = false;
 
         this.#screen.addChild(this.#customCursorIcon); // if I add this too early, it doesn't show up due to hierarchy, overwritten by map
@@ -611,106 +613,6 @@ export default class GUI {
         });
     } 
     
-    CreatePopUpEditItemTray(args={}){
-        const { realmEditor } = args;
-        // Define pop-up gui for editing itmes.
-        const popUpEditItemTray = new pc.Entity('Parent');
-        popUpEditItemTray.addComponent('element', {
-            layers: [pc.LAYERID_UI],
-            type: 'group',  // This makes it a UI element
-            anchor: [0.5,0.5,0.5,0.5],
-            pivot: [0.5, 0.5],
-            margin: [this.leftMargin, 0, 0, 0],
-            width: 320, 
-            height: 360, 
-        });
-        this.#screen.addChild(popUpEditItemTray);
-        popUpEditItemTray.element.margin = new pc.Vec4(this.leftMargin,0,0,0);
-
-        const editableItemMenu = new pc.Entity("eidtablemenu");
-        editableItemMenu.addComponent("element", {
-            type: pc.ELEMENTTYPE_GROUP,
-            layers:[pc.LAYERID_UI],
-            anchor: [0.0, 0.95, 0.5, 0.05], // [ left, top, ?, ? 
-            pivot: [0.5, 0.5],
-            // the element's width and height dictate the group's bounds
-            width: 320,
-            height: 360,
-        });
-
-
-        this.#editableItemBackboard = new pc.Entity("inv");
-        this.#editableItemBackboard.addComponent("element", {
-            anchor: [0.5, 0.5, 0.5, 0.5],
-            pivot: [0.5, 0.5],
-            type: 'image',
-            width: 320,
-            height: 360,
-            useInput: true,
-
-            textureAsset: assets.textures.ui.builder.editItemBackboard,
-        });
-
-        popUpEditItemTray.addChild(this.#editableItemBackboard);
-        popUpEditItemTray.addChild(editableItemMenu);
-//        realmEditor.SetEditableItemMode(EditableItemMode.Editing); // TODO: Eytan, how pass thru realmeditor to set this mode?
-
-        // Define a circle of buttons for various actions like copy, delete
-        let points = Utils.GetCircleOfPoints({degreesToComplete:360,radius:100,scale:100});
-        this.circleButtons = []; // we'll access RealmBuilder by index later.
-        points.forEach(point=>{
-            const el = new pc.Entity("el");
-            el.addComponent('element',{
-                type: pc.ELEMENTTYPE_IMAGE,
-                anchor:[.5,.5,.5,.5],
-                pivot:[.5,.5],
-                width:50,
-                height:50,
-                textureAsset: assets.textures.ui.numberSpherePos,
-            })
-            popUpEditItemTray.addChild(el);
-            this.circleButtons.push(el);
-            const offCenter = 20;
-            el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
-        });
-
-        
-        // Set up MOVE
-        // Pop up tray should be its own class?
-        /// Eytan - this is the example mentioned in realmEditor constructor for new GUI();
-        // need to bind this button to realmEditor.editItemMode.action
-        // this.moveButton.element.on('mousedown',function(){ })
-
-        // Awkward because these need to be set up in the realmBuilderModeEditingItemMode class
-        // But, they require references to this gui base
-        // So, should we move the entire popUpEditItemTray logic to realmBuilderEditingMode?
-        this.moveButton = UI.SetUpItemButton({
-            parentEl:this.circleButtons[0],
-            width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
-            mouseDown:function(){realmEditor.BeginDraggingEditedObject();}
-        });
-
-
-        // Set up Rotate Left button
-        UI.SetUpItemButton({
-            parentEl:this.circleButtons[3],
-            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
-            anchor:[.2,.5,.2,.5],
-            mouseDown:function(){realmEditor.RotateEditingItem(45);}
-        });
-
-        // Set up Rotate Right button
-        UI.SetUpItemButton({
-            parentEl:this.circleButtons[3],
-            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
-            anchor:[.8,.5,.8,.5],
-            mouseDown:function(){realmEditor.RotateEditingItem(-45);}
-        });
-
-        popUpEditItemTray.enabled = false;
-        return popUpEditItemTray;
-
-    }
 
     OpenLoadRealmUI(){
         this.realmEditor.toggle('loadScreen');

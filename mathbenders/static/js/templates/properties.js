@@ -1,8 +1,39 @@
 class Property {
+    static icon = assets.textures.ui.trash; // should always be overwritten.
+
     constructor(args){
-        const {entity}=args;
+        const {entity,onChangeFn,getCurValFn,buttonIndex}=args;
         this.entity = entity;
+        this.onChangeFn = onChangeFn;
+        this.getCurValFn = getCurValFn;
+        this.buttonIndex = buttonIndex;
     }
+
+    buildUiButton(args={}){
+        const btn = UI.SetUpItemButton({
+            width:30,height:30,
+            textureAsset:this.constructor.icon,
+        });
+        this.btn = btn;
+        return btn;
+    }
+
+    buildUi(){
+
+    }
+    showUi(){
+        if (this.ui) this.ui.enabled=true;
+    }
+    hideUi(){
+        if (this.ui) this.ui.enabled=false;
+
+    }
+
+    destroy(){
+        if (this.ui) this.ui.destroy();
+    }
+
+
 
     static panel(){
         const panel = new pc.Entity("panel");
@@ -70,6 +101,51 @@ class Property {
     }
 }
 
+class MoveProperty extends Property {
+    static icon = assets.textures.ui.builder.moveItem;
+    constructor(args){
+        super(args);
+    }
+
+    buildUiButton(){
+        const moveButton = UI.SetUpItemButton({
+            parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
+            width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
+            mouseDown:function(){realmEditor.BeginDraggingEditedObject();} // pass entity instead?
+        });
+        return moveButton;
+    }
+}
+
+class RotateProperty extends Property {
+    static icon = null; // blank. Special property where 2 buttons exist on the ring instead of a signle button which pops up a ui.
+    constructor(args){
+        super(args);
+    }
+
+    buildUiButton(){
+        const $this = this;
+        const container = new pc.Entity();
+        container.addComponent('element');
+        const rotateLeft = UI.SetUpItemButton({
+            parentEl:container,
+            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
+            anchor:[.2,.5,.2,.5],
+            mouseDown:function(){   $this.entity.rotate(45);    }
+        });
+
+        // Set up Rotate Right button
+        const rotateRight = UI.SetUpItemButton({
+            parentEl:container,
+            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
+            anchor:[.8,.5,.8,.5],
+            mouseDown:function(){   $this.entity.rotate(-45);    }
+        });
+
+        return container;
+    }
+}
+
 class FractionProperty extends Property {
     static icon = assets.textures.ui.icons.fraction; 
 
@@ -77,7 +153,7 @@ class FractionProperty extends Property {
         super(args);
     }
 
-    buildUi(onChangeFn,getCurValFn){
+    buildUi(){
         const $this = this; 
         const panel = Property.panel();
        
@@ -87,21 +163,21 @@ class FractionProperty extends Property {
         function setFracText(frac){
             fracText.element.text = frac.numerator + "/" + frac.denominator;
         }
-        setFracText(getCurValFn($this.entity));
+        setFracText(this.getCurValFn($this.entity));
  
         const upBtn = Property.upBtn();
         upBtn.element.on('mousedown',function(){
             // Where is the fraction stored here ? Do we double store it (once for the UI) or do we dig deep for the frac every time?
             // Let's dig deep why not
-            let curFrac = getCurValFn($this.entity);
+            let curFrac = $this.getCurValFn($this.entity);
             let newFrac = new Fraction(curFrac.numerator+1,curFrac.denominator);
-            onChangeFn($this.entity,newFrac);
+            $this.onChangeFn($this.entity,newFrac);
             setFracText(newFrac);
         });
 
         panel.addChild(upBtn);
  
-       return panel;
+        this.ui=panel;
     }
 }
 
@@ -110,7 +186,7 @@ class SizeProperty extends Property {
         super(args);
     }
 
-    buildUi(onChangeFn,getCurValFn){
+    buildUi(){
         const $this = this;
         const panel = Property.panel();
 
@@ -122,18 +198,18 @@ class SizeProperty extends Property {
             text1.element.text = size[1];
             text2.element.text = size[2];
         }
-        const size = getCurValFn(this.entity);
+        const size = this.getCurValFn(this.entity);
         setSizeText(size);
 
         const upBtn = Property.upBtn({anchor:[0.2,0.2,0.2,0.2]});
         upBtn.element.on('mousedown',function(){
-            let size = getCurValFn($this.entity);
+            let size = $this.getCurValFn($this.entity);
             size[0]++;
-            onChangeFn($this.entity,size);
+            $this.onChangeFn($this.entity,size);
             setSizeText(size);
         });
         panel.addChild(upBtn);
- 
-        return panel;
+        this.ui=panel;
     }
+
 }

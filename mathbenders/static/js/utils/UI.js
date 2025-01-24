@@ -245,7 +245,7 @@ const UI = {
             });
             ent.addChild(textA); 
         }
-        parentEl.addChild(ent);
+        if (parentEl) parentEl.addChild(ent);
         UI.HoverColor({element:ent.element,cursor:cursor});
         if (mouseDown) ent.element.on('mousedown',function(){ mouseDown(ent); });
         return ent;

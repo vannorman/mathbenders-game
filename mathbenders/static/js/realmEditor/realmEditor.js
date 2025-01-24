@@ -271,12 +271,6 @@ class RealmEditor {
 
     }
 
-    RotateEditingItem(deg){
-        // e.g. this.editingItemMode.#editingItem.rotate(-45);}
-        if (this.#mode === this.#modes.get('editingItem')){
-            this.#mode.entity.rotate(deg);
-        }
-    }
 
     UpdateData(data){
         this.RealmData.name = data['name'];
