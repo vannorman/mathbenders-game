@@ -368,6 +368,7 @@ export default class GUI {
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
                     { ItemTemplate:CastleTurret } ,
                     { ItemTemplate:CastleWall } ,
+                    { ItemTemplate:BigConcretePad} ,
             ],}));
         const editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
         editTerrainPanel.panel.addChild(this.#editTerrainScreen);

@@ -2,11 +2,13 @@ class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
     constructor(args){
-        const {entity,onChangeFn,getCurValFn,buttonIndex}=args;
+        const {entity,onChangeFn,getCurValFn,buttonIndex,valueType}=args;
         this.entity = entity;
         this.onChangeFn = onChangeFn;
         this.getCurValFn = getCurValFn;
         this.buttonIndex = buttonIndex;
+        this.valueType=valueType; // vec3, string, array?
+        // What of setting Scale .. a type that isn't easily serializable/deserializable on json to and fro?
     }
 
     buildUiButton(args={}){
@@ -101,6 +103,44 @@ class Property {
     }
 }
 
+class ScaleProperty extends Property {
+    static icon = assets.textures.ui.builder.scaleItem;
+
+    constructor(args){
+        super(args);
+    }
+
+    buildUi(){
+        // TODO: Combine this with SizeProperty UI (they're the same almost);
+        const $this = this;
+        const panel = Property.panel();
+
+        const text0 = Property.text({anchor:[0.5,0.2,0.5,0.2],parent:panel});
+        const text1 = Property.text({anchor:[0.5,0.5,0.5,0.5],parent:panel});
+        const text2 = Property.text({anchor:[0.5,0.8,0.5,0.8],parent:panel});
+        function setSizeText(size){
+            text0.element.text = size[0];
+            text1.element.text = size[1];
+            text2.element.text = size[2];
+        }
+        const size = this.getCurValFn(this.entity);
+        setSizeText(size);
+
+        const upBtn = Property.upBtn({anchor:[0.2,0.2,0.2,0.2]});
+        const deltaScale = 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
+        upBtn.element.on('mousedown',function(){
+            let size = $this.getCurValFn($this.entity).clone();
+            size.x += deltaScale;
+            $this.onChangeFn($this.entity,size);
+            setSizeText(size);
+        });
+        panel.addChild(upBtn);
+        this.ui=panel;
+ 
+    }
+
+}
+
 class MoveProperty extends Property {
     static icon = assets.textures.ui.builder.moveItem;
     constructor(args){
@@ -187,6 +227,8 @@ class SizeProperty extends Property {
     }
 
     buildUi(){
+
+        // TODO: Move this to super.buildGridOf3x3()
         const $this = this;
         const panel = Property.panel();
 

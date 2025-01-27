@@ -45,6 +45,16 @@ class Template {
         return props;
     }
 
+    getInstanceData(args={}){
+        const {terrainCentroidOffset = pc.Vec3.ZERO} = args;
+        return {
+            templateName : this.constructor.name,
+            position : this.entity.getPosition().sub(terrainCentroidOffset).trunc(),
+            rotation : this.entity.getEulerAngles().trunc(),
+            properties : this.properties,
+        }
+    }
+
     setProperties(properties) {
         // Note that all data here is stored in the *game entity* not in the template instance.
         this.constructor.editablePropertiesMap.forEach(x=>{
@@ -348,6 +358,53 @@ class CastleWall extends Template {
     }
 }
 
+class BigConcretePad extends Template {
+    static icon = assets.textures.ui.builder.concretePadBig;
+    pad;
+
+    static editablePropertiesMap = [
+         {  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : ScaleProperty.constructor.name,
+            property : ScaleProperty,
+            valueType : pc.Vec3,
+            onChangeFn : (entity,value) => { entity.script.itemTemplateReference.itemTemplate.setScale(value);},
+            getCurValFn : (entity) => { return entity.script.itemTemplateReference.itemTemplate.pad.getLocalScale() },
+         },
+    ];
+ 
+    constructor(){
+        super();
+        this.setup();
+        this.updateColliderMap();
+
+    }
+
+    setup(){
+        const pad = new pc.Entity();
+        pad.addComponent("render", {  type: "box" }); 
+        pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
+        pad.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE});
+        this.pad = pad;
+        this.setScale(new pc.Vec3(10,10,10));
+        this.entity.addChild(pad);
+
+    }
+
+    setScale(scale){
+        // Custom set properties due to SCALE being serialized as JSON and needing to be inflated as Vec3.
+        // TODO: Property should have a TYPE so that it knows how to be deserialized.  @Eytan
+        if (scale instanceof pc.Vec3 == false) {
+            scale = JsonUtil.ArrayToVec3(scale);
+        }
+        this.pad.setLocalScale(scale);
+        this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(1/2);
+    }
+
+
+
+}
+
 const templateNameMap = {
     "NumberHoop" : NumberHoop,
     "NumberFaucet" : NumberFaucet,
@@ -356,6 +413,8 @@ const templateNameMap = {
     "PlayerPortal" : PlayerPortal,
     "CastleTurret" : CastleTurret,
     "CastleWall" : CastleWall,
+    "BigConcretePad" : BigConcretePad,
+
 }
 
 function getTemplateByName(name){

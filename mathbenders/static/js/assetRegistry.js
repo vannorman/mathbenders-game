@@ -144,6 +144,8 @@ const assets = {
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
             },
             builder : {
+                scaleItem : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/scale.png" }),
+                concretePadBig : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/concretePadBig.png" }),
                 editTerrain : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconEditTerrain.png" }),
                 portal : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconPortal2.png" }),
                 start : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/start.png" }),

@@ -71,12 +71,8 @@ export default class Level {
     toJSON(){
         const templateInstances = [];
         this.templateInstances.forEach(x=>{
-            templateInstances.push({
-                templateName : x.constructor.name,
-                position : x.entity.getPosition().sub(this.terrain.centroid).trunc(), 
-                rotation : x.entity.getEulerAngles().trunc(),
-                properties : x.properties,
-            })
+            const instanceData = x.getInstanceData({terrainCentroidOffset:this.terrain.centroid}); 
+            templateInstances.push(instanceData);
         });
         const obj = {
             templateInstances : templateInstances,
