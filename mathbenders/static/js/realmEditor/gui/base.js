@@ -366,8 +366,8 @@ export default class GUI {
                    //  { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
-                    { templateName:Constants.Templates.CastleTurret,textureAsset:assets.textures.ui.icons.turret1 },
-                    { templateName:Constants.Templates.CastleWall,textureAsset:assets.textures.ui.icons.wall, },
+                    { ItemTemplate:CastleTurret } ,
+                    { ItemTemplate:CastleWall } ,
             ],}));
         const editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
         editTerrainPanel.panel.addChild(this.#editTerrainScreen);

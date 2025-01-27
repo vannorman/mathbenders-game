@@ -264,13 +264,6 @@ class RealmEditor {
         this.#mode.mapClicked();
     }
 
-    get editingItem(){ 
-        // Eytan - todo - how to extract editing item from that mode? Or call it directly skipping realmEditor
-        return null;
-//        return this.#editingItem;
-
-    }
-
 
     UpdateData(data){
         this.RealmData.name = data['name'];

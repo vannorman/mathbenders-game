@@ -1077,32 +1077,6 @@ function slideArray(arr,amt){
     return arr;
 }
 
-function CastleWall(p){
-return
-    const clone = myTemplates['castleWall'].clone();
-    clone.enabled = true;
-    pc.app.root.addChild(clone);
-    clone.rigidbody.teleport(p);
-    return clone;
-    /*
-     let om = cb.render.meshInstances[0].mesh;
-    let p = [];
-    p = om.getPositions(p);
-    let n = [];
-    om.getNormals(n);
-    let uv=[];
-    om.getUvs(uv);
-    let iss=[];
-    om.getIndices[iss];
-    mesh = pc.createMesh(
-         pc.app.graphicsDevice,p,
-     {
-         normals: n,
-         uvs: uv,
-         indices: iss
-     });
-     */
-}
 
 
 function Hoop(p=pc.Vec3.ZERO){

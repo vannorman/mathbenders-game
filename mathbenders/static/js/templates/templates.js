@@ -270,12 +270,92 @@ class PlayerPortal extends Template {
     }
 }
 
+class CastleTurret extends Template {
+    static icon = assets.textures.ui.icons.turret1;
+
+
+    constructor(args){
+        super(args);
+        this.setup();
+        this.updateColliderMap(); // Is there a way to always have this executed as the last step in setup in the super? without explicitly callign it in any subclass?
+    }
+
+    setup(){
+            
+        // Castle Pillar
+        const pillarAsset = assets.models.castle_pillar;
+        const pillarRender = pillarAsset.resource.instantiateRenderEntity();
+        let pillarCollision = Game.addMeshCollider(pillarRender,pillarAsset,pc.RIGIDBODY_TYPE_KINEMATIC); // TODO performance: move to a box collider.
+
+        // Set up collision groups and masks for castles not to intersect each other
+        var COLLISION_GROUP_1 = 1;
+        var COLLISION_GROUP_2 = 2;
+        var ALL_GROUPS = 0xFFFFFFFF;
+
+        pillarCollision.group = COLLISION_GROUP_1;
+        pillarCollision.mask = ALL_GROUPS ^ COLLISION_GROUP_2;
+
+        pillarRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        ApplyTextureAssetToEntity({entity:pillarRender,textureAsset:assets.textures.stone90}); 
+        
+        // Castle Top
+        const topAsset = assets.models.castle_top;
+        const topRender = topAsset.resource.instantiateRenderEntity();
+        let topCollision = Game.addMeshCollider(topRender,topAsset,pc.RIGIDBODY_TYPE_STATIC); // todo performance change to box collider
+
+
+        // Set up collision groups and masks for castles not to intersect each other
+        topCollision.group = COLLISION_GROUP_1;
+        topCollision.mask = ALL_GROUPS ^ COLLISION_GROUP_2;
+
+        topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
+        ApplyTextureAssetToEntity({entity:topRender,textureAsset:assets.textures.stone90}); 
+        
+        this.entity.addChild(topRender);
+        this.entity.addChild(pillarRender);
+        topRender.setLocalEulerAngles(-90,0,0);
+        topRender.setLocalPosition(new pc.Vec3(0,3.4,0));
+        
+        pillarRender.setLocalEulerAngles(-90,0,0);
+        pillarRender.setLocalPosition(new pc.Vec3(0,0.0,0));
+    }
+
+}
+
+class CastleWall extends Template {
+    static icon = assets.textures.ui.icons.wall;
+    constructor(){
+        super();
+        this.setup();
+        this.updateColliderMap();
+    }
+
+    setup(){ 
+        
+        const asset = assets.models.castle_wall;
+        const render = asset.resource.instantiateRenderEntity();
+        this.entity.addChild(render);
+        const col = new pc.Entity("castlewall collider");
+        col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        col.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(3,3.5,0.5)});
+        col.setLocalPosition(0,0,0);
+        let mat = ApplyTextureAssetToEntity({entity:render,textureAsset:assets.textures.stone}); 
+        mat.diffuseMapTiling=new pc.Vec2(3,3); 
+        mat.update();
+        
+        this.entity.addChild(col);
+        render.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
+    }
+}
+
 const templateNameMap = {
     "NumberHoop" : NumberHoop,
     "NumberFaucet" : NumberFaucet,
     "NumberWall" : NumberWall,
     "PlayerStart" : PlayerStart,
     "PlayerPortal" : PlayerPortal,
+    "CastleTurret" : CastleTurret,
+    "CastleWall" : CastleWall,
 }
 
 function getTemplateByName(name){
