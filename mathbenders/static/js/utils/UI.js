@@ -134,6 +134,55 @@ class UISlider {
 }
 
 const UI = {
+    createElementGrid(options={}){
+        const {rowDim=3,colDim=3,spacing,defaultSize={x:50,y:50}}=options;
+    // Validate input
+        if (rowDim <= 0 || colDim <= 0) {
+            throw new Error("rowDim and colDim must be greater than 0");
+        }
+
+        // Create the parent layout group entity
+        const layoutGroup = new pc.Entity("LayoutGroup");
+        layoutGroup.addComponent("element", {
+            type: "group",
+            anchor: [0, 0, 1, 1],
+            pivot: [0.5, 0.5],
+        });
+        
+        // Add layout group component
+        layoutGroup.addComponent("layoutgroup", {
+            orientation: pc.ORIENTATION_HORIZONTAL, // Horizontal layout by default
+            spacing:new pc.Vec2(spacing,spacing),
+            widthFitting: pc.FITTING_BOTH,
+            heightFitting: pc.FITTING_BOTH,
+            wrap: true // Wrap to form rows and columns
+        });
+
+        const elements = [];
+
+        // Create elements and add them to the layout group
+        for (let i = 0; i < rowDim; i++) {
+            for (let j = 0; j < colDim; j++) {
+                const element = new pc.Entity(`Element-${i}-${j}`);
+                element.addComponent("element", {
+                    type: "image",
+                    anchor: [0, 0, 0, 0], // No anchor to avoid stretching
+                    pivot: [0.5, 0.5],
+                    width: defaultSize.x, // Example fixed width (can be adjusted as needed)
+                    height: defaultSize.y // Example fixed height (can be adjusted as needed)
+                });
+                element.addComponent('layoutchild');
+                // Add the element to the layout group
+                layoutGroup.addChild(element);
+
+                // Store the element in the array
+                elements.push(element);
+            }
+        }
+
+        // Return the group and its elements
+        return { group: layoutGroup, elements };
+    },
     createInputWithLabel(options={}){
         const {
             onChangeFn,
@@ -449,7 +498,7 @@ const UI = {
             element,
             colorOff=new pc.Color(0.9,0.9,0.9),
             colorOn=pc.Color.WHITE,
-            cursor='auto',
+            cursor='pointer',
             opacityOn=1,
             opacityOff=1,
             useSelectedState=false }= options;

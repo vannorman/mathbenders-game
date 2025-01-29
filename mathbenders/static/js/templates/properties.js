@@ -115,6 +115,19 @@ class ScaleProperty extends Property {
         const $this = this;
         const panel = Property.panel();
 
+
+        var y=0;
+        const elementGrid = UI.createElementGrid({rowDim:3, colDim:5});
+        elementGrid.elements.forEach(x=>{
+            console.log("x;"+x);
+            x.element.useInput = true;
+            UI.HoverColor({element:x.element});
+            x.on('mousedown',function(){console.log('click:'+y);});
+            y++;
+        });
+
+        panel.addChild(elementGrid.group);
+
         const text0 = Property.text({anchor:[0.5,0.2,0.5,0.2],parent:panel});
         const text1 = Property.text({anchor:[0.5,0.5,0.5,0.5],parent:panel});
         const text2 = Property.text({anchor:[0.5,0.8,0.5,0.8],parent:panel});
