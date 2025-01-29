@@ -28,14 +28,12 @@ class Template {
     }
 
     enableColliders(){
-        console.log("en col:"+this.constructor.name);
         for (const [colliderComponent, activeState] of this.colliders) {
             if (activeState) colliderComponent.enabled = true;
         }
     }
 
     disableColliders(){
-        console.log("dis col:"+this.constructor.name);
         for (const [colliderComponent, activeState] of this.colliders) {
             if (activeState) colliderComponent.enabled = false;
         }

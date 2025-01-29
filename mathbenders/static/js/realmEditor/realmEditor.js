@@ -96,7 +96,6 @@ class RealmEditor {
                 portals.push(portal);
             }
         });
-        console.log('found:'+portals.length+" portals");
 
         // now we have a list of portals; connect every 2 of them
         for (let i=0;i<portals.length-1;i+=2){

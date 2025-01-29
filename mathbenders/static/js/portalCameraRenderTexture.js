@@ -55,7 +55,6 @@ PortalCameraRenderTexture.prototype.setupCamera = function(){
 
 
 PortalCameraRenderTexture.prototype.updateConfig = function(){
-    console.log("update config");
     if (!this.sourceTracker || !this.targetTracker || !this.staticObjSource || !this.staticObjTarget || !this.staticObjTarget.parent || !this.staticObjTarget.parent.parent) return; // ugh
     this.staticObjTarget.parent.parent.getComponentsInChildren('portal')[0].camPivot.addChild(this.targetTracker);
     this.staticObjSource.addChild(this.sourceTracker);

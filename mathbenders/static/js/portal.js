@@ -58,7 +58,6 @@ Portal.prototype.initialize = function () {
     const portalDoor = new pc.Entity("machinePortal");
     let s = new pc.Vec3(3,9,0.1);
     portalDoor.setLocalScale(s);
-    console.log("portal door localscale:"+portalDoor.getLocalScale());
     portalDoor.addComponent("collision", { type: "box", halfExtents: new pc.Vec3(s.x/2, s.y/2, s.z/2),    });
     portalDoor.tags.add(Constants.Tags.Portal);
 //    portalDoor.addComponent("rigidbody", { group : Constants.Layers.Portal });
