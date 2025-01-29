@@ -34,10 +34,10 @@ PortalCameraRenderTexture.prototype.initialize = function(){
 
     this.targetCam = this.setupCamera();
     this.setupTexture();
-
 }
 
 PortalCameraRenderTexture.prototype.setupCamera = function(){
+    console.log("setup cameraconfig");
     let cam3 = new pc.Entity("cam3");
     cam3.addComponent("camera", {
         layers: [pc.LAYERID_WORLD, pc.LAYERID_SKYBOX],
@@ -55,6 +55,7 @@ PortalCameraRenderTexture.prototype.setupCamera = function(){
 
 
 PortalCameraRenderTexture.prototype.updateConfig = function(){
+    console.log("update config");
     if (!this.sourceTracker || !this.targetTracker || !this.staticObjSource || !this.staticObjTarget || !this.staticObjTarget.parent || !this.staticObjTarget.parent.parent) return; // ugh
     this.staticObjTarget.parent.parent.getComponentsInChildren('portal')[0].camPivot.addChild(this.targetTracker);
     this.staticObjSource.addChild(this.sourceTracker);
@@ -62,7 +63,7 @@ PortalCameraRenderTexture.prototype.updateConfig = function(){
 
 PortalCameraRenderTexture.prototype.setupTexture = function(){
     // Set the shader to use the camera texture
-
+    console.log("render texture");
 
     this.renderTexture= new pc.Texture(pc.app.graphicsDevice, {
         width: pc.app.graphicsDevice.canvas.clientWidth,

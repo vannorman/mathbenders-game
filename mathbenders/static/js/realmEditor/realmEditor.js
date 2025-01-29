@@ -96,6 +96,7 @@ class RealmEditor {
                 portals.push(portal);
             }
         });
+        console.log('found:'+portals.length+" portals");
 
         // now we have a list of portals; connect every 2 of them
         for (let i=0;i<portals.length-1;i+=2){
@@ -297,8 +298,8 @@ class RealmEditor {
 //        placedItem.entity.on('destroy',function(){
         level.registerPlacedTemplateInstance(instance);
         instance.entity.on('destroy',function(){
+            // culprit: Adjusts array size while destroying entities in this array. oops.
             level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
-
             //level.deRegisterPlacedItem(placedItem);
         })
         return instance;

@@ -3,12 +3,14 @@ class Template {
     static name="TemplateSuper";
     static icon;
     static editablePropertiesMap=[];
+    colliders = new Map();
 
     entity; // stores scale, position, and rotation;
 
     constructor(args={}) {
         const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO}=args;
         this.entity = new pc.Entity();
+        const $this=this;
         pc.app.root.addChild(this.entity);
         this.entity.moveTo(position,rotation);
         this.entity.addComponent('script');
@@ -26,12 +28,14 @@ class Template {
     }
 
     enableColliders(){
+        console.log("en col:"+this.constructor.name);
         for (const [colliderComponent, activeState] of this.colliders) {
             if (activeState) colliderComponent.enabled = true;
         }
     }
 
     disableColliders(){
+        console.log("dis col:"+this.constructor.name);
         for (const [colliderComponent, activeState] of this.colliders) {
             if (activeState) colliderComponent.enabled = false;
         }
@@ -63,6 +67,10 @@ class Template {
                 x.onChangeFn(this.entity,val);
             }
         })
+    }
+
+    destroy(){
+        this.entity.destroy();
     }
 
 //    toJSON(){
@@ -272,10 +280,11 @@ class PlayerPortal extends Template {
     }
 
     setup(){
-        let p = Portal.CreatePortal();
-        this.entity.addChild(p);
-        const childOffset = new pc.Vec3(-2.75,-1,0.75)
-        p.setLocalPosition(childOffset);
+        this.entity.addComponent("script");
+        this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
+
+        //const childOffset = new pc.Vec3(-2.75,-1,0.75)
+        //portal.setLocalPosition(childOffset);
  
     }
 }

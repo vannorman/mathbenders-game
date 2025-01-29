@@ -17,8 +17,88 @@ Portal.attributes.add('onPlayerEnter', { type: 'object' });
 
 // initialize code called once per entity
 Portal.prototype.initialize = function () {
+    this.buildWalls();
+    const portalPlane = new pc.Entity("PortalPlane");
+    portalPlane.addComponent("render", {
+          type: "plane",
+           material: new pc.StandardMaterial(),
+           layers: [pc.LAYERID_WORLD],
+      });
+    portalPlane.setLocalPosition(0, 1.14, -0.3);
+    portalPlane.setLocalEulerAngles(90, 0, 0);
+    portalPlane.setLocalScale(3.7,1.0,5.5);
+    portalPlane.render.enabled=false;
+    this.portalPlane = portalPlane;
 
+    const pivot = new pc.Entity("PortalPlanePivot");
+    this.entity.addChild(pivot);
+    pivot.addChild(this.portalPlane);
+    this.pivot = pivot;
+   
+    // target camera pivot needs to flip 180 since portals are unidirectional and "mirror" (no passthru, way in is way out)
+
+    const camPivot = new pc.Entity("portalCameraPivot");
+    pivot.addChild(camPivot);
+    camPivot.setLocalEulerAngles(0,180,0);
+    this.camPivot = camPivot;
+
+    // Create the portal visual geometry
+    const portalEntity = assets.portal.resource.instantiateRenderEntity();
+    // Game.pe = portalEntity;
+
+    portalEntity.getComponentsInChildren('render').forEach(r => {
+        r.meshInstances[0].material = Materials.black;
+    });
+
+    portalEntity.setLocalPosition(0, -3, 0);
+    portalEntity.setLocalScale(0.02, 0.02, 0.02);
+    this.entity.addChild(portalEntity);
+
+    // This is the actual entity that player triggers and crosses.
+    const portalDoor = new pc.Entity("machinePortal");
+    let s = new pc.Vec3(3,9,0.1);
+    portalDoor.setLocalScale(s);
+    console.log("portal door localscale:"+portalDoor.getLocalScale());
+    portalDoor.addComponent("collision", { type: "box", halfExtents: new pc.Vec3(s.x/2, s.y/2, s.z/2),    });
+    portalDoor.tags.add(Constants.Tags.Portal);
+//    portalDoor.addComponent("rigidbody", { group : Constants.Layers.Portal });
+    this.entity.addChild(portalDoor);
+    portalDoor.addComponent('script');
+    portalDoor.script.create('machinePortal',{attributes:{group:this.entity}});//,onCrossFn:onCrossFn}});
+    //console.log("machine portal group:"+portalDoor.script.machinePortal.group);
+    portalDoor.script.machinePortal.sourcePortal = this.entity;
+    portalDoor.setLocalPosition(new pc.Vec3(0,2,0));
+    pivot.addChild(portalDoor);
+    // Game.hoop = portalDoor;
+  
+//    group.addComponent('rigidbody',{type:pc.BODYTYPE_KINEMATIC});
+ //   group.rigidbody.group = Constants.Layers.Portal;
+
+
+    
 };
+
+Portal.prototype.buildWalls = function(){
+    let options = {position:pc.Vec3.ZERO,scale:new pc.Vec3(5,15,0.2),rigid:true,rbType:pc.RIGIDBODY_TYPE_KINEMATIC};
+    let wall = Cube(options)
+    wall.render.material = Materials.black; 
+    this.entity.addChild(wall);
+    wall.setLocalPosition(-4.15,0,0);
+    
+    options.scale = new pc.Vec3(5,15,0.2);
+    wall = Cube(options);
+    wall.render.material = Materials.black; 
+    this.entity.addChild(wall);
+    wall.setLocalPosition(4.15,0,0);
+
+    options.scale = new pc.Vec3(3.3,3.2,0.2);
+    wall = Cube(options);
+    wall.render.material = Materials.black; 
+    this.entity.addChild(wall);
+    wall.setLocalPosition(0,5.9,0);
+
+
+}
 
 Portal.prototype.createLandingPlatform = function(textureAsset){
 //    c = Game.Instantiate.gothicChurchCeiling({rotation:new pc.Vec3(-90,0,0),localOnly:true,network:false});
@@ -51,83 +131,9 @@ Portal.prototype.update = function(dt){
 Portal.CreatePortal = function(opts={}){
 //    const { onCrossFn = null} = opts;//(()=>{})()} = opts;
      
-    let app = pc.app;
-
-    // Create a root for the graphical scene
-    const group = new pc.Entity("Portal");
-    app.root.addChild(group);
-    const portalPlane = new pc.Entity("PortalPlane");
-    portalPlane.addComponent("render", {
-          type: "plane",
-           material: new pc.StandardMaterial(),
-           layers: [pc.LAYERID_WORLD],
-      });
-    portalPlane.setLocalPosition(0, 1.14, -0.3);
-    portalPlane.setLocalEulerAngles(90, 0, 0);
-    portalPlane.setLocalScale(3.7,1.0,5.5);
-    portalPlane.render.enabled=false;
-
-    group.addComponent("script");
-    group.script.create("portal",{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
-   // 
-    const pivot = new pc.Entity("PortalPlanePivot");
-    group.addChild(pivot);
-    pivot.addChild(portalPlane);
-    group.script.portal.pivot = pivot;
-   
-    // target camera pivot needs to flip 180 since portals are unidirectional and "mirror" (no passthru, way in is way out)
-
-    const camPivot = new pc.Entity("portalCameraPivot");
-    pivot.addChild(camPivot);
-    camPivot.setLocalEulerAngles(0,180,0);
-    group.script.portal.camPivot = camPivot;
-
-    // Create the portal visual geometry
-    const portalEntity = assets.portal.resource.instantiateRenderEntity();
-    Game.pe = portalEntity;
-
-    portalEntity.getComponentsInChildren('render').forEach(r => {
-        r.meshInstances[0].material = Materials.black;
-    });
-
-    portalEntity.setLocalPosition(0, -3, 0);
-    portalEntity.setLocalScale(0.02, 0.02, 0.02);
-    group.addChild(portalEntity);
-
-    // This is the actual entity that player triggers and crosses.
-    const portalDoor = new pc.Entity("machinePortal");
-    let s = new pc.Vec3(3,9,0.1);
-    portalDoor.setLocalScale(s);
-    portalDoor.addComponent("collision", { type: "box", halfExtents: new pc.Vec3(s.x/2, s.y/2, s.z/2),    });
-    portalDoor.tags.add(Constants.Tags.Portal);
-//    portalDoor.addComponent("rigidbody", { group : Constants.Layers.Portal });
-    portalDoor.reparent(group);
-    portalDoor.addComponent('script');
-    portalDoor.script.create('machinePortal',{attributes:{group:group}});//,onCrossFn:onCrossFn}});
-    //console.log("machine portal group:"+portalDoor.script.machinePortal.group);
-    portalDoor.script.machinePortal.sourcePortal = this.entity;
-    portalDoor.setLocalPosition(new pc.Vec3(0,2,0));
-    pivot.addChild(portalDoor);
-    Game.hoop = portalDoor;
-  
-//    group.addComponent('rigidbody',{type:pc.BODYTYPE_KINEMATIC});
- //   group.rigidbody.group = Constants.Layers.Portal;
-
-
-    let options = {position:pc.Vec3.ZERO,scale:new pc.Vec3(5,15,0.2),rigid:true,rbType:pc.RIGIDBODY_TYPE_KINEMATIC};
-    let wall = Cube(options)
-    wall.render.material = Materials.black; wall.reparent(group); wall.setLocalPosition(-4.15,0,0);
-    
-    options.scale = new pc.Vec3(5,15,0.2);
-    wall = Cube(options);
-    wall.render.material = Materials.black; wall.reparent(group); wall.setLocalPosition(4.15,0,0);
-
-    options.scale = new pc.Vec3(3.3,3.2,0.2);
-    wall = Cube(options);
-    wall.render.material = Materials.black; wall.reparent(group); wall.setLocalPosition(0,5.9,0);
 
     
-    return group;
+        
 }
 
 

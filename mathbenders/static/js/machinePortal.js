@@ -14,6 +14,7 @@ MachinePortal.prototype.initialize = function () {
 }
 
 MachinePortal.prototype.Cross = function (options={}){
+    console.log("Cross.");
     const { obj,direction=true,context } = options;
     if (direction) {
         // TODO: LevelBuilder flow breaks if you link the unlink two portals; context dest still there; some random pos?

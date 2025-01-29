@@ -25,7 +25,9 @@ export default class Level {
     }
 
     ClearPlacedTemplateInstances(){
-        this.templateInstances.forEach(x=>{x.entity.destroy(); x=null;});
+        var entities = [];
+        this.templateInstances.forEach(x=>{entities.push(x.entity);})
+        entities.forEach(x=>{x.destroy();}) // each destroy instance also fires "deregister". awkward.
     }
 
     deRegisterPlacedTemplateInstance(templateInstance){
