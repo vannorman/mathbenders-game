@@ -573,13 +573,13 @@ export default class GUI {
 
     }
 
-    UpdateTerrainToolValues(source="non"){
+    UpdateTerrainToolValues(args={}){
+        const {terrainData=realmEditor.RealmData.currentLevel.terrain.data}=args;
         // console.log('update ter val from:'+source);
-        const td = realmEditor.RealmData.currentLevel.terrain.data;
         Object.keys(this.#TerrainTools).forEach(key=>{
             // relies on terrain tools keys having same name as terrain data keys
-            if (td[key]){
-                const val = td[key] / this.#TerrainTools[key]._maxVal; 
+            if (terrainData[key]){
+                const val = terrainData[key] / this.#TerrainTools[key]._maxVal; 
                 this.#TerrainTools[key].SetVal({resultX:val,fireOnChangeFn:false});
             }
         });

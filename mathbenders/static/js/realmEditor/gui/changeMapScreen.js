@@ -87,6 +87,7 @@ export default class ChangeMapScreen {
                         targetPivotPosition:tempCamPivotPosition,
                         targetZoomFactor:level.terrain.scale*1.5
                     });
+                    realmEditor.gui.UpdateTerrainToolValues({terrainData:level.terrain.data});
                    },
                 cursor:'pointer',
             });
