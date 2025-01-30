@@ -37,7 +37,6 @@ PortalCameraRenderTexture.prototype.initialize = function(){
 }
 
 PortalCameraRenderTexture.prototype.setupCamera = function(){
-    console.log("setup cameraconfig");
     let cam3 = new pc.Entity("cam3");
     cam3.addComponent("camera", {
         layers: [pc.LAYERID_WORLD, pc.LAYERID_SKYBOX],
@@ -62,7 +61,6 @@ PortalCameraRenderTexture.prototype.updateConfig = function(){
 
 PortalCameraRenderTexture.prototype.setupTexture = function(){
     // Set the shader to use the camera texture
-    console.log("render texture");
 
     this.renderTexture= new pc.Texture(pc.app.graphicsDevice, {
         width: pc.app.graphicsDevice.canvas.clientWidth,
@@ -149,12 +147,20 @@ PortalCameraRenderTexture.prototype.postUpdate = function(dt){
             this.currentPortal = nearestPortal;
             // we're near a different portal, so switch camera approps
 
-            pc.app.root.getComponentsInChildren('portal').forEach(portal => { portal.portalPlane.render.enabled = false; })
+            pc.app.root.getComponentsInChildren('portal').forEach(portal => { 
+                portal.portalPlane.render.enabled = false; 
+                portal.portalPlane.render.emissiveMap = null;
+            //    portal.portalPlane.render.material.update();
+                portal.portalPlane.render.material = null;
+                portal.portalPlane.enabled=false;
+
+            })
             this.staticObjSource = nearestPortal;
             this.renderPlane = nearestPortal.script.portal.portalPlane;
-            this.renderPlane.render.enabled = true;
-            this.renderPlane.render.material.emissiveMap = this.renderTexture;     // assign the rendered texture as an emissive texture
+            this.renderPlane.enabled=true;
             this.renderPlane.render.material = this.renderMaterial; 
+            this.renderPlane.render.material.emissiveMap = this.renderTexture;     // assign the rendered texture as an emissive texture
+            this.renderPlane.render.enabled = true;
             this.renderPlane.render.material.update();
             //console.log("Eh:"+this.renderPlane);
             this.staticObjTarget = nearestPortal.script.portal.dest;

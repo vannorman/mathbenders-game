@@ -11,9 +11,6 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     // these gui things are populated in gui.circleButtons appear when object is placed
     // Destroy them on close.
-    #guiButtonEntities=[];
-    #guiElementEntities=[];
-    #propertyInstances=[];
 
     constructor(params) {
         super(params);
@@ -72,9 +69,6 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     onExit(){
         realmEditor.gui.editItemTray.entity.enabled=false; // Eytan; I'd like this to "shrink away" as I swtich to dragging mode.
         // But, that requires a "lingering" update here while drag mode is already enabled (meaning this mode, and thus its update, is disabled, so it can't shrink.)
-        this.#guiButtonEntities.forEach(x=>{x.destroy();});
-        this.#guiElementEntities.forEach(x=>{x.destroy();});
-        this.#propertyInstances.forEach(x=>{x=null;});
     }
 }
 

@@ -2,6 +2,9 @@ import RealmBuilderMode from "./realmBuilderMode.js";
 
 export default class NormalRealmBuilderMode extends RealmBuilderMode {
 
+    onEnter(){
+    }
+
     onMouseMove(e) {
         super.onMouseMove(e);
     }

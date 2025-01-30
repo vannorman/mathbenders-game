@@ -27,6 +27,7 @@ class RealmEditor {
     #modes;
     #mode;
     #RealmData;
+    get RealmData() {return this.#RealmData;}
     #UpdateInitialized=false;
 
     get mode(){return this.#mode}
@@ -38,6 +39,8 @@ class RealmEditor {
     constructor() {
         this.#isEnabled = false;
         this.#realm = null;
+        this.camera = new EditorCamera({realmEditor:this});
+        this.gui = new GUI({ realmEditor:this });
         this.#modes = new Map([
             ['draggingObject', new DraggingObjectRealmBuilderMode({realmEditor: this})],
             ['editingItem', new EditingItemRealmBuilderMode({realmEditor: this})],
@@ -57,8 +60,6 @@ class RealmEditor {
 
         GameManager.subscribe(this,this.onGameStateChange);
 
-        this.camera = new EditorCamera({realmEditor:this});
-        this.gui = new GUI({ realmEditor:this });
 
         window.terrainCentroidManager = new TerrainCentroidManager(); // awkward as fuck to create this global thing here .. :) 
         // BUT, if I don't, I run into dependency loops which to resolve I have to pass references everywhere
@@ -129,6 +130,8 @@ class RealmEditor {
     toggle(mode) {
         // If the 'mode' does not exist, return
         if (!this.#modes.has(mode)) return;
+
+        if (this.#modes.get(mode) == this.#mode) return;
 
         // Exit the current mode (if there is one)
         // Point to the mode to use
@@ -227,6 +230,19 @@ class RealmEditor {
             id:id,
             callbackSuccess:callbackSuccess,
             callbackFail:callbackFail});
+    }
+
+    createNewLevel(){
+        const level = new Level({skipTerrainGen:true});
+        this.#RealmData.Levels.push(level);
+        const newTerrainPos = terrainCentroidManager.getCentroid();
+        
+        level.terrain = new Terrain({centroid:newTerrainPos,seed:Math.random()});
+        level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
+        
+        const zoomFactor = 100;
+        realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
+        
     }
 
     SetEditableItemMode() {

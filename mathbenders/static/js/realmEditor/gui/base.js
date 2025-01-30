@@ -1,5 +1,6 @@
 import BuilderPanel from './builderPanel.js';
 import EditItemTray from './editItemTray.js';
+import ChangeMapScreen from './changeMapScreen.js'; 
 export default class GUI {
 
     // Note: 'backboard', 'screen', 'panel', 'window' terminology to be merged/truncated
@@ -10,13 +11,12 @@ export default class GUI {
 
     // Various buttons and ui elements
     #changeMapBtn;
+    changeMapScreen;
     #saveBtn;
     #loadBtn;
     #mapControlPanel;
     #mapPanel;
     #mapIcons;
-    #changeMapScreen; // parent
-    #changeMapScreenLayout; // child
     #customCursorIcon;
     get customCursorIcon(){return this.#customCursorIcon;}
 
@@ -549,53 +549,24 @@ export default class GUI {
         });
         this.#loadRealmWindow.addChild(loadText);
  
-        this.#changeMapScreen = new pc.Entity("changemap");
-        this.#changeMapScreen.addComponent('element',{
-            type:'image',
-            textureAsset: assets.textures.ui.builder.changeMapBg,
-            anchor:[0.52,0.52,0.52,0.52],
-            pivot:[0.5,0.5],
-            height:420,
-            width:500,
-            opacity:1,
-            useInput:true
-            }); // not sure why x-max-anchor needs to be 0.7 here and not 1.0, but 1.0 pushes it beyond the parent width somehow
-        this.#mapPanel.addChild(this.#changeMapScreen);
-      
-        UI.AddCloseWindowButton({
-            parentEl:this.#changeMapScreen,
-            onClickFn:function(){realmEditor.SetMode('normal'); }});
 
-        this.#changeMapScreenLayout = new pc.Entity();
-        this.#changeMapScreenLayout.addComponent("element", {
-            type: "image",
-            anchor: [0.5,0.5,0.5,0.5],
-            pivot: [0.5, 0.5],       
-            width:380,
-            height:340,
-            color:pc.Color.WHITE,
-        });
-        this.#mapIcons = []; // need to clear these each time we open terrain.
+        // Change Map screen (Terrain )
+        this.changeMapScreen = new ChangeMapScreen();
+        this.#mapPanel.addChild(this.changeMapScreen.group);
 
-        this.#changeMapScreenLayout.addComponent("layoutgroup", {
-            orientation: pc.ORIENTATION_HORIZONTAL,
-            spacing: new pc.Vec2(10, 10),
-            // fit_both for width and height, making all child elements take the entire space
-            widthFitting: pc.FITTING_NONE,
-            heightFitting: pc.FITTING_NONE,
-            // wrap children
-            wrap: true,
-        });
-
-        this.#changeMapScreen.addChild(this.#changeMapScreenLayout);
-        this.#changeMapScreen.enabled=false;
-
-
+        // Edit item
         this.editItemTray = new EditItemTray({leftMargin:this.leftMargin});
+
+
+
+        // Entire editor
         this.#screen.addChild(this.editItemTray.entity);
         // this.CreatePopUpEditItemTray({realmEditor:this.realmEditor});
         this.#screen.enabled = false;
 
+
+
+        // Custom icon
         this.#screen.addChild(this.#customCursorIcon); // if I add this too early, it doesn't show up due to hierarchy, overwritten by map
 
  
