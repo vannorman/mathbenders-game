@@ -356,6 +356,7 @@ export default class GUI {
 //                    { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
 //                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
                     { ItemTemplate:NumberHoop } ,
+                    { ItemTemplate:Multiblaster } ,
                     // templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(

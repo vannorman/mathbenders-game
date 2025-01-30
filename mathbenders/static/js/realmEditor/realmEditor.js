@@ -178,7 +178,7 @@ class RealmEditor {
 //            levelJson._placedItems.forEach(x=>{
             levelJson.templateInstances.forEach(x=>{
 
-                let obj = this.InstantiateTemplate({level:level,ItemTemplate:getTemplateByName(x.templateName)});
+                let obj = this.InstantiateTemplate({level:level,ItemTemplate:templateNameMap[x.templateName]});
                 obj.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
  

@@ -1,3 +1,5 @@
+var templateNameMap = {}
+
 class Template {
 
     static name="TemplateSuper";
@@ -18,7 +20,11 @@ class Template {
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
         this.entity.tags.add(Constants.Tags.BuilderItem);
+        this.setup();
+        this.updateColliderMap();
     }
+
+    setup(){console.log("ERR: No setup method on "+this.constructor.name);}
 
     updateColliderMap(){
         this.colliders = new Map();
@@ -84,6 +90,7 @@ class Template {
 }
 
 class NumberHoop extends Template {
+    static { templateNameMap["NumberHoop"] = NumberHoop }
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -96,9 +103,8 @@ class NumberHoop extends Template {
     ]
   
     static icon = assets.textures.ui.icons.hoop;
-    constructor(args={}){
-        super(args);
 
+    setup(){
         const scale = 1.5;
         this.renderEntity = assets.numberHoop.resource.instantiateRenderEntity();
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
@@ -106,13 +112,7 @@ class NumberHoop extends Template {
         
         const childOffset = new pc.Vec3(0,0,2);
         this.renderEntity.setLocalPosition(childOffset);
-        this.setup(); 
-        this.updateColliderMap();
-        const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO}=args;
-        //this.entity.moveTo(position,rotation);
-    }
-
-    setup(){
+        
         const hoop = this.renderEntity; // specific to architecture of NumberHoop
         hoop.addComponent('script');
         hoop.script.create('machineHoop',{
@@ -144,8 +144,8 @@ class NumberFaucet extends Template {
          },
 
     ]
-    constructor(args={}){
-        super(args);
+
+    setup(){
         const scale = 2;
     
         this.renderEntity = assets.models.faucet.resource.instantiateRenderEntity();
@@ -154,11 +154,7 @@ class NumberFaucet extends Template {
 
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
         this.fraction = new Fraction(1,2);
-        this.setup();    
-        this.updateColliderMap();
-    }
-
-    setup(){
+        
         this.renderEntity.addComponent('script');
         this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:this.fraction}});
 
@@ -184,9 +180,7 @@ class NumberFaucet extends Template {
 class PlayerStart extends Template {
     static icon = assets.textures.ui.builder.start;
 
-    constructor(args={}){
-        super(args);
-
+    setup () {
         const childOffset = new pc.Vec3(0,0,0.5)
         const scale = 1.5
         
@@ -195,12 +189,6 @@ class PlayerStart extends Template {
         this.entity.render.material = Materials.green;
         this.entity.setLocalScale(6,6,6);
 
-        this.setup();
-        this.updateColliderMap();
-
-    }            
-
-    setup () {
         const $this = this;
         function onGameStateChange(state) {
             switch(state){
@@ -251,12 +239,6 @@ class NumberWall extends Template {
          },
     ]
 
-    constructor(args){
-        super(args);
-        this.setup();
-        this.updateColliderMap();
-
-    }
 
     setup(){
         this.entity.addComponent('script'); 
@@ -271,11 +253,6 @@ class NumberWall extends Template {
 
 class PlayerPortal extends Template {
     static icon = assets.textures.ui.builder.portal;
-    constructor(args){
-        super(args);
-        this.setup();
-        this.updateColliderMap();
-    }
 
     setup(){
         this.entity.addComponent("script");
@@ -290,15 +267,7 @@ class PlayerPortal extends Template {
 class CastleTurret extends Template {
     static icon = assets.textures.ui.icons.turret1;
 
-
-    constructor(args){
-        super(args);
-        this.setup();
-        this.updateColliderMap(); // Is there a way to always have this executed as the last step in setup in the super? without explicitly callign it in any subclass?
-    }
-
     setup(){
-            
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
@@ -341,11 +310,6 @@ class CastleTurret extends Template {
 
 class CastleWall extends Template {
     static icon = assets.textures.ui.icons.wall;
-    constructor(){
-        super();
-        this.setup();
-        this.updateColliderMap();
-    }
 
     setup(){ 
         
@@ -367,7 +331,6 @@ class CastleWall extends Template {
 
 class BigConcretePad extends Template {
     static icon = assets.textures.ui.builder.concretePadBig;
-    pad;
 
     static editablePropertiesMap = [
          {  
@@ -376,16 +339,10 @@ class BigConcretePad extends Template {
             property : ScaleProperty,
             valueType : pc.Vec3,
             onChangeFn : (entity,value) => { entity.script.itemTemplateReference.itemTemplate.setScale(value);},
-            getCurValFn : (entity) => { return entity.script.itemTemplateReference.itemTemplate.pad.getLocalScale() },
+            getCurValFn : (entity) => { return entity.script.itemTemplateReference.itemTemplate.pad.getLocalScale() }, // todo: expect ItemTemplate, not Entity, here
          },
     ];
  
-    constructor(){
-        super();
-        this.setup();
-        this.updateColliderMap();
-
-    }
 
     setup(){
         const pad = new pc.Entity();
@@ -408,12 +365,28 @@ class BigConcretePad extends Template {
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(1/2);
     }
 
-
-
 }
 
-const templateNameMap = {
-    "NumberHoop" : NumberHoop,
+class Multiblaster extends Template {
+    icon = assets.textures.ui.icons.multiblaster;
+    static { templateNameMap["Multiblaster"] = Multiblaster }
+    setup(){
+        const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
+        blaster.addComponent('script'); 
+        blaster.script.create('gadgetMultiblaster',{attributes:{
+            onFireFn:()=>{AudioManager.play({source:assets.sounds.multiblasterFire,position:pc.Vec3.ZERO,volume:0.4,pitch:1,positional:false});},
+            // createBulletFn:(p)=>{return Network.Instantiate.NumberSphere({position:p});}, // not sure why we passed this in as fn?
+            //onSelectSound:()=>{AudioManager.play({source:assets.sounds.getGadget});},
+            onPickupFn:()=>{AudioManager.play({source:assets.sounds.getGadget});},
+            camera:Camera.main.entity,
+        }}); 
+        this.entity.addChild(blaster);
+        blaster.script.create('objectProperties', {attributes:{ objectProperties:{templateName:this.constructor.name},  }}) 
+  
+    }
+}
+
+templateNameMap = { ...templateNameMap, ... {
     "NumberFaucet" : NumberFaucet,
     "NumberWall" : NumberWall,
     "PlayerStart" : PlayerStart,
@@ -422,7 +395,7 @@ const templateNameMap = {
     "CastleWall" : CastleWall,
     "BigConcretePad" : BigConcretePad,
 
-}
+}}
 
 function getTemplateByName(name){
     return templateNameMap[name];
