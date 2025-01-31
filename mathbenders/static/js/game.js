@@ -69,6 +69,7 @@ var Game = {
         window.Mouse = new MouseClass();
         Game.currentState = Game.GameState.Running;
         window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)});
+        Player.createInventory();
         let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         let skyCam = new RealmBuilderCamera();

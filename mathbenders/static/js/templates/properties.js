@@ -106,10 +106,6 @@ class Property {
 class ScaleProperty extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
 
-    constructor(args){
-        super(args);
-    }
-
     buildUi(){
         // TODO: Combine this with SizeProperty UI (they're the same almost);
         const $this = this;

@@ -1,4 +1,9 @@
 class PlayerClass {
+    entity;
+    pivot;
+    camera;
+    inventory;
+
     constructor(args={}){
         const { startingPosition = pc.Vec3.ZERO } = args;
         // TODO: Remove global refs e.g. to Game.
@@ -18,8 +23,8 @@ class PlayerClass {
  
         // camrea pivot
          let pivot = new pc.Entity("pivot");
-         Game.pivot = pivot;
         this.entity.addChild(pivot);
+        this.pivot = pivot;
 
         
         this.camera = new PlayerCamera({
@@ -45,19 +50,19 @@ class PlayerClass {
 
 
 
-        this.Inventory = new Inventory({playerEntity:this.entity}); 
-        Game.inventory = this.Inventory; // legacy
+    //     Game.inventory = this.Inventory; // legacy
 
         let handEntity = new pc.Entity();
         pc.app.root.addChild(handEntity);
         handEntity.reparent(Game.player);
         handEntity.setLocalPosition(0, 0, 1);
+        this.hand = handEntity;
         this.entity.script.create('playerPickup',{attributes:{
+            handEntity:this.hand,
             hasOwnership:(obj)=>{ 
                 return ObjectRegistry.playerHasOwnership(obj); 
             }
         }});
-        this.entity.script.playerPickup.handEntity = handEntity;     
 
 
 
@@ -90,7 +95,7 @@ class PlayerClass {
 
 
     enable(){
-        this.Inventory.show();
+        this.inventory.show();
         this.entity.enabled = true;
         this.controller.enabled = true;
         this.camera.self.enabled=true;
@@ -99,7 +104,7 @@ class PlayerClass {
     }
 
     disable(){
-        this.Inventory.hide();
+        this.inventory.hide();
         this.entity.enabled = false;
         this.controller.enabled = false;
         this.camera.self.enabled=false;
@@ -139,6 +144,11 @@ class PlayerClass {
             console.log("noground");
             return to;
         }
+
+    }
+
+    createInventory(){
+        this.inventory = new Inventory();
 
     }
   

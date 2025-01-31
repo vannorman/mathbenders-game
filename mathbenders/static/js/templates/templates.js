@@ -337,7 +337,7 @@ class BigConcretePad extends Template {
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : ScaleProperty.constructor.name,
             property : ScaleProperty,
-            valueType : pc.Vec3,
+            // valueType : pc.Vec3,
             onChangeFn : (entity,value) => { entity.script.itemTemplateReference.itemTemplate.setScale(value);},
             getCurValFn : (entity) => { return entity.script.itemTemplateReference.itemTemplate.pad.getLocalScale() }, // todo: expect ItemTemplate, not Entity, here
          },
@@ -356,6 +356,7 @@ class BigConcretePad extends Template {
     }
 
     setScale(scale){
+        // after serialization, vec3(1,2,3) becomes [1,2,3]
         // Custom set properties due to SCALE being serialized as JSON and needing to be inflated as Vec3.
         // TODO: Property should have a TYPE so that it knows how to be deserialized.  @Eytan
         if (scale instanceof pc.Vec3 == false) {

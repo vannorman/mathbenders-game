@@ -1,19 +1,22 @@
-class Slot {
+class InventorySlot {
     constructor(args={}){
-        const { item } = args;
-        this._item = item;
+        const { templateName, properties } = args;
+        this.templateName = templateName;
+        this.properties = properties;
     }
 }
 
 class Inventory {
+    beltSlots = Array.from({ length: 9 }, () => new InventorySlot());
     constructor(args={}){
-        const { playerEntity } = args;
-        this._beltItems = Array.from({ length: 9 }, () => new Slot());
-        // Player inventory
-        this.script = playerEntity.script.create('inventory',{attributes:{
-            pivot:Game.pivot,
-            player:Game.player,
-            droppedPosition:Game.droppedPosition,
+        this.setupScript();
+    }
+
+    setupScript() {
+         this.script = Player.entity.script.create('inventory',{attributes:{
+            pivot:Player.pivot,
+            player:Player.entity,
+            droppedPosition:Player.droppedPosition,
             getItemFn : (x)=>{AudioManager.play({source:assets.sounds.getItem});},
             placeItemFn : (x)=>{AudioManager.play({source:assets.sounds.placeItem});},
             throwSoundFn : (x)=>{AudioManager.play({source:assets.sounds.throwItem});},
@@ -26,15 +29,7 @@ class Inventory {
                 numberSphereNeg:assets.textures.ui.numberSphereNeg,
                 }
         }});
-//        Game.player.script.create('constantForce',{attributes:{force:new pc.Vec3(0,-2000,0)}})
 
-        // Add axis for debug/placement purposes.
-
-        // Add inventory
-
-        // Add the handEntity and playerPickup to the Player
-        // Create a new entity for the hand
-        this.enabled=true;
     }
 
     beginDrag(){
@@ -218,7 +213,7 @@ Inventory_Old.prototype.onMouseMove = function(event){
 };
 
 Inventory_Old.prototype.pickUpItem = function(entity){
-    if (!Player.Inventory.enabled) return;
+    if (!Player.inventory.enabled) return;
     // Make sure not to pick up items weve just thrown.
     if (Object.keys(this.thrownItems).includes(entity.getGuid())) {
     //    console.log("ignoring item we just threw:"+entity.getGuid());
@@ -374,7 +369,7 @@ Inventory_Old.prototype.toggleInventory_Old = function() {
     // This may involve showing or hiding UI elements and changing the mouse lock state
 };
 Inventory_Old.prototype.onMouseDown = function(event) {
-    if (!Player.Inventory.enabled) return;
+    if (!Player.inventory.enabled) return;
     
     this.mouseHeld = true;
     if (this.inventoryShown){
