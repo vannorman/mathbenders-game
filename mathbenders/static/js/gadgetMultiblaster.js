@@ -1,10 +1,4 @@
 
-class Multblaster extends Gadget2 {
-    constructor(args={}){
-
-    }
-}
-
 var GadgetMultiblaster = pc.createScript('gadgetMultiblaster');
 GadgetMultiblaster.attributes.add('onFireFn', { type: 'object'}); 
 //GadgetMultiblaster.attributes.add('createBulletFn', { type: 'object'}); 

@@ -368,21 +368,33 @@ class BigConcretePad extends Template {
 
 }
 
-class Multiblaster extends Template {
-    icon = assets.textures.ui.icons.multiblaster;
-    static { templateNameMap["Multiblaster"] = Multiblaster }
+class MultiblasterPickup extends Template {
+    static icon = assets.textures.ui.icons.multiblaster;
     setup(){
+
+        // graphics
         const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
-        blaster.addComponent('script'); 
-        blaster.script.create('gadgetMultiblaster',{attributes:{
-            onFireFn:()=>{AudioManager.play({source:assets.sounds.multiblasterFire,position:pc.Vec3.ZERO,volume:0.4,pitch:1,positional:false});},
-            // createBulletFn:(p)=>{return Network.Instantiate.NumberSphere({position:p});}, // not sure why we passed this in as fn?
-            //onSelectSound:()=>{AudioManager.play({source:assets.sounds.getGadget});},
-            onPickupFn:()=>{AudioManager.play({source:assets.sounds.getGadget});},
-            camera:Camera.main.entity,
-        }}); 
+        ApplyTextureAssetToEntity({entity:blaster,textureAsset:assets.textures.gadget});
         this.entity.addChild(blaster);
-        blaster.script.create('objectProperties', {attributes:{ objectProperties:{templateName:this.constructor.name},  }}) 
+
+        // pickup item 
+        this.entity.addComponent('collision');
+        this.entity.addComponent('rigidbody',{type:'kinematic'});
+        this.entity.script.create('pickUpItem',{attrributs:{
+            priority:2,
+            heldRot:new pc.Quat().setFromEulerAngles(110,0,0),
+            heldPos:new pc.Vec3(0.7,0.3,-0.2),
+            onPickup:function(){console.log("pickup blaster.");}
+                // should we have pickupItem link to Player Inventory or a PlayerPickup script here?
+                // OR, should we have playerpickup script react to touching pickUpItem?
+        }});
+
+        // Legacy for Inventory to know what we picked up
+        this.entity.script.create('objectProperties', {attributes:{ objectProperties:{templateName:this.constructor.name},  }}) 
+
+
+
+
   
     }
 }
@@ -395,6 +407,7 @@ templateNameMap = { ...templateNameMap, ... {
     "CastleTurret" : CastleTurret,
     "CastleWall" : CastleWall,
     "BigConcretePad" : BigConcretePad,
+    "MultiblasterPickup" : MultiblasterPickup,
 
 }}
 

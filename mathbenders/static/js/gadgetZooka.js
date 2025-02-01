@@ -1,9 +1,4 @@
 
-class Zooka extends Gadget2 {
-    constructor(args={}){
-
-    }
-}
 
 var GadgetZooka = pc.createScript('gadgetZooka');
 GadgetZooka.attributes.add('onFireFn', { type: 'object'}); 

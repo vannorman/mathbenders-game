@@ -7,12 +7,25 @@ class InventorySlot {
 }
 
 class Inventory {
+
+    // New architecutre
+    // class PlayerItemCollisionDetector which broadcasts item collision events (e..g player walks into a Multiblaster or Number)
+    // Inventory subscribes to collision events to decide what to do with them
+
+    /*
+        subscribe(Player.collisionDetector.
+
+    */
+
+
     beltSlots = Array.from({ length: 9 }, () => new InventorySlot());
     constructor(args={}){
         this.setupScript();
     }
 
     setupScript() {
+        // TODO : WE don't need a 'script' / entity here; since inventory "lives" on the player 
+        // and has no physical manifestation it needs no entity script (Monobehaviour)
          this.script = Player.entity.script.create('inventory',{attributes:{
             pivot:Player.pivot,
             player:Player.entity,
@@ -29,6 +42,10 @@ class Inventory {
                 numberSphereNeg:assets.textures.ui.numberSphereNeg,
                 }
         }});
+
+    }
+
+    collectItem(){
 
     }
 
@@ -213,6 +230,11 @@ Inventory_Old.prototype.onMouseMove = function(event){
 };
 
 Inventory_Old.prototype.pickUpItem = function(entity){
+
+    // Pick up gadget, number, or "other random item"
+    // pickUpItem script should hold "helditemrot, helditempos" ?
+    // pickUpItem script should contain "onpickup" method, gadget pickup can have Player.inventory.collectGadget(gadgetName)?
+
     if (!Player.inventory.enabled) return;
     // Make sure not to pick up items weve just thrown.
     if (Object.keys(this.thrownItems).includes(entity.getGuid())) {

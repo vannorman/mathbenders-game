@@ -135,7 +135,6 @@ const assets = {
                 sword : new pc.Asset("iconSword", "texture", { url: "/static/assets/textures/ui/iconSword.png", }),
                 multiblaster : new pc.Asset("iconMultiblaster", "texture", { url: "/static/assets/textures/ui/iconMultiblaster.png", }),
                 zooka : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/zooka.png", }),
-                multiblaster : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/multiblaster.png", }),
                 faucet : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/faucet.png", }),
                 hoop : new pc.Asset("iconHoop", "texture", {url : "/static/assets/textures/ui/iconHoop.png" }),
                 turret1 : new pc.Asset("turret1 ", "texture", {url : "/static/assets/textures/ui/iconTurret1.png" }),
