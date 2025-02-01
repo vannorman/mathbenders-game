@@ -26,6 +26,7 @@ class Inventory {
     setupScript() {
         // TODO : WE don't need a 'script' / entity here; since inventory "lives" on the player 
         // and has no physical manifestation it needs no entity script (Monobehaviour)
+
          this.script = Player.entity.script.create('inventory',{attributes:{
             pivot:Player.pivot,
             player:Player.entity,
