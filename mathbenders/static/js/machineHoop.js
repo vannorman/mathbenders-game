@@ -96,7 +96,7 @@ MachineHoop.prototype.Cross = function (options){
    } else {
         // console.log("HUH? No number hmmmmmmmmmm");
         // probably thirdpersoncontroller, need to pop all my invs
-        Player.Inventory.script.modifyInventoryNumbers(x => {
+        Player.inventory.script.modifyInventoryNumbers(x => {
             return MachineHoop.ModifyNumber({direction:direction,fracToModify:x,hoopFrac:context.fraction});
         });
     }

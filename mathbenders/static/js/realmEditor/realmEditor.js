@@ -232,6 +232,12 @@ class RealmEditor {
             callbackFail:callbackFail});
     }
 
+    NewRealm(){
+        this.#RealmData.Clear();
+        this.#RealmData = new RealmData();
+
+    }
+
     createNewLevel(){
         const level = new Level({skipTerrainGen:true});
         this.#RealmData.Levels.push(level);
@@ -299,9 +305,9 @@ class RealmEditor {
             properties={},
             } = args;
 
-        const instance = new ItemTemplate();
-        instance.setProperties(properties);
+        const instance = new ItemTemplate({properties:properties});
         const entity = instance.entity;
+        entity.tags.add(Constants.Tags.BuilderItem);
         //const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
 //        const placedItem = new PlacedItem({

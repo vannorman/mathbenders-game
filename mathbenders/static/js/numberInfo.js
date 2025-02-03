@@ -66,6 +66,8 @@ NumberInfo.prototype.Setup = function() {
         this.ints = [this.int1];
         Game.int1 = this.int1;
 
+        // Can we PLEASE move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
+
     } else if (this.numberType == NumberInfo.Shape.Hoop) {
         // Let the hoop add its own text
         //console.log("Hoop detected");
@@ -120,23 +122,15 @@ NumberInfo.prototype.createTextEntity = function(name,pos){
 
 };
 
-// update code called every frame
-NumberInfo.prototype.update = function(dt) {
-};
-
 NumberInfo.prototype.setObjectProperties = function(properties, context){
     context.fraction = properties.fraction;
     context.updateNumberText(properties, context);
-    
-    
 };
 
 NumberInfo.prototype.updateNumberText  = function(properties, context){
-//    var nts = context.entity.getComponentsInChildren("numberText");
     for(var i=0; i< context.ints.length; i++){
         var int1 = context.ints[i];
         int1.element.text = properties.fraction.numerator;
-        //nt.updateNumber(properties.fraction);
     }
 };
 
@@ -144,6 +138,9 @@ NumberInfo.prototype.updateNumberText  = function(properties, context){
 
 NumberInfo.prototype.onCollisionStart = function (result) {
     if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return;
+    this.OfflineCollision(result);
+
+
     // PROBLEM (dislike): Two clients see the same two numbers collide. 
     // Due to client side prediction, both clients predict a new # created (with different objId).
     // Server recevies this cSP from BOTH clients and creates tWO numbers.
@@ -157,7 +154,6 @@ NumberInfo.prototype.onCollisionStart = function (result) {
     if (false && network){
         NumberInfo.NetworkCollision(result);
     } else {
-        this.OfflineCollision(result);
     }
 }
 

@@ -36,17 +36,14 @@ class Inventory {
             throwSoundFn : (x)=>{AudioManager.play({source:assets.sounds.throwItem});},
             selectItemFn : (x)=>{AudioManager.play({source:assets.sounds.selectItem});},
     //        placeItemDownFn : (x)=>{AudioManager.play({source:assets.sounds.thud});},
-            numberIcons : {
-                numberCubePos:assets.textures.ui.numberCubePos,
-                numberCubeNeg:assets.textures.ui.numberCubeNeg,
-                numberSpherePos:assets.textures.ui.numberSpherePos,
-                numberSphereNeg:assets.textures.ui.numberSphereNeg,
-                }
         }});
 
     }
 
-    collectItem(){
+    collectItem(args={}){
+        const {ItemTemplate} = args;
+        console.log("Pickup:"+ItemTemplate.name);
+
 
     }
 
@@ -74,6 +71,15 @@ class Inventory {
 }
 
 class InventoryGui {
+
+    static numberIcons = {
+            numberCubePos:assets.textures.ui.numberCubePos,
+            numberCubeNeg:assets.textures.ui.numberCubeNeg,
+            numberSpherePos:assets.textures.ui.numberSpherePos,
+            numberSphereNeg:assets.textures.ui.numberSphereNeg,
+    }
+
+
     // todo / duplicated in inventory_old.js
     constructor(args={}){
        this.guiParent = new pc.Entity();
@@ -171,7 +177,6 @@ Inventory_Old.attributes.add('throwSoundFn', {    type: 'object' });
 Inventory_Old.attributes.add('placeItemFn', {    type: 'object' });
 Inventory_Old.attributes.add('selectItemFn', {    type: 'object' });
 Inventory_Old.attributes.add('placeItemDownFn', {    type: 'object' });
-Inventory_Old.attributes.add('numberIcons', {    type: 'object' });
 
 Inventory_Old.prototype.getThrownItemPosition= function(){
     let p = this.getDroppedPosition();
@@ -321,10 +326,10 @@ Inventory_Old.prototype.placeInventory_OldItem = function(i, props){
 
     if (nip){
         // Object was a number, so let's add number text, icon
-        if (props.templateName == "NumberCube" && nip.fraction.numerator > 0) icon = this.numberIcons.numberCubePos;
-        else if (props.templateName == "NumberCube" && nip.fraction.numerator < 0) icon = this.numberIcons.numberCubeNeg;
-        else if (props.templateName == "NumberSphere" && nip.fraction.numerator > 0) icon = this.numberIcons.numberSpherePos;
-        else if (props.templateName == "NumberSphere" && nip.fraction.numerator < 0) { icon = this.numberIcons.numberSphereNeg; }
+        if (props.templateName == "NumberCube" && nip.fraction.numerator > 0) icon = InventoryGui.numberIcons.numberCubePos;
+        else if (props.templateName == "NumberCube" && nip.fraction.numerator < 0) icon = InventoryGui.numberIcons.numberCubeNeg;
+        else if (props.templateName == "NumberSphere" && nip.fraction.numerator > 0) icon = InventoryGui.numberIcons.numberSpherePos;
+        else if (props.templateName == "NumberSphere" && nip.fraction.numerator < 0) { icon = InventoryGui.numberIcons.numberSphereNeg; }
         if (icon) {
             this.beltItemImages[i].element.textureAsset = icon;
             const color = nip.fraction.numerator > 0 ? pc.Color.BLACK : pc.Color.WHITE;

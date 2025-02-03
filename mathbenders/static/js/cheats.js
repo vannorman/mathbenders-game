@@ -281,13 +281,14 @@ $(document).on("keydown", function (e) {
         const num = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? -1000 : -2;
         const options = {
             position : Player.droppedPosition,
-            numberInfo : {
-                fraction : {
+            properties : {
+                'numberInfo' : {
                     numerator:num,
                     denominator:1
                 },
             }
         }
+        const ns = new NumberSphere(options);
         Game.Instantiate.NumberSphere(options);
         
     }
@@ -312,16 +313,14 @@ $(document).on("keydown", function (e) {
     }
     if (ee == 'X'){
         const num = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? 1000 : 2;
+        const frac = new Fraction(num,1);
         const options = {
             position : Player.droppedPosition,
-            numberInfo : {
-                fraction : {
-                    numerator:num,
-                    denominator:1
-                },
+            properties : {
+                NumberSphere : frac
             }
         } 
-        Game.x = Game.Instantiate.NumberSphere(options);
+        const ns = new NumberSphere(options);
      }
     if (ee == 'M'){
         const p = Player.droppedPosition;

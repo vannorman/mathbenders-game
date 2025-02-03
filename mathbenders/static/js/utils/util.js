@@ -29,7 +29,30 @@ Utils = {
         jsonString = jsonString.replaceAll("'",'"')
         jsonString = jsonString.replaceAll("True",'true')
         jsonString = jsonString.replaceAll("False",'false')
-        return JSON.parse(jsonString);
+        let parsedJson = JSON.parse(jsonString);
+        parsedJson = Utils.transformFractions(parsedJson);
+        return parsedJson;
+
+    },
+    transformFractions(obj,depth=0) {
+        if (depth>20) return null; //oopes
+        if (Array.isArray(obj)) {
+            // Recurse into arrays
+            return obj.map(Utils.transformFractions);
+        } else if (typeof obj === "object" && obj !== null) {
+            // Check if this object has a key "Fraction" with an object value
+            if ("Fraction" in obj && typeof obj.Fraction === "object") {
+                return new Fraction(obj.Fraction.numerator, obj.Fraction.denominator);
+            }
+
+            // Recurse into all object properties
+            let newObj = {};
+            for (let key in obj) {
+                newObj[key] = Utils.transformFractions(obj[key],++depth);
+            }
+            return newObj;
+        }
+        return obj; // Return as is for primitive types
     },
     newGuid() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

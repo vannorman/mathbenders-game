@@ -98,6 +98,7 @@ const Constants = {
         BuilderItem : 'BuilderEditableItem',
         Tree : 'Tree',
         Terrain : 'Terrain',
+        PlayerCanPickUp : 'PlayerCanPickUp',
     },
     Templates : {
         // Hmm.. would rather define these as new PlacedItem(name:CastleWall,props:...) inside Prefabs - @Eytan

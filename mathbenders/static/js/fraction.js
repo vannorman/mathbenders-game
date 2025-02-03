@@ -6,6 +6,9 @@ class Fraction {
         this.numerator = numerator;
         this.denominator = denominator;
     }
+    toJSON(){
+        return {Fraction:{numerator:this.numerator,denominator:this.denominator}}; // preserve "Fraction" key in JSON conversion; else {numerator:1,denominator:1} is returned, stripping "Fraction" label
+    }
     static Add (a,b, reduce=true){
 		if (a.denominator == 1 && b.denominator == 1){
 			return new Fraction(a.numerator+b.numerator,1);

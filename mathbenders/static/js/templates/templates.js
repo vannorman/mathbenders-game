@@ -10,8 +10,9 @@ class Template {
     entity; // stores scale, position, and rotation;
 
     constructor(args={}) {
-        const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO}=args;
+        const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO,properties}=args;
         this.entity = new pc.Entity();
+
         const $this=this;
         pc.app.root.addChild(this.entity);
         this.entity.moveTo(position,rotation);
@@ -19,9 +20,13 @@ class Template {
         this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this}});
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
-        this.entity.tags.add(Constants.Tags.BuilderItem);
+         // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup();
+        if (properties) {
+            this.setProperties(properties);
+        }
         this.updateColliderMap();
+
     }
 
     setup(){console.log("ERR: No setup method on "+this.constructor.name);}
@@ -96,7 +101,9 @@ class NumberHoop extends Template {
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberHoop",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineHoop')[0].setFraction(value); },
+            onChangeFn : (entity,value) => { 
+                entity.getComponentsInChildren('machineHoop')[0].setFraction(value); 
+            },
             getCurValFn : (entity) => { return entity.getComponentsInChildren('machineHoop')[0].fraction },
          },
 
@@ -368,6 +375,42 @@ class BigConcretePad extends Template {
 
 }
 
+class NumberSphere extends Template {
+    static icon = assets.textures.ui.numberSpherePos;
+    static icon_neg = assets.textures.ui.numberSphereNeg;
+
+    static editablePropertiesMap = [
+         {  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : "NumberSphere", // if this changes, data will break
+            property : FractionProperty, 
+            onChangeFn : (entity,value) => { entity.getComponentsInChildren('numberInfo')[0].setFraction(value); },
+            getCurValFn : (entity) => { return entity.getComponentsInChildren('numberInfo')[0].fraction },
+         },
+
+    ]
+ 
+    setup(){
+        let sphere =this.entity;
+        sphere.tags.add(Constants.Tags.PlayerCanPickUp);
+        sphere.addComponent("render",{ type : "sphere" });
+        sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
+        const s = sphere.getLocalScale.x;
+        sphere.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
+        sphere.addComponent('script');
+        // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
+        // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
+        // Anyway, playerPickupService can check if collided with Number tag..?
+        let fraction = new Fraction(2,1);
+        sphere.script.create('numberInfo',{attributes:{
+            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
+            fraction:fraction,
+            }});
+        sphere.script.numberInfo.Setup();
+
+    }
+}
+
 class MultiblasterPickup extends Template {
     static icon = assets.textures.ui.icons.multiblaster;
     setup(){
@@ -384,7 +427,18 @@ class MultiblasterPickup extends Template {
             priority:2,
             heldRot:new pc.Quat().setFromEulerAngles(110,0,0),
             heldPos:new pc.Vec3(0.7,0.3,-0.2),
-            onPickup:function(){console.log("pickup blaster.");}
+            onPickup:function(){
+                console.log("pickAup blaster.");
+//                Player.inventory.
+                // I think I prefer not to explicitly list inventory here. 
+                // Rather, pickupItem shouls have all the data Inventory needs, 
+                // and PlayerPickupService will bridge between pickupitem data and inventory interactions.
+                // But what is the purpose? Is there any negative to putting the logic here vs playerpickup service?
+                // Advantages are that now neither Inventory nor PickUpItem need to be tightly coupled to each other..
+                // Meaning I can create a brand new pickup item and add functionality to it
+                // without ever talking to inventory
+
+            }
                 // should we have pickupItem link to Player Inventory or a PlayerPickup script here?
                 // OR, should we have playerpickup script react to touching pickUpItem?
         }});
