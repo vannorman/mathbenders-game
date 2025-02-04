@@ -19,6 +19,7 @@ var ScriptManager = {
         // "Plain" script type
         // These scripts do not live on any entity and are all singletons or utilities
          "/static/js/mouse.js", 
+         "/static/js/collisionManager.js", 
          "/static/js/animationManager.js", 
 
         "/static/js/playcanvasExtensions/extensions.js", 
@@ -92,6 +93,7 @@ var ScriptManager = {
         "/static/js/destroyAfterSeconds.js",
         "/static/js/explodeOnImpact.js",
         "/static/js/numberInfo.js",
+        "/static/js/numberInfoManager.js",
         "/static/js/constantForce.js",
         "/static/js/followTarget.js",
         "/static/js/nogravity.js",

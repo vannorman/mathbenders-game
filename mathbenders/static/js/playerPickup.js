@@ -33,7 +33,7 @@ PlayerPickup.prototype.onCollisionEnd = function(other) {
 
 };
 PlayerPickup.prototype.onCollisionStart = function(result) {
-    console.log(result)
+    // console.log(result)
     // move to "tag" of "isPickUpItem"
     if (result.other.script && result.other.script.pickUpItem){  // legacy
         this.collisionStay = true;

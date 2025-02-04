@@ -44,6 +44,27 @@ class Inventory {
         const {ItemTemplate} = args;
         console.log("Pickup:"+ItemTemplate.name);
 
+        // Check if item can be collected or combined in one of these cases:
+        // If yes, place the slot where item will be collected (or added to gadget)
+        // If no, fail to collect item.
+       
+        // Cases 1: collectItem on Number
+            // Case 1: Nothing held, Number picked up
+            // Case 2: Number held, Number picked up
+            // Case 3: Gadget held, Number picked up, Loaded as ammo
+            // Case 4: Gadget held, Number picked up, Not loaded as ammo
+            // Case 5: Gadget held, Not loaded, Inventory full
+            // Case 6: Something else held, Number picked up
+            // Case 7: Number held, inventory full
+        // Cases 2: collectItem on Gadget
+            // Case 1: Nothing held
+            // Case 2: Number held
+            // Case 3: Another gadget held
+            // Case 4: Another item held
+            // Case 5: Inventory full
+
+
+       
 
     }
 

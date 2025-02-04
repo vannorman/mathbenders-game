@@ -1,17 +1,22 @@
-var templateNameMap = {}
+
+
 
 class Template {
 
     static name="TemplateSuper";
     static icon;
     static editablePropertiesMap=[];
-    colliders = new Map();
 
     entity; // stores scale, position, and rotation;
+    script; // stores the main entity script (like monobehavior)
 
     constructor(args={}) {
         const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO,properties}=args;
         this.entity = new pc.Entity();
+
+        this.entity._templateInstance = this;
+        this.entity._template = this.constructor;
+        this.entity._templateName = this.constructor.name;
 
         const $this=this;
         pc.app.root.addChild(this.entity);
@@ -23,10 +28,15 @@ class Template {
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup();
         if (properties) {
+            console.log("setpr:");
+            console.log(properties)
             this.setProperties(properties);
+        } else {
+            console.log('nopr');
         }
         this.updateColliderMap();
 
+        
     }
 
     setup(){console.log("ERR: No setup method on "+this.constructor.name);}
@@ -71,9 +81,13 @@ class Template {
     setProperties(properties) {
         // Note that all data here is stored in the *game entity* not in the template instance.
         this.constructor.editablePropertiesMap.forEach(x=>{
+            console.log("Editabl:"+x.name);
             if (properties[x.name] !== undefined){
                 const val = properties[x.name];
-                x.onChangeFn(this.entity,val);
+                console.log("val:"+val+", properties[x.name]");
+                console.log(val);
+                console.log(properties);
+                x.onChangeFn(this,val);
             }
         })
     }
@@ -95,7 +109,6 @@ class Template {
 }
 
 class NumberHoop extends Template {
-    static { templateNameMap["NumberHoop"] = NumberHoop }
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -146,11 +159,22 @@ class NumberFaucet extends Template {
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "Fraction",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberFaucet')[0].setFraction(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberFaucet')[0].fraction },
+            onChangeFn : ($this,value) => { $this.fraction = value },
+            // entity.getComponentsInChildren('machineNumberFaucet')[0].setFraction(value); },
+            getCurValFn : ($this) => { return $this.fraction }, 
+            //entity.getComponentsInChildren('machineNumberFaucet')[0].fraction },
          },
 
     ]
+
+    get fraction(){
+//        return this.entity.getComponentsInChildren('machineNumberFaucet')[0].fraction;
+        return this.script.fraction;
+    }
+    set fraction(value){
+        this.script.fraction = value;
+        // Difference between setting fraction of josn value and setting regular fraction. Hm
+    }
 
     setup(){
         const scale = 2;
@@ -160,10 +184,10 @@ class NumberFaucet extends Template {
         this.renderEntity.setLocalEulerAngles(-90,0,0);
 
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
-        this.fraction = new Fraction(1,2);
         
-        this.renderEntity.addComponent('script');
-        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:this.fraction}});
+        this.script = this.renderEntity.addComponent('script');
+        const tempFraction = new Fraction(2,3);
+        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:tempFraction}});
 
         this.renderEntity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.75,0.75,4)}); 
         this.renderEntity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
@@ -180,7 +204,6 @@ class NumberFaucet extends Template {
  
     }
 
-    toJSON(){}
 
 }
 
@@ -379,13 +402,16 @@ class NumberSphere extends Template {
     static icon = assets.textures.ui.numberSpherePos;
     static icon_neg = assets.textures.ui.numberSphereNeg;
 
+    // Question if we need this for NumberSphere. Will we be placing/editing these?
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberSphere", // if this changes, data will break
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('numberInfo')[0].setFraction(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('numberInfo')[0].fraction },
+
+            // Question where to get/store fraciton if no on numberinfo. on entity perhaps?
+            onChangeFn : ($this,value) => { $this.fraction = value; }, //getComponentsInChildren('numberInfo')[0].setFraction(value); },
+            getCurValFn : ($this) => { return $this.fraction; }, //getComponentsInChildren('numberInfo')[0].fraction },
          },
 
     ]
@@ -397,17 +423,75 @@ class NumberSphere extends Template {
         sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
         const s = sphere.getLocalScale.x;
         sphere.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
-        sphere.addComponent('script');
-        // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
-        // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
-        // Anyway, playerPickupService can check if collided with Number tag..?
-        let fraction = new Fraction(2,1);
-        sphere.script.create('numberInfo',{attributes:{
-            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
-            fraction:fraction,
-            }});
-        sphere.script.numberInfo.Setup();
 
+        this.setupNumberText();
+
+        const callback = function(entity,result) {
+        
+        }
+        CollisionManager.RegisterCollider(sphere,callback);
+        
+        sphere.addComponent('script');
+     
+        this.destroyTemplateAndReferences();
+
+    }
+
+    destroyTemplateAndReferences(){
+        // special only for NumberSpheres because there may be like 1000s of them
+        this.entity._templateInstance = null;
+        // Not sure if anything else references this ..?
+        // Ugh , .. apparently I need to move a lot of things to a central manager to save performance here, like numberText, update frac, etc..
+        //  Let's skip it for now.. branch and trim..
+    }
+
+    setupNumberText(){
+        Object.defineProperty(this.entity,'numberType', {get: function(){
+            if (this.entity.render === undefined){
+                return NumberShape.None;
+            } else {
+                switch(this.entity.render.type){
+                    case 'box':return NumberShape.Cube;
+                    case 'sphere':return NumberShape.Sphere;
+                    default: return "Uh oh";
+                
+                }
+            }
+        }})
+
+        this.cubeSize = this.entity.getLocalScale().x;
+        this.pivot = new pc.Entity("numPivot");
+        this.entity.addChild(this.pivot);
+        this.int1 =  Utils.AddText( { 
+            color:pc.Color.RED,
+            parent:this.pivot,
+            scale:0.10,
+            localPos:new pc.Vec3(0,0,0.59),
+        });
+        this.pivot.addComponent('script');
+        this.pivot.script.create('alwaysFaceCamera',{attributes:{reverse:true,useRadius:true,radius:16}}); // todo: centralize.
+        // this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
+    
+        // this.updateNumberText();
+        Game.n = this;
+    }
+
+    updateNumberText(){
+        this.int1.element.text = this.fraction.numerator;
+        this.int1.element.color = this.color;
+    }
+
+    set fraction(value){
+        this.entity._fraction = value; //JSON.stringify(value);
+        this.updateNumberText();
+    }
+
+    get fraction(){
+        return this.entity._fraction;
+    }
+
+    get color() {
+        return this.entity._fraction.numerator < 0 ? pc.Color.WHITE : pc.Color.BLACK;
     }
 }
 
@@ -453,7 +537,7 @@ class MultiblasterPickup extends Template {
     }
 }
 
-templateNameMap = { ...templateNameMap, ... {
+templateNameMap = {
     "NumberFaucet" : NumberFaucet,
     "NumberWall" : NumberWall,
     "PlayerStart" : PlayerStart,
@@ -462,9 +546,18 @@ templateNameMap = { ...templateNameMap, ... {
     "CastleWall" : CastleWall,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
-
-}}
+    "NumberHoop" :  NumberHoop,
+}
 
 function getTemplateByName(name){
     return templateNameMap[name];
 }
+
+/* 
+const TemplateType = Object.freeze({
+    // When the user Drags-and-drops an item onto the level, enter this mode.
+    Normal : 'Normal',
+    Number : 'Number',
+    Gadget : 'Gadget',
+});
+*/

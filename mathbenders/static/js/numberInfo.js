@@ -19,7 +19,6 @@ NumberInfo.Shape = {
 }
 
 NumberInfo.prototype.initialize = function() {
-    const $this=this;
 }
 
 
@@ -177,26 +176,26 @@ NumberInfo.ResolveCollisionOffline = function(data){
     data.objId2 = obj2.getGuid();
     var detectedIndex = -1;
     //console.log("try w count "+NumberInfo.collisionPairs.length+"from : "+data.objId1.substr(0,5)+","+data.objId2.substr(0,5));
-    NumberInfo.collisionPairs.forEach(pair => {
+    NumberInfoManager.collisionPairs.forEach(pair => {
         if ((pair[0] == data.objId1 && pair[1] == data.objId2) || (pair[0] == data.objId2 && pair[1] == data.objId1)){
             //console.log("pair detected!");
-            detectedIndex = NumberInfo.collisionPairs.indexOf(pair);
+            detectedIndex = NumberInfoManager.collisionPairs.indexOf(pair);
         } else {
             //console.log("nopair");
         }
     });
     if (detectedIndex == -1){
-        NumberInfo.collisionPairs.push([data.objId1,data.objId2]);
+        NumberInfoManager.collisionPairs.push([data.objId1,data.objId2]);
         //console.log("detected: "+detectedIndex);
      } else {
         // Successful number combination
 
         // get resulting number and produce it
-        const collisionResult = NumberInfo.GetCollisionResolutionOffline({obj1:obj1,obj2:obj2});
+        const collisionResult = NumberInfoManager.GetCollisionResolutionOffline({obj1:obj1,obj2:obj2});
         NumberInfo.ProduceCollisionResult(collisionResult);
        
         // destroy collided objects, remove them from collisionPairs
-        NumberInfo.collisionPairs.splice(detectedIndex,1);
+        NumberInfoManager.collisionPairs.splice(detectedIndex,1);
         obj1.destroy();
         obj2.destroy();
 
@@ -270,7 +269,6 @@ NumberInfo.prototype.NetworkCollision = function (result){
     }
 };
 
-NumberInfo.collisionPairs = [];
 
 NumberInfo.networkCollisionPairs = [];
 
