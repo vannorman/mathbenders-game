@@ -57,8 +57,7 @@ PlayerPickup.prototype.update = function(dt) {
 };
 
 PlayerPickup.prototype.pickup = function(obj) {
-    const ItemTemplate = obj.script.itemTemplateReference.itemTemplate.constructor;
-    Player.inventory.collectItem({ItemTemplate:ItemTemplate});
+    Player.inventory.collectEntity(obj);
 
 }
 

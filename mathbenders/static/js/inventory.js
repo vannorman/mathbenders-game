@@ -40,6 +40,11 @@ class Inventory {
 
     }
 
+    collectEntity(entity){
+        const ItemTemplate = obj.script.itemTemplateReference.itemTemplate.constructor;
+
+    }
+
     collectItem(args={}){
         const {ItemTemplate} = args;
         console.log("Pickup:"+ItemTemplate.name);
