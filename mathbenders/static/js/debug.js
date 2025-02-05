@@ -1,7 +1,7 @@
 class DebugAxis {
     constructor(){
-        Game.axis = Game.Instantiate.axis({position:Game.player.getPosition()})
-        Game.axis.setLocalScale(.0005,.0005,.0005);
+        // Game.axis = Game.Instantiate.axis({position:Game.player.getPosition()})
+        // Game.axis.setLocalScale(.0005,.0005,.0005);
         
         
 
@@ -17,13 +17,13 @@ class DebugAxis {
         Game.axisText = Utils.AddTextFloater(options);
         
         // attach a function to the text that will update its position.
-        pc.app.on('update', function(){ 
-           let pos = Game.axis.getPosition();
-            pos = Utils3.TruncVec3(pos);
-            Game.axisText.element.text = pos;
-        });
-        Game.axis.enabled=false;
-        Game.axisText.enabled=false;
+//        pc.app.on('update', function(){ 
+//           let pos = Game.axis.getPosition();
+//            pos = Utils3.TruncVec3(pos);
+//            Game.axisText.element.text = pos;
+//        });
+//        Game.axis.enabled=false;
+//        Game.axisText.enabled=false;
     }
 }
 

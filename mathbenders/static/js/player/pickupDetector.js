@@ -1,4 +1,4 @@
-class PlayerCollisionDetector {
+/*class PlayerCollisionDetector {
     // Should I be broadcasting on every collision?
     // Or only on collided with "playerpickup" script?
     // PlayerPickup script which lives on entities should be the one broadcasting ... 
@@ -32,4 +32,4 @@ class PlayerCollisionDetector {
         this.listeners = this.listeners.filter(l => l !== listener);
     } 
 }
-
+*/

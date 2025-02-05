@@ -1,3 +1,5 @@
+import Inventory from "./inventory/base.js";
+
 class PlayerClass {
     entity;
     pivot;
@@ -71,6 +73,23 @@ class PlayerClass {
         
         GameManager.subscribe(this,this.onGameStateChange);
         Game.player = this.entity;
+
+
+        // GUI screen for player
+        // PlayerMessenger, Inventory etc.
+        this.screen = new pc.Entity();
+
+        this.screen.addComponent("screen", {
+            referenceResolution: new pc.Vec2(1280, 720),
+            scaleBlend: 0.5,
+            scaleMode: pc.SCALEMODE_BLEND,
+            screenSpace: true,
+        });
+
+        pc.app.root.addChild(this.screen);
+
+        this.inventory = new Inventory({Player:this});
+
    }
 
    freeze(){
@@ -95,6 +114,9 @@ class PlayerClass {
 
 
     enable(){
+        if (!this.inventory){
+            console.log('noinv');
+        }
         this.inventory.show();
         this.entity.enabled = true;
         this.controller.enabled = true;
@@ -147,10 +169,11 @@ class PlayerClass {
 
     }
 
-    createInventory(){
-        this.inventory = new Inventory();
-
-    }
   
 }
 
+window.Player = new PlayerClass();
+PlayerMessenger.build(); 
+PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
+console.log("P c.");
+Player.entity.moveTo(Game.c.getPosition());

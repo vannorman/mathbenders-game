@@ -20,7 +20,13 @@ PortalCameraRenderTexture.attributes.add('renderPlane', {type: 'entity'});// a t
 // look at vec3 delta between player camera and portal we're standing next to, 
 // then position this object equivalently, relative to the target portal
 
-PortalCameraRenderTexture.prototype.initialize = function(){
+class PortalCameraService {
+    static init(){
+        PortalCameraRenderTexture.prototype.init();
+    }
+}
+
+PortalCameraRenderTexture.prototype.init = function(){
     this.sourceCam = Camera.main.entity;
     //console.log('init, maincam:'+Camera.main.entity);
     this.sourceTracker = new pc.Entity("sourceTracker");

@@ -68,17 +68,21 @@ var Game = {
         // Create core objects
         window.Mouse = new MouseClass();
         Game.currentState = Game.GameState.Running;
-        window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)});
-        Player.createInventory();
-        let fpsMeter = new DebugFps();
+        
+        // window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)}); // Module, so now handled in /player/player.js
+
+
+        // let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         let skyCam = new RealmBuilderCamera();
         let portalCam = new PortalCam();
-        let axis = new DebugAxis();
+        // let axis = new DebugAxis();
 
         // Bootstrapped starting area (temporary) -- Platform for player to stand.
         let cubeP = new pc.Vec3(0,18,0);
         let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
+        Game.c = c;
+        console.log("Game c.");
         ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
 
         GameManager.setState(GameState.Playing);

@@ -20,6 +20,8 @@ class Template {
         this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this}});
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
+
+        this.entity._templateInstance = this; // hacky .. should put all "Game" data into a entity._gameData {} ?
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup();
         if (properties) {

@@ -1,12 +1,6 @@
-class InventorySlot {
-    constructor(args={}){
-        const { templateName, properties } = args;
-        this.templateName = templateName;
-        this.properties = properties;
-    }
-}
+import InventorySlot from './slot.js';
 
-class Inventory {
+export default class Inventory {
 
     // New architecutre
     // class PlayerItemCollisionDetector which broadcasts item collision events (e..g player walks into a Multiblaster or Number)
@@ -18,39 +12,66 @@ class Inventory {
     */
 
 
-    beltSlots = Array.from({ length: 9 }, () => new InventorySlot());
+    beltSlots = Array.from({ length: 2 }, (_, index) => new InventorySlot({index:index}));
+    backpackSlots = Array.from({ length: 1 }, (_, index) => new InventorySlot({index:index}));
+    get allSlots() { return [ ...this.beltSlots, ...this.backpackSlots]; }
+    get firstAvailableSlot() { return this.allSlots.find(x=> !x.isUsed) || null; }
+
     constructor(args={}){
-        this.setupScript();
+        const {Player}=args;
+        this.Player = Player;
+        this.setupScript(); // old script
     }
 
     setupScript() {
         // TODO : WE don't need a 'script' / entity here; since inventory "lives" on the player 
         // and has no physical manifestation it needs no entity script (Monobehaviour)
 
-         this.script = Player.entity.script.create('inventory',{attributes:{
-            pivot:Player.pivot,
-            player:Player.entity,
-            droppedPosition:Player.droppedPosition,
+         this.script = this.Player.entity.script.create('inventory',{attributes:{
+            pivot:this.Player.pivot,
+            player:this.Player.entity,
+            droppedPosition:this.Player.droppedPosition,
             getItemFn : (x)=>{AudioManager.play({source:assets.sounds.getItem});},
             placeItemFn : (x)=>{AudioManager.play({source:assets.sounds.placeItem});},
             throwSoundFn : (x)=>{AudioManager.play({source:assets.sounds.throwItem});},
             selectItemFn : (x)=>{AudioManager.play({source:assets.sounds.selectItem});},
     //        placeItemDownFn : (x)=>{AudioManager.play({source:assets.sounds.thud});},
         }});
-
     }
+
 
     collectEntity(entity){
-        const ItemTemplate = obj.script.itemTemplateReference.itemTemplate.constructor;
+        const template = entity._templateInstance;
 
+        let availableSlot = this.firstAvailableSlot;
+        if (availableSlot) {
+            availableSlot.placeItem({templateName:template.name,properties:template.properties});
+            entity.destroy();
+            console.log("Pickup:"+template.name);
+        } else {
+            PlayerMessenger.Say("Inventory full!"); 
+        }
+
+        // Check if item can be collected or combined in one of these cases:
+        // If yes, place the slot where item will be collected (or added to gadget)
+        // If no, fail to collect item.
+       
+        // Cases 1: collectItem on Number
+            // Case 1: Nothing held, Number picked up
+            // Case 2: Number held, Number picked up
+            // Case 3: Gadget held, Number picked up, Loaded as ammo
+            // Case 4: Gadget held, Number picked up, Not loaded as ammo
+            // Case 5: Gadget held, Not loaded, Inventory full
+            // Case 6: Something else held, Number picked up
+            // Case 7: Number held, inventory full
+        // Cases 2: collectItem on Gadget
+            // Case 1: Nothing held
+            // Case 2: Number held
+            // Case 3: Another gadget held
+            // Case 4: Another item held
+            // Case 5: Inventory full
     }
 
-    collectItem(args={}){
-        const {ItemTemplate} = args;
-        console.log("Pickup:"+ItemTemplate.name);
-
-
-    }
 
     beginDrag(){
 
@@ -199,10 +220,12 @@ Inventory_Old.prototype.getDroppedPosition = function(){
 // Initialize
 Inventory_Old.prototype.initialize = function() {
     Object.defineProperty(Inventory_Old.prototype, "heldItemTemplateName", {
-       get : function() { return this.heldItemProperties?.templateName } 
+       get : function() { return this.heldItemProperties?.templateName }, 
+       set : function(value) { this.heldItemProperties = {templateName:value}}
     });
     Object.defineProperty(Inventory_Old.prototype, "heldItemProperties", {
-       get  : () => { return this.beltItems[this.selectedSlot];  } 
+       get  : () => { return this.beltItems[this.selectedSlot];  } ,
+       set : function(value) { this.heldItemProperties = value }
     });
     this.thrownItems = {};
     this.beltItems = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i, null])); // object with 10 null enties 0-9
@@ -526,6 +549,7 @@ Inventory_Old.prototype.createBeltGui = function(){
 // Create a 2D screen
     this.beltItemImages = [];
     this.screen = new pc.Entity();
+
     this.screen.addComponent("screen", {
         referenceResolution: new pc.Vec2(1280, 720),
         scaleBlend: 0.5,
@@ -869,16 +893,5 @@ Inventory_Old.prototype.modifyInventoryNumbers = function(fn){
         this.modifyInventoryNumber(key,fn);
     });
 };
-
-Inventory_Old.prototype.debugBeltPositions = function(){
-    // For debugging x,y corners of beltItemImages:
-    $(window).resize(function(){
-        Game.inventory.beltItemImages.forEach(x=>{
-            const sc = x.element.screenCorners;
-            const text = Math.round(sc[0].x)+","+Math.round(sc[0].y)+"\n"+Math.round(sc[2].x)+","+Math.round(sc[2].y);
-            Game.inventory.addTextToEntity({entity:x,text:text})
-        });
-    });
-}
 
 

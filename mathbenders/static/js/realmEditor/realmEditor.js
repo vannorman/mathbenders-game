@@ -340,8 +340,6 @@ class RealmEditor {
 
 }
 
-// Created somewhere in the code where it makes sense
+
+
 window.realmEditor = new RealmEditor();
-
-
-
