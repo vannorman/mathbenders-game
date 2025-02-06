@@ -12,14 +12,26 @@ export default class Inventory {
     */
 
 
-    beltSlots = Array.from({ length: 2 }, (_, index) => new InventorySlot({index:index}));
-    backpackSlots = Array.from({ length: 1 }, (_, index) => new InventorySlot({index:index}));
+    beltSlots;
+    backpackSlots;
+    // backpackSlots = Array.from({ length: 1 }, (_, index) => new InventorySlot({index:index}));
     get allSlots() { return [ ...this.beltSlots, ...this.backpackSlots]; }
     get firstAvailableSlot() { return this.allSlots.find(x=> !x.isUsed) || null; }
 
     constructor(args={}){
         const {Player}=args;
         this.Player = Player;
+        const group = InventoryGui.createLayoutGroup();
+        
+        // Create, then Add belt slots to gui group
+        this.beltSlots = Array.from({ length: 9 }, (_, index) => new InventorySlot({index:index}));
+        this.beltSlots.forEach(x=>{group.addChild(x.slotBackground.entity)});
+
+        // Create, then Add backpack slots to gui group
+        this.backpackSlots = Array.from({ length: 1 }, (_, index) => new InventorySlot({index:index}));
+
+
+        this.Player.screen.addChild(group);
         this.setupScript(); // old script
     }
 
@@ -45,7 +57,7 @@ export default class Inventory {
 
         let availableSlot = this.firstAvailableSlot;
         if (availableSlot) {
-            availableSlot.placeItem({templateName:template.name,properties:template.properties});
+            availableSlot.placeItem({template:template,properties:template.properties});
             entity.destroy();
             console.log("Pickup:"+template.name);
         } else {
@@ -112,7 +124,31 @@ class InventoryGui {
        pc.app.root.addChild(this.guiParent);
     }
 
-    createBeltImages() {
+    static createLayoutGroup(){
+        // Create Layout Group Entity
+        const group = new pc.Entity();
+        group.addComponent("element", {
+            type: pc.ELEMENTTYPE_GROUP,
+            layers:[pc.LAYERID_UI],
+            anchor: [0.5, 0.05, 0.5, 0.05],
+            pivot: [0.5, 0.5],
+            width: 700,
+            height: 70,
+        });
+
+        group.addComponent("layoutgroup", {
+            orientation: pc.ORIENTATION_HORIZONTAL,
+            spacing: new pc.Vec2(10, 10),
+            widthFitting: pc.FITTING_BOTH,
+            heightFitting: pc.FITTING_BOTH,
+            wrap: true,
+        });
+        return group;
+    }
+
+
+    createBeltImages() { // old
+        /*
         this.beltEntities = []
         this.selectedSlot = 0;
         this.beltItemImages = [];
@@ -186,6 +222,7 @@ class InventoryGui {
             child.addChild(childImage);
             childImage.element.index = i;
         }
+        */
     }
 }
 
@@ -544,6 +581,7 @@ Inventory_Old.prototype.updateSelectedGfx = function(){
 
 
 Inventory_Old.prototype.createBeltGui = function(){
+    return;
     this.beltEntities = []
     this.selectedSlot = 0;
 // Create a 2D screen
@@ -587,7 +625,6 @@ Inventory_Old.prototype.createBeltGui = function(){
 
     // create 9 children to show off the layout group
     for (let i = 0; i < 9; ++i) {
-        // create a random-colored panel
         const child = new pc.Entity("inv"+i);
         this.beltEntities.push(child);
         child.addComponent("element", {

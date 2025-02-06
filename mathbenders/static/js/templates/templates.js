@@ -1,4 +1,3 @@
-var templateNameMap = {}
 
 class Template {
 
@@ -97,7 +96,6 @@ class Template {
 }
 
 class NumberHoop extends Template {
-    static { templateNameMap["NumberHoop"] = NumberHoop }
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -455,8 +453,10 @@ class MultiblasterPickup extends Template {
     }
 }
 
-templateNameMap = { ...templateNameMap, ... {
+templateNameMap = {
+    "NumberSphere" : NumberSphere,
     "NumberFaucet" : NumberFaucet,
+    "NumberHoop" : NumberHoop,
     "NumberWall" : NumberWall,
     "PlayerStart" : PlayerStart,
     "PlayerPortal" : PlayerPortal,
@@ -465,8 +465,4 @@ templateNameMap = { ...templateNameMap, ... {
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
 
-}}
-
-function getTemplateByName(name){
-    return templateNameMap[name];
 }

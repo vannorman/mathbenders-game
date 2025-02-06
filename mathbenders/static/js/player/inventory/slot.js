@@ -3,20 +3,23 @@ export default class InventorySlot {
     templateName = null;
     properties = null;
     index; // for debugging
+    slotBackground;
 
     constructor(args={}){
         const {index=-1}=args;
         this.index=index;
+        this.createGui();
         // Always empty args, always create inv slot as empty before populating.
         // Unless it has properties??
         // Utility of create then populate properties vs. just create and pass props if it is full? Complexity
     }
 
     placeItem(args={}){
-        const {templateName,properties} = args;
-        this.templateName = templateName;
+        const {template,properties} = args;
+        this.template = template;
         this.properties = properties;
-        console.log("placed "+templateName+" in slot "+this.index);
+        this.itemImage.textureAsset = template.constructor.icon;
+        console.log("placed "+template.name+" in slot "+this.index);
     }
 
     clearItem(){
@@ -24,7 +27,39 @@ export default class InventorySlot {
         this.properties = null;
     }
 
-    get isUsed() { return this.templateName != null; }
+    createGui(){
+        const slotBackground = new pc.Entity("inv"+i);
+        slotBackground.addComponent("element", {
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            type: 'image',
+            textureAsset: assets.quad,
+        });
+
+        slotBackground.addComponent("layoutchild", { excludeFromLayout: false, });
+
+        // add a child image
+        const itemImage = new pc.Entity("invImg"+i);
+        itemImage.addComponent("element", {
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            width:64,
+            height:64,
+            type: 'image',
+            textureAsset: null,
+            useInput: true,
+            layer: pc.LAYERID_UI
+        });
+        slotBackground.addChild(itemImage);
+        UI.HoverColor({element:slotBackground.element})
+
+// slock
+        
+        this.slotBackground = slotBackground.element;
+        this.itemImage = itemImage.element;
+    }
+
+    get isUsed() { return this.template != null; }
 }
 
 
