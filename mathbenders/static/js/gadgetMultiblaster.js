@@ -27,6 +27,7 @@ GadgetMultiblaster.prototype.initialize = function() {
     this.entity.script.pickUpItem.heldRot = new pc.Quat().setFromEulerAngles(110,0,0);
     this.entity.script.pickUpItem.heldPos = new pc.Vec3(0.7,0.3,-0.2);
     ApplyTextureAssetToEntity({entity:this.entity,textureAsset:assets.textures.gadget});
+    this.onFireFn = AudioManager.play({source:assets.sounds.multiblasterFire,position:pc.Vec3.ZERO,volume:0.4,pitch:1,positional:false});
 
     this.entity.script.create('gadget',{attributes:{
             subGadget:this,
@@ -46,6 +47,7 @@ GadgetMultiblaster.prototype.initialize = function() {
 GadgetMultiblaster.prototype.canPickupNumber = function(num) {
     return num !== undefined && this.ammo.length == 0;
 }
+
 GadgetMultiblaster.prototype.onNumberPickup = function(num,gfx) {
     this.ammo = Array(10).fill(num);
     this.fillAmmoGfx();

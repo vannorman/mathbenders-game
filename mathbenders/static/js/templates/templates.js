@@ -1,32 +1,49 @@
+import HeldItem from './heldItem.js';
+import {Gadget,Multiblaster} from './gadgets.js';
+import {Property,SizeProperty,FractionProperty,ScaleProperty,} from './properties.js';
+
 
 class Template {
 
     static name="TemplateSuper";
     static icon;
     static editablePropertiesMap=[];
+    static isThrowable = false;
     colliders = new Map();
 
     entity; // stores scale, position, and rotation;
 
     constructor(args={}) {
-        const {position=pc.Vec3.ZERO,rotation=pc.Vec3.ZERO,properties}=args;
+        const {
+            position=pc.Vec3.ZERO,
+            rotation=pc.Vec3.ZERO,
+            properties={},
+            rigidbodyType='none',
+            rigidbodyVelocity=pc.Vec3.ZERO,
+        }=args;
         this.entity = new pc.Entity();
 
         const $this=this;
         pc.app.root.addChild(this.entity);
         this.entity.moveTo(position,rotation);
+        if (rigidbodyType != 'none'){
+            console.log("new :"+this.constructor.name);
+            this.entity.addComponent('rigidbody',{type:rigidbodyType});
+            this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
+        }
         this.entity.addComponent('script');
-        this.entity.script.create('itemTemplateReference',{attributes:{itemTemplate:this}});
+        this.entity._template = this;
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
 
-        this.entity._templateInstance = this; // hacky .. should put all "Game" data into a entity._gameData {} ?
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup();
         if (properties) {
             this.setProperties(properties);
         }
         this.updateColliderMap();
+
+
 
     }
 
@@ -54,7 +71,7 @@ class Template {
     get properties() {
         const props = {};
         this.constructor.editablePropertiesMap.forEach(x=>{
-           props[x.name] = x.getCurValFn(this.entity) 
+           props[x.name] = x.getCurValFn(this) 
         });
         return props;
     }
@@ -74,13 +91,18 @@ class Template {
         this.constructor.editablePropertiesMap.forEach(x=>{
             if (properties[x.name] !== undefined){
                 const val = properties[x.name];
-                x.onChangeFn(this.entity,val);
+                x.onChangeFn(this,val);
             }
         })
     }
 
     destroy(){
         this.entity.destroy();
+    }
+
+    static createHeldItem(){
+        console.log("huh? no createHeldGfx for this template:"+this.constructor.name);
+        return null;
     }
 
 //    toJSON(){
@@ -101,10 +123,8 @@ class NumberHoop extends Template {
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberHoop",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { 
-                entity.getComponentsInChildren('machineHoop')[0].setFraction(value); 
-            },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineHoop')[0].fraction },
+            onChangeFn : (template,value) => {  template.fraction=value; },
+            getCurValFn : (template) => { return template.fraction },
          },
 
     ]
@@ -134,8 +154,13 @@ class NumberHoop extends Template {
                 }});
         hoop.setEulerAngles(new pc.Vec3(-90,0,0));                        
         hoop.script.machineHoop.init();
+        this.script = hoop.script.machineHoop;
 
     }
+
+    get fraction(){ return this.script.fraction; }
+    set fraction(value) { this.script.setFraction(value); }
+
 }
 
 class NumberFaucet extends Template {
@@ -146,8 +171,8 @@ class NumberFaucet extends Template {
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "Fraction",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberFaucet')[0].setFraction(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberFaucet')[0].fraction },
+            onChangeFn : (template,value) => {  template.fraction=value; },
+            getCurValFn : (template) => { return template.fraction },
          },
 
     ]
@@ -177,8 +202,12 @@ class NumberFaucet extends Template {
         renders[2].meshInstances[0].material=Materials.red;
         renders[2].meshInstances[1].material=Materials.gray;
         renders[2].meshInstances[2].material=Materials.white;
- 
+
+        this.script = this.renderEntity.script.machineNumberFaucet;
     }
+    
+    get fraction(){ return this.script.fraction; }
+    set fraction(value) { this.script.setFraction(value); }
 
     toJSON(){}
 
@@ -228,23 +257,30 @@ class NumberWall extends Template {
          {  
             name : "Fraction1",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setFraction1(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].fraction1 },
+            onChangeFn : (template,value) => { template.fraction = value; }, 
+            getCurValFn : (template) => { return template.fraction; }, 
          },
 
          {  
             name : "Fraction2",
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setFraction2(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].fraction2 },
+            onChangeFn : (template,value) => { template.fraction = value; }, 
+            getCurValFn : (template) => { return template.fraction; }, 
          },
          {  
             name : "Size",
             property : SizeProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('machineNumberWall')[0].setSize(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('machineNumberWall')[0].size },
+            onChangeFn : (template,value) => { template.size = value; },
+            getCurValFn : (template) => { return template.size; }
          },
     ]
+
+    get fraction1() { return this.script.fraction1;}
+    get fraction2() { return this.script.fraction2;}
+    set fraction1(value) { this.script.setFraction1(value); }
+    set fraction2(value) { this.script.setFraction2(value); }
+    set size(value) { this.script.setSize(value); }
+    get size() { return this.script.size; }
 
 
     setup(){
@@ -254,6 +290,7 @@ class NumberWall extends Template {
         const $this = this;
         this.entity.script.machineNumberWall.onChangeFn = function(){$this.updateColliderMap(); }
         this.entity.script.machineNumberWall.rebuildWall();
+        this.script = this.entity.script.machineNumberWall;
     }
  
 }
@@ -345,11 +382,13 @@ class BigConcretePad extends Template {
             name : ScaleProperty.constructor.name,
             property : ScaleProperty,
             // valueType : pc.Vec3,
-            onChangeFn : (entity,value) => { entity.script.itemTemplateReference.itemTemplate.setScale(value);},
-            getCurValFn : (entity) => { return entity.script.itemTemplateReference.itemTemplate.pad.getLocalScale() }, // todo: expect ItemTemplate, not Entity, here
+            onChangeFn : (template,value) => { template.scale = value; },
+            getCurValFn : (template) => { return template.scale },
          },
     ];
- 
+
+    get scale(){ return this.pad.getLocalScale(); }
+    set scale(value) { this.pad.setLocalScale(value); }
 
     setup(){
         const pad = new pc.Entity();
@@ -378,23 +417,27 @@ class BigConcretePad extends Template {
 class NumberSphere extends Template {
     static icon = assets.textures.ui.numberSpherePos;
     static icon_neg = assets.textures.ui.numberSphereNeg;
-
+    static isThrowable=true;
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberSphere", // if this changes, data will break
             property : FractionProperty, 
-            onChangeFn : (entity,value) => { entity.getComponentsInChildren('numberInfo')[0].setFraction(value); },
-            getCurValFn : (entity) => { return entity.getComponentsInChildren('numberInfo')[0].fraction },
+            onChangeFn : (template,value) => { template.fraction = value; }, 
+            getCurValFn : (template) => { return template.fraction; }, 
          },
-
     ]
+    
+    constructor(args={}) {
+        args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
+        super(args);
+    }
  
     setup(){
         let sphere =this.entity;
         sphere.tags.add(Constants.Tags.PlayerCanPickUp);
         sphere.addComponent("render",{ type : "sphere" });
-        sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
+        // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
         const s = sphere.getLocalScale.x;
         sphere.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
         sphere.addComponent('script');
@@ -407,15 +450,45 @@ class NumberSphere extends Template {
             fraction:fraction,
             }});
         sphere.script.numberInfo.Setup();
+        this.script = sphere.script.numberInfo;
 
+    }
+
+    get fraction(){ return this.script.fraction; }
+    set fraction(value) { this.script.setFraction(value); }
+
+    static createHeldItem(properties){
+        // awkward conflict between the version of this template that is graphics only or not... ughhh
+        // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
+        // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
+        // const {fraction=new Fraction(3,1)}=args;
+        const fraction = properties.NumberSphere; // awkward data model.
+        const sphere = new pc.Entity("helditem");
+        sphere.addComponent("render",{ type : "sphere" });
+        sphere.addComponent('script');
+        sphere.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
+        sphere.script.numberInfo.Setup();
+        sphere.script.numberInfo.setFraction(fraction);
+        return new HeldItem({
+            entity:sphere,
+        });
     }
 }
 
-class MultiblasterPickup extends Template {
+class GadgetPickup extends Template {}
+
+class MultiblasterPickup extends GadgetPickup {
     static icon = assets.textures.ui.icons.multiblaster;
+
+    static selectGadget(){
+        const blaster = new Multiblaster();
+
+    }
+
     setup(){
 
         // graphics
+
         const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
         ApplyTextureAssetToEntity({entity:blaster,textureAsset:assets.textures.gadget});
         this.entity.addChild(blaster);
@@ -429,31 +502,16 @@ class MultiblasterPickup extends Template {
             heldPos:new pc.Vec3(0.7,0.3,-0.2),
             onPickup:function(){
                 console.log("pickAup blaster.");
-//                Player.inventory.
-                // I think I prefer not to explicitly list inventory here. 
-                // Rather, pickupItem shouls have all the data Inventory needs, 
-                // and PlayerPickupService will bridge between pickupitem data and inventory interactions.
-                // But what is the purpose? Is there any negative to putting the logic here vs playerpickup service?
-                // Advantages are that now neither Inventory nor PickUpItem need to be tightly coupled to each other..
-                // Meaning I can create a brand new pickup item and add functionality to it
-                // without ever talking to inventory
-
             }
-                // should we have pickupItem link to Player Inventory or a PlayerPickup script here?
-                // OR, should we have playerpickup script react to touching pickUpItem?
         }});
 
         // Legacy for Inventory to know what we picked up
         this.entity.script.create('objectProperties', {attributes:{ objectProperties:{templateName:this.constructor.name},  }}) 
-
-
-
-
-  
     }
 }
 
-templateNameMap = {
+
+window.templateNameMap = {
     "NumberSphere" : NumberSphere,
     "NumberFaucet" : NumberFaucet,
     "NumberHoop" : NumberHoop,
@@ -466,3 +524,6 @@ templateNameMap = {
     "MultiblasterPickup" : MultiblasterPickup,
 
 }
+Object.entries(window.templateNameMap).forEach(([key,value])=>{
+      window[key] = value;
+    });

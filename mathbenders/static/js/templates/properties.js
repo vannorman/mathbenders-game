@@ -1,9 +1,11 @@
-class Property {
+export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
+    get entity(){ console.log("deprecate plz"); return this.template.entity; }
+
     constructor(args){
-        const {entity,onChangeFn,getCurValFn,buttonIndex,valueType}=args;
-        this.entity = entity;
+        const {template,onChangeFn,getCurValFn,buttonIndex,valueType}=args;
+        this.template = template;
         this.onChangeFn = onChangeFn;
         this.getCurValFn = getCurValFn;
         this.buttonIndex = buttonIndex;
@@ -103,7 +105,7 @@ class Property {
     }
 }
 
-class ScaleProperty extends Property {
+export class ScaleProperty extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
 
     buildUi(){
@@ -150,7 +152,7 @@ class ScaleProperty extends Property {
 
 }
 
-class MoveProperty extends Property {
+export class MoveProperty extends Property {
     static icon = assets.textures.ui.builder.moveItem;
     constructor(args){
         super(args);
@@ -166,7 +168,7 @@ class MoveProperty extends Property {
     }
 }
 
-class RotateProperty extends Property {
+export class RotateProperty extends Property {
     static icon = null; // blank. Special property where 2 buttons exist on the ring instead of a signle button which pops up a ui.
     constructor(args){
         super(args);
@@ -195,7 +197,7 @@ class RotateProperty extends Property {
     }
 }
 
-class FractionProperty extends Property {
+export class FractionProperty extends Property {
     static icon = assets.textures.ui.icons.fraction; 
 
     constructor(args={}){
@@ -230,7 +232,7 @@ class FractionProperty extends Property {
     }
 }
 
-class SizeProperty extends Property {
+export class SizeProperty extends Property {
     constructor(args){
         super(args);
     }

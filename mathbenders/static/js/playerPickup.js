@@ -7,7 +7,7 @@
 var PlayerPickup = pc.createScript('playerPickup');
 
 // Add an attribute for the hand entity
-PlayerPickup.attributes.add('handEntity', { type: 'entity' }); // reference to Player.handEntity
+// PlayerPickup.attributes.add('handEntity', { type: 'entity' }); // reference to Player.handEntity
 
 
 PlayerPickup.prototype.initialize = function() {
@@ -33,16 +33,18 @@ PlayerPickup.prototype.onCollisionEnd = function(other) {
 
 };
 PlayerPickup.prototype.onCollisionStart = function(result) {
-    console.log(result)
     // move to "tag" of "isPickUpItem"
     if (result.other.script && result.other.script.pickUpItem){  // legacy
         this.collisionStay = true;
         this.collidedEntity = result.other;
     }
     if (result.other.tags.list().includes(Constants.Tags.PlayerCanPickUp)){  // new way
-        this.pickup(result.other);
+        if (result.other.script?.numberInfo) {
+            Player.interactWithNumber({entity:result.other});
+        } else {
+            Player.interactWithObject({entity:result.other});
+        }
         this.collidedEntity = result.other;
-    
     }
 
 };
@@ -55,27 +57,6 @@ PlayerPickup.prototype.update = function(dt) {
         //}
     }
 };
-
-PlayerPickup.prototype.pickup = function(obj) {
-    Player.inventory.collectEntity(obj);
-
-}
-
-PlayerPickup.pickUpItem = function(obj){
-
-
-//    console.log("TODO: Add lsitener from inventory to pickupitem");
-//    console.log("TODO: consider how to implement pickup hierarchy e.g. dont pick up a number when multiblaster equipped.");
-//    console.log("TODO: consider the set of all triggers the player may touch that could affect inventory or items or amunition");
-//    console.log("TODO: consider the difference between 'pickupitem.heldPos/heldRot' which assumes Inventory will clone item exactly, strip it, then position it in the 'hand', vs. gadget.heldPos/heldRot and having a special case for other non-gadget pickup items which need their own 'way' to be held");
-
-
-    // Gadgets only?
-    if (obj.script && obj.script.pickUpItem){ 
-        
-        obj.script.pickUpItem.onPickup(obj); // fire event to picked up object in case there are effects
-    }
-}
 
 
 

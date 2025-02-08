@@ -26,7 +26,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     setEntity(entity){
         this.entity = entity;
-        this.ItemTemplate = entity.script.itemTemplateReference.itemTemplate.constructor;
+        this.ItemTemplate = entity._template.constructor;
         realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
         
         // Note that positions "0" and "3" around the cirlce are already taken.

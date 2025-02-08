@@ -1,6 +1,4 @@
 
-
-
 var Gadget_Old = pc.createScript('gadget');
 // Used for pickup detection and fx only
 

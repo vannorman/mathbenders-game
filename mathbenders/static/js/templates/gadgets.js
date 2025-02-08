@@ -1,7 +1,6 @@
-class Gadget {
-
+export class Gadget {
     static icon = assets.textures.ui.trash;
-    static pickupSound = assets.soudns.gadgets.getGadget;
+    static pickupSound = assets.sounds.getGadget;
     static texture = assets.textures.gadget;
     static model;
     static ammo=[];
@@ -54,11 +53,17 @@ class Gadget {
 
 }
 
-class Multiblaster extends Gadget {
+export class Multiblaster extends Gadget {
     static icon = assets.textures.ui.icons.multiblaster;
     static model = assets.models.gadgets.multiblaster;
     #lastFiredTime=0;
     #bulletScale=0.6;
+
+    constructor(){
+
+    }
+
+
     onMouseDown(){
         if (this.ammo.length > 0){
             this.fire();

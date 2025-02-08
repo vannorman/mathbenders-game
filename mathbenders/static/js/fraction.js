@@ -6,6 +6,15 @@ class Fraction {
         this.numerator = numerator;
         this.denominator = denominator;
     }
+
+    toString(){
+        if (this.denominator == 1) {
+            return this.numerator.toString();
+        } else {
+            return (this.numerator + "/" + this.denominator).toString();
+        }
+    }
+
     toJSON(){
         return {Fraction:{numerator:this.numerator,denominator:this.denominator}}; // preserve "Fraction" key in JSON conversion; else {numerator:1,denominator:1} is returned, stripping "Fraction" label
     }

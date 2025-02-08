@@ -56,9 +56,6 @@ var ScriptManager = {
          "/static/js/assetRegistry.js", 
         "/static/js/constants.js",
         "/static/js/utils/util.js",
-         "/static/js/templates/itemTemplateReference.js", 
-         "/static/js/templates/properties.js", 
-         "/static/js/templates/templates.js", 
          "/static/js/prefabs.js", 
          "/static/js/shaders/groundFogShader.js",
          "/static/js/cameras.js", 
@@ -130,6 +127,8 @@ var ScriptManager = {
 //          "/static/js/charlie/gui/base.js", 
 //          "/static/js/charlie/camera.js", 
 //          "/static/js/charlie/placedItem.js", 
+         "/static/js/templates/properties.js", 
+         "/static/js/templates/templates.js", 
           "/static/js/realmEditor/realmEditor.js", 
 
           "/static/js/player/inventory/base.js",

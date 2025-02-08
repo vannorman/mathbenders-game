@@ -24,7 +24,7 @@ class PlayerClass {
         // this.entity.script.create('recordPosition');
  
         // camrea pivot
-         let pivot = new pc.Entity("pivot");
+        let pivot = new pc.Entity("pivot");
         this.entity.addChild(pivot);
         this.pivot = pivot;
 
@@ -90,14 +90,16 @@ class PlayerClass {
 
         this.inventory = new Inventory({Player:this});
 
-   }
+    }
 
-   freeze(){
+
+
+    freeze(){
         Player.entity.rigidbody.enabled = false;
-   }
-   unfreeze(){
+    }
+    unfreeze(){
         Player.entity.rigidbody.enabled = true;
-   }
+    }
 
     onGameStateChange(state) {
         switch(state){
@@ -134,6 +136,13 @@ class PlayerClass {
     }
 
 //    get playerController(){ return  this.entity.getComponentsInChildren('thirdPersonController')[0] }
+    get throwPosition() {
+        const dir = Utils3.flattenVec3(Camera.main.entity.forward);
+        const p = this.entity.getPosition().clone().add(dir).add(dir);
+        p.add(new pc.Vec3(0,1,0));
+        return p;
+    }
+
     get droppedPosition() {
         if (!Camera.main) return pc.Vec3.ZERO;
         const dir = Utils3.flattenVec3(Camera.main.entity.forward);
@@ -169,11 +178,48 @@ class PlayerClass {
 
     }
 
-  
+    interactWithNumber({entity:entity}){
+        const selectedItem = this.inventory.getSelectedItem();
+
+        if (selectedItem instanceof Gadget) {
+            // console.log(`Number ${entity.script.numberInfo.fraction} loaded into ${selectedItem.name}`);
+            selectedItem.loadNumber(number);
+        } else { 
+            // console.log(`Number ${entity.script.numberInfo.fraction} added to inventory`);
+            this.inventory.collectEntity(entity);
+        }
+    }
+
+    pickUpItem({entity:entity}){
+        this.inventory.collectEntity(entity);
+    }
+
+    throwItem(Template,props){
+        console.log("Thro");
+        if (!Template.isThrowable) { console.log('cant throw:'+Template); return false; }
+
+        const thrownItem = new Template({position:this.throwPosition,properties:props});
+        // Note, 
+        const forceMultiplier = Template.name == "NumberSphere" ? 1.6 : 1; // awkward
+        thrownItem.entity.rigidbody.linearVelocity = this.getThrownItemVelocity();
+     
+        return true;
+            
+    }
+
+    getThrownItemVelocity(){ 
+        const throwSpeed = 10;
+        return Camera.main.entity.forward.clone().mulScalar(throwSpeed);//.add(new pc.Vec3(0,Game.tf,0));
+    }
+
+
+    interactWithObject({entity:entity}){
+
+    }
+
 }
 
 window.Player = new PlayerClass();
 PlayerMessenger.build(); 
 PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
-console.log("P c.");
 Player.entity.moveTo(Game.c.getPosition());

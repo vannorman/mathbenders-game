@@ -33,6 +33,9 @@ export default class Inventory {
 
         this.Player.screen.addChild(group);
         this.setupScript(); // old script
+        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
+        pc.app.keyboard.on(pc.EVENT_KEYDOWN, this.onKeyDown, this);
+
     }
 
     setupScript() {
@@ -51,15 +54,22 @@ export default class Inventory {
         }});
     }
 
+    getSelectedItem(){
+        return this.selectedSlot?.Template;
+    }
 
     collectEntity(entity){
-        const template = entity._templateInstance;
+        const template = entity._template;
 
         let availableSlot = this.firstAvailableSlot;
         if (availableSlot) {
-            availableSlot.placeItem({template:template,properties:template.properties});
-            entity.destroy();
-            console.log("Pickup:"+template.name);
+            // A slot was available, so collect the item.
+            availableSlot.placeItem({Template:template.constructor,properties:template.properties});
+            entity.destroy(); 
+            if (this.beltSlots.find(x=>x==availableSlot)){
+                // The available slot was a belt slot, so select it.
+                this.selectSlot(availableSlot);
+            }
         } else {
             PlayerMessenger.Say("Inventory full!"); 
         }
@@ -84,6 +94,77 @@ export default class Inventory {
             // Case 5: Inventory full
     }
 
+    selectSlot(slot){
+        this.beltSlots.forEach(x=>{
+            if (x != slot) {
+                x.deSelect();
+            }
+        });
+        slot.onSelect();
+        this.selectedSlot = slot;
+        this.updateHeldItem();
+    }
+    
+
+    updateHeldItem(){
+        if (this.heldItem) {
+            this.heldItem.entity.destroy();
+            this.heldItem = null;
+        }
+         
+        if (this.selectedSlot.Template){
+            this.heldItem = this.selectedSlot.Template.createHeldItem(this.selectedSlot.itemProperties);
+            Player.pivot.addChild(this.heldItem.entity);
+            this.heldItem.onHeld();
+        } else {
+            console.log("%c ERR: no Template on slot "+i,"color:red;font-weight:bold;");
+        }
+
+        // At this point, "selected" item is created visibly to the user (no collision or interaction.)
+        // If the selected item is a number, 
+            // we need the onMouseDown listener bound to "create this number at throwPos, 
+            // then remove the heldItem from slot.
+        // if the selected item is a gadget,
+            // we need a new gadgetInstance to be created based on slot.itemproperties and listening for events
+            // we need the onMouseDown listener bound to "gadgetInstance.mouseDown()"
+        
+    }
+
+
+    onMouseDown(){
+        const item = this.getSelectedItem();
+        if (item && item.isThrowable) {
+            Player.throwItem(item,this.selectedSlot.itemProperties);
+            this.selectedSlot.clear();
+            this.updateHeldItem();
+        }else {console.log('no');}
+            
+
+    }
+
+    onKeyDown(event){
+        // Handle number keys for belt slots
+        if (event.key >= pc.KEY_1 && event.key <= pc.KEY_9) {
+            const slotIndex = event.key - pc.KEY_1;
+            const slot = this.beltSlots.find(x=>x.index==slotIndex);
+            this.selectSlot(slot);
+        }
+        if (event.key === pc.KEY_I) {
+            this.toggleBackpack();
+        }
+        if (event.key === pc.KEY_W || event.key === pc.KEY_Q || event.key === pc.KEY_E || event.key === pc.KEY_D){
+            if (this.backpackShown) {
+                this.hideBackpack();
+            }
+        }
+    }
+
+    hideBackpack(){ console.log("hide bk"); }
+    showBackpack(){ console.log("showbk"); }
+    toggleBackpack(){
+        if (this.backpackShown) this.hideBackpack();
+        else this.showBackpack();
+    }
 
     beginDrag(){
 
@@ -288,6 +369,7 @@ Inventory_Old.prototype.initialize = function() {
     this.createBeltGui();
 };
 Inventory_Old.prototype.onMouseMove = function(event){
+    /*
     this.hoveredItemIndex = null;
     this.mouse.y = Mouse.y;
     this.mouse.x = Mouse.x;
@@ -298,9 +380,12 @@ Inventory_Old.prototype.onMouseMove = function(event){
 //            x.element.color = pc.Color.GREEN;
         }
     }); 
+    */
 };
 
 Inventory_Old.prototype.pickUpItem = function(entity){
+
+    /*
 
     // Pick up gadget, number, or "other random item"
     // pickUpItem script should hold "helditemrot, helditempos" ?
@@ -364,6 +449,7 @@ Inventory_Old.prototype.pickUpItem = function(entity){
      if (this.getItemFn) this.getItemFn(); // Inventory_Old's get item function (pickup sound?)
     this.placeInventory_OldItem(emptyBeltSlotIndex,properties);
     this.selectSlot({slotIndex:emptyBeltSlotIndex,force:true,pickup:true});
+    */
 };
 
 
@@ -740,6 +826,7 @@ Inventory_Old.prototype.onKeyDown = function(event) {
 };
 
 Inventory_Old.prototype.selectSlot = function(options){
+    return;
     const { slotIndex,force=false,pickup=false } = options;
     if (this.selectedSlot != slotIndex ||  force){
         if (this.heldItemGfx != null){

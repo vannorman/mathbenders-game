@@ -39,7 +39,7 @@ NumberInfo.prototype.Setup = function() {
         }
     }})
 
-    this.entity.collision.on('collisionstart', this.onCollisionStart, this);
+    this.entity.collision?.on('collisionstart', this.onCollisionStart, this);
     if (this.fraction == null) this.fraction = new Fraction(2,1); // dislike!!!
     this.cubeSize = this.entity.getLocalScale().x;
     if (this.numberType == NumberInfo.Shape.Cube){
@@ -62,11 +62,11 @@ NumberInfo.prototype.Setup = function() {
         });
         this.pivot.addComponent('script');
         this.pivot.script.create('alwaysFaceCamera',{attributes:{reverse:true,useRadius:true,radius:16}});
-        this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
+        // this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
         this.ints = [this.int1];
         Game.int1 = this.int1;
 
-        // Can we PLEASE move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
+        // Can we move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
 
     } else if (this.numberType == NumberInfo.Shape.Hoop) {
         // Let the hoop add its own text
@@ -218,7 +218,7 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
         NumberInfo.destroyNumberFx({position:options.position,maxNumber:maxNumber});
     } else {
         // console.log("Sinepop:"+templateName);
-        const result = Game.Instantiate[templateName](options); // TODO: Replace with Promise return
+        const result = new NumberSphere(options); //Game.Instantiate[templateName](options); // TODO: Replace with Promise return
         result.script.create('sinePop');
 
         // Awkward way to propagate "destroy after seconds" which was detected if both parent numbers had destroyAfterSEconds

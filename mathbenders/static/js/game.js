@@ -81,10 +81,8 @@ var Game = {
         // Bootstrapped starting area (temporary) -- Platform for player to stand.
         let cubeP = new pc.Vec3(0,18,0);
         let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
-        Game.c = c;
-        console.log("Game c.");
         ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
-
+        Game.c = c; // Player relies on the position of the starting platform; boostrap; awkward
         GameManager.setState(GameState.Playing);
 
     },
