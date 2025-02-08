@@ -368,8 +368,7 @@ class MultiblasterPickup extends GadgetPickup {
     static icon = assets.textures.ui.icons.multiblaster;
 
     static onCollect(){
-        const blaster = new Multiblaster();
-        return blaster;
+        return Multiblaster;
     }
 
     setup(){
@@ -394,6 +393,8 @@ class MultiblasterPickup extends GadgetPickup {
 
 
 window.templateNameMap = {
+    "Template" : Template,
+
     "NumberSphere" : NumberSphere,
     "NumberFaucet" : NumberFaucet,
     "NumberHoop" : NumberHoop,
@@ -404,8 +405,9 @@ window.templateNameMap = {
     "CastleWall" : CastleWall,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
-
 }
+
+// Export all templates to global scope for use in rest of app
 Object.entries(window.templateNameMap).forEach(([key,value])=>{
       window[key] = value;
     });

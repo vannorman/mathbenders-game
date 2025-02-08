@@ -179,19 +179,27 @@ class PlayerClass {
     }
 
     interactWithNumber({entity:entity}){
-        const selectedItem = this.inventory.getSelectedItem();
 
-        if (selectedItem instanceof Gadget) {
-            // console.log(`Number ${entity.script.numberInfo.fraction} loaded into ${selectedItem.name}`);
-            selectedItem.loadNumber(number);
+        if (this.inventory.heldGadget){
+            const frac = entity._template.fraction;
+            const collected = this.inventory.loadNumberIntoGadget(frac);
+            if (collected) {
+                entity.destroy();
+                 
+            } else {
+                const collected2 = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
+                if (collected2) { // awkward.. but.. multiple switchings happening
+                    entity.destroy();
+                }
+
+            }
         } else { 
             // console.log(`Number ${entity.script.numberInfo.fraction} added to inventory`);
-            this.inventory.collectTemplate(entity._template);
+            const collected = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
+            if (collected) {
+                entity.destroy();
+            }
         }
-    }
-
-    pickUpItem({entity:entity}){
-        this.inventory.collectTemplate(entity._template);
     }
 
     throwItem(Template,props){
@@ -215,10 +223,16 @@ class PlayerClass {
     interactWithObject({entity:entity}){
         const template = entity._template;
         if (template instanceof GadgetPickup){
-            const gadget = template.constructor.onCollect();
-            this.inventory.collectTemplate(gadget);
+            const Gadget = template.constructor.onCollect();
+            if (this.inventory.collectGadget(Gadget)){
+                entity._template = null;
+                entity.destroy();
+            } else {
+                console.log("Player failed to get gadg");
+            }
+            // this.inventory.collectTemplate(gadget);
         }
-        console.log("obj.");
+        // console.log("obj.");
     }
 
 }

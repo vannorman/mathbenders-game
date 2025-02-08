@@ -325,7 +325,8 @@ $(document).on("keydown", function (e) {
     if (ee == 'M'){
         const p = Player.droppedPosition;
         const r = new pc.Vec3(270,0,0);
-        Game.Instantiate.multiblaster({position:p,rotation:r});
+        const m = new MultiblasterPickup({position:p});
+//        Game.Instantiate.multiblaster({position:p,rotation:r});
     }
     if (ee == 'B'){
         let p = Player.droppedPosition;

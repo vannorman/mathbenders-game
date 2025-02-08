@@ -5,16 +5,16 @@ export class Gadget extends Template {
     static pickupSound = assets.sounds.getGadget;
     static texture = assets.textures.gadget;
     static model;
-    static ammo=[];
-    static ammoGfx=[];
+   
+     ammo=[];
+    ammoGfx=[];
 
     #mouseHeld;
 
     constructor(){
         super();
         this.entity = new pc.Entity("Gadget "+this.constructor.name);
-        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
-        pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
+        // pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
     }
 
    onPickup(){
@@ -49,6 +49,20 @@ export class Gadget extends Template {
  
     update(){}
 
+    get properties(){
+        return {
+            ammo : this.ammo,
+        }
+    } 
+
+    set properties(value){
+        // console.log(value);
+        const properties = value;
+        if (properties.ammo) {
+            this.ammo = properties.ammo;
+        }
+    }
+
 }
 
 export class Multiblaster extends Gadget {
@@ -57,8 +71,12 @@ export class Multiblaster extends Gadget {
     // This conflicts with the way Slot handles Template so ok it is a template
     static icon = assets.textures.ui.icons.multiblaster;
     static model = assets.models.gadgets.multiblaster;
+    ammo = [];
+    ammoGfx = [];
     #lastFiredTime=0;
     #bulletScale=0.6;
+    fireTimeDelta=0.1;
+    static get isGadget(){ return true;  }
 
     constructor(){
         super();
@@ -68,12 +86,19 @@ export class Multiblaster extends Gadget {
         const heldItemGfx = Multiblaster.model.resource.instantiateRenderEntity();
         ApplyTextureAssetToEntity({entity:heldItemGfx,textureAsset:assets.textures.gadget});
     
-        console.log('SUP crt held item gfx');
+        // console.log('SUP crt held item gfx');
         return new HeldItem({
             entity:heldItemGfx,
+            position:new pc.Vec3(0.7,0.5,-0.8),
+            rotation:new pc.Vec3(90,0,0),
         });
 
 
+    }
+
+    setup(){
+        // this gets called twice for some reason when we pick up a multiblaster...
+        // console.log(`set up ${this.name}`);
     }
 
     onMouseDown(){
@@ -95,13 +120,17 @@ export class Multiblaster extends Gadget {
         });
         const timeSinceLastFired = Date.now() - this.#lastFiredTime;
         if (timeSinceLastFired > this.fireTimeDelta * 1000) {
+            console.log('hi');
             let frac = this.ammo.pop();
             const firePos = this.heldItemGfx.getPosition().clone().add(this.heldItemGfx.down);
             const sc = this.#bulletScale;
 
-            const s = Game.Instantiate.NumberSphere({position:firePos});
-            s.script.destroy('pickUpItem');
+            const s = new NumberSphere({position:firePos}).entity;
+//            Game.Instantiate.NumberSphere({position:firePos});
+            // s.script.destroy('pickUpItem');
             s.setLocalScale(new pc.Vec3(sc,sc,sc));
+            s.tags.remove(Constants.Tags.PlayerCanPickUp); // todo: Both "Bullet" and "NumberSphere" should inherit from NumberObject
+            // Never create stuff then remove stuff.. to get a different stuff lol
 
             s.name="bullet";
             s.script.create('destroyAfterSeconds');
@@ -110,12 +139,29 @@ export class Multiblaster extends Gadget {
             this.#lastFiredTime = Date.now();
             this.ammoGfx.pop().destroy();
         }
+
+        
     }
 
-    collectAmmo(args={}){
+    loadNumber(args={}){
+
+//    collectAmmo(args={}){
         const {fraction=new Fraction(-9,8)}=args;
-        this.ammo = Array(10).fill(fraction);
-        this.updateAmmoGfx();
+        if (this.ammo.length == 10){
+            PlayerMessenger.Say("Ammo full!");
+            return false;
+        } else {
+
+            this.ammo = Array(10).fill(fraction);
+            this.updateAmmoGfx();
+            return true;
+        }
+
+    }
+
+    get heldItemGfx(){
+        // awkward. where does heldItemGfx live again?
+        return Player.inventory.heldItem.entity;
     }
 
     updateAmmoGfx(){
@@ -145,12 +191,8 @@ export class Multiblaster extends Gadget {
         const ammoScale = new pc.Vec3(0.2,0.2,0.2);
         const circle = Utils.GetCircleOfPoints3d({degreesToComplete:360,radius:.3,scale:.18,autoCount:false,count:9});
         circle.forEach(pos => { 
-            if (count-- > 0){
+            if (--count > 0){
                 let b = Game.Instantiate['NumberSphere'](options);
-//                {
-//                    noCollision:true,
-//                    numberInfo:{fraction:{numerator:num.numerator,denominator:num.denominator}},
-//                });
                 b.setLocalScale(ammoScale),
                 this.heldItemGfx.addChild(b);
                 b.setLocalPosition(pos); 

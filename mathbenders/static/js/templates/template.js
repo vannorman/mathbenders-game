@@ -8,6 +8,16 @@ export default class Template {
 
     entity; // stores scale, position, and rotation;
 
+    static isSubclass(child, parent) {
+      while (child && child !== Object) {
+        if (child === parent) return true;
+        child = Object.getPrototypeOf(child);
+      }
+      return false;
+    } 
+
+    static get isGadget(){ return false;  }
+
     constructor(args={}) {
         const {
             position=pc.Vec3.ZERO,
@@ -63,6 +73,8 @@ export default class Template {
     }
 
     get properties() {
+        // awkward that this is irrelevant for gadgets being held in inventory
+        // and that we overwrite this in Gadget get properties() {return this.ammo....}
         const props = {};
         this.constructor.editablePropertiesMap.forEach(x=>{
            props[x.name] = x.getCurValFn(this) 
