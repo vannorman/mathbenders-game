@@ -52,7 +52,7 @@ PlayerPickup.prototype.onCollisionStart = function(result) {
 PlayerPickup.prototype.update = function(dt) {
     if (this.collisionStay){
         //if (this.hasOwnership(this.collidedEntity)){ // for network/multiplayer
-            PlayerPickup.pickUpItem(this.collidedEntity);
+          //  PlayerPickup.pickUpItem(this.collidedEntity);
             this.onCollisionEnd(this.collidedEntity);
         //}
     }

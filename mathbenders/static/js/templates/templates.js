@@ -1,121 +1,9 @@
 import HeldItem from './heldItem.js';
+import Template from './template.js';
 import {Gadget,Multiblaster} from './gadgets.js';
-import {Property,SizeProperty,FractionProperty,ScaleProperty,} from './properties.js';
-
-
-class Template {
-
-    static name="TemplateSuper";
-    static icon;
-    static editablePropertiesMap=[];
-    static isThrowable = false;
-    colliders = new Map();
-
-    entity; // stores scale, position, and rotation;
-
-    constructor(args={}) {
-        const {
-            position=pc.Vec3.ZERO,
-            rotation=pc.Vec3.ZERO,
-            properties={},
-            rigidbodyType='none',
-            rigidbodyVelocity=pc.Vec3.ZERO,
-        }=args;
-        this.entity = new pc.Entity();
-
-        const $this=this;
-        pc.app.root.addChild(this.entity);
-        this.entity.moveTo(position,rotation);
-        if (rigidbodyType != 'none'){
-            console.log("new :"+this.constructor.name);
-            this.entity.addComponent('rigidbody',{type:rigidbodyType});
-            this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
-        }
-        this.entity.addComponent('script');
-        this.entity._template = this;
-        this.name = this.constructor.name;
-        this.entity.name = this.constructor.name;
-
-         // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
-        this.setup();
-        if (properties) {
-            this.setProperties(properties);
-        }
-        this.updateColliderMap();
-
-
-
-    }
-
-    setup(){console.log("ERR: No setup method on "+this.constructor.name);}
-
-    updateColliderMap(){
-        this.colliders = new Map();
-        this.entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
-            this.colliders.set(collisionComponent,collisionComponent.enabled);
-        });
-    }
-
-    enableColliders(){
-        for (const [colliderComponent, activeState] of this.colliders) {
-            if (activeState) colliderComponent.enabled = true;
-        }
-    }
-
-    disableColliders(){
-        for (const [colliderComponent, activeState] of this.colliders) {
-            if (activeState) colliderComponent.enabled = false;
-        }
-    }
-
-    get properties() {
-        const props = {};
-        this.constructor.editablePropertiesMap.forEach(x=>{
-           props[x.name] = x.getCurValFn(this) 
-        });
-        return props;
-    }
-
-    getInstanceData(args={}){
-        const {terrainCentroidOffset = pc.Vec3.ZERO} = args;
-        return {
-            templateName : this.constructor.name,
-            position : this.entity.getPosition().sub(terrainCentroidOffset).trunc(),
-            rotation : this.entity.getEulerAngles().trunc(),
-            properties : this.properties,
-        }
-    }
-
-    setProperties(properties) {
-        // Note that all data here is stored in the *game entity* not in the template instance.
-        this.constructor.editablePropertiesMap.forEach(x=>{
-            if (properties[x.name] !== undefined){
-                const val = properties[x.name];
-                x.onChangeFn(this,val);
-            }
-        })
-    }
-
-    destroy(){
-        this.entity.destroy();
-    }
-
-    static createHeldItem(){
-        console.log("huh? no createHeldGfx for this template:"+this.constructor.name);
-        return null;
-    }
-
-//    toJSON(){
-    // Handle this in Level.toJson()?
-//
-//        return {
-//            position : this.entity.getPosition().sub(this.level.terrain.centroid).trunc(), // I hate how this is here
-//            rotation : this.entity.getEulerAngles().trunc(),
-//            templateName : this.constructor.name,
-//            properties : this.properties,
-//        }
-//    }
-}
+import {Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
+globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {
     static editablePropertiesMap = [
@@ -185,10 +73,9 @@ class NumberFaucet extends Template {
         this.renderEntity.setLocalEulerAngles(-90,0,0);
 
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
-        this.fraction = new Fraction(1,2);
         
         this.renderEntity.addComponent('script');
-        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:this.fraction}});
+        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:new Fraction(1,2)}});
 
         this.renderEntity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.75,0.75,4)}); 
         this.renderEntity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
@@ -235,7 +122,7 @@ class PlayerStart extends Template {
                 break;
             case GameState.Playing:
                 //console.log("Levelbuilder off");
-                Game.player.moveTo($this.entity.getPosition().clone().add(pc.Vec3.UP.clone().mulScalar(3)));
+                Game.player.moveTo($this.entity.getPosition().clone().add(pc.Vec3.UP.clone().mulScalar(10)));
                 $this.entity.enabled=false;
                 break;
             }
@@ -476,39 +363,34 @@ class NumberSphere extends Template {
 }
 
 class GadgetPickup extends Template {}
-
+window['GadgetPickup'] = GadgetPickup; //awkward
 class MultiblasterPickup extends GadgetPickup {
     static icon = assets.textures.ui.icons.multiblaster;
 
-    static selectGadget(){
+    static onCollect(){
         const blaster = new Multiblaster();
-
+        return blaster;
     }
 
     setup(){
 
         // graphics
 
+        this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
         const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
         ApplyTextureAssetToEntity({entity:blaster,textureAsset:assets.textures.gadget});
         this.entity.addChild(blaster);
+        blaster.setLocalEulerAngles(0,-90,-90);
+        blaster.setLocalPosition(pc.Vec3.UP);
 
         // pickup item 
         this.entity.addComponent('collision');
         this.entity.addComponent('rigidbody',{type:'kinematic'});
-        this.entity.script.create('pickUpItem',{attrributs:{
-            priority:2,
-            heldRot:new pc.Quat().setFromEulerAngles(110,0,0),
-            heldPos:new pc.Vec3(0.7,0.3,-0.2),
-            onPickup:function(){
-                console.log("pickAup blaster.");
-            }
-        }});
 
-        // Legacy for Inventory to know what we picked up
-        this.entity.script.create('objectProperties', {attributes:{ objectProperties:{templateName:this.constructor.name},  }}) 
     }
 }
+
+
 
 
 window.templateNameMap = {

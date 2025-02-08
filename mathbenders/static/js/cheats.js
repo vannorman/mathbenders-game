@@ -316,7 +316,6 @@ $(document).on("keydown", function (e) {
         const frac = new Fraction(num,1);
         const options = {
             position : Player.droppedPosition,
-            rigidbodyType : pc.RIGIDBODY_TYPE_DYNAMIC,
             properties : {
                 NumberSphere : frac
             }

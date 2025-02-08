@@ -186,16 +186,15 @@ class PlayerClass {
             selectedItem.loadNumber(number);
         } else { 
             // console.log(`Number ${entity.script.numberInfo.fraction} added to inventory`);
-            this.inventory.collectEntity(entity);
+            this.inventory.collectTemplate(entity._template);
         }
     }
 
     pickUpItem({entity:entity}){
-        this.inventory.collectEntity(entity);
+        this.inventory.collectTemplate(entity._template);
     }
 
     throwItem(Template,props){
-        console.log("Thro");
         if (!Template.isThrowable) { console.log('cant throw:'+Template); return false; }
 
         const thrownItem = new Template({position:this.throwPosition,properties:props});
@@ -214,7 +213,12 @@ class PlayerClass {
 
 
     interactWithObject({entity:entity}){
-
+        const template = entity._template;
+        if (template instanceof GadgetPickup){
+            const gadget = template.constructor.onCollect();
+            this.inventory.collectTemplate(gadget);
+        }
+        console.log("obj.");
     }
 
 }

@@ -52,17 +52,20 @@ MachineNumberFaucet.prototype.update = function(dt){
                 },
             }
         } 
-        const n = Game.Instantiate['NumberSphere']({numberInfo:{fraction:this.fraction},position:dripPosition})
+        const n = new NumberSphere({
+            properties:{NumberSphere:this.fraction},
+            position:dripPosition
+            });
 
         const faucet = this;
-        n.on('destroy', function() {
+        n.entity.on('destroy', function() {
             for (let i=0;i<faucet.drippedNumbers.length;i++){
-                if (n.getGuid() == faucet.drippedNumbers[i].getGuid()){
+                if (n.entity.getGuid() == faucet.drippedNumbers[i].getGuid()){
                     faucet.drippedNumbers.splice(i,1);
                 }
             }
         });
-        this.drippedNumbers.push(n);
+        this.drippedNumbers.push(n.entity);
     }
 }
 

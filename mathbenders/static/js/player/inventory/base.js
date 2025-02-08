@@ -22,6 +22,7 @@ export default class Inventory {
         const {Player}=args;
         this.Player = Player;
         const group = InventoryGui.createLayoutGroup();
+        this.ui = group;
         
         // Create, then Add belt slots to gui group
         this.beltSlots = Array.from({ length: 9 }, (_, index) => new InventorySlot({index:index}));
@@ -32,7 +33,7 @@ export default class Inventory {
 
 
         this.Player.screen.addChild(group);
-        this.setupScript(); // old script
+        //this.setupScript(); // old script
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         pc.app.keyboard.on(pc.EVENT_KEYDOWN, this.onKeyDown, this);
 
@@ -58,14 +59,13 @@ export default class Inventory {
         return this.selectedSlot?.Template;
     }
 
-    collectEntity(entity){
-        const template = entity._template;
+    collectTemplate(template){
 
         let availableSlot = this.firstAvailableSlot;
         if (availableSlot) {
             // A slot was available, so collect the item.
             availableSlot.placeItem({Template:template.constructor,properties:template.properties});
-            entity.destroy(); 
+            template.entity?.destroy(); 
             if (this.beltSlots.find(x=>x==availableSlot)){
                 // The available slot was a belt slot, so select it.
                 this.selectSlot(availableSlot);
@@ -175,14 +175,14 @@ export default class Inventory {
     }
 
     hide(){
-        this.script.screen.enabled=false;
-        this.script.enabled=false;
+        this.ui.enabled=false;
+//        this.script.enabled=false;
         this.enabled=false;
     }
 
     show(){
-        this.script.screen.enabled=true;
-        this.script.enabled=true;
+        this.ui.enabled=true;
+        // this.script.enabled=true;
         this.enabled=true;
     }
 
@@ -228,83 +228,6 @@ class InventoryGui {
     }
 
 
-    createBeltImages() { // old
-        /*
-        this.beltEntities = []
-        this.selectedSlot = 0;
-        this.beltItemImages = [];
-        this.screen = new pc.Entity();
-        this.screen.addComponent("screen", {
-            referenceResolution: new pc.Vec2(Constants.Resolution.width,Constants.Resolution.height),
-            scaleBlend: 0.5,
-            scaleMode: pc.SCALEMODE_BLEND,
-            screenSpace: true,
-        });
-
-       this.guiParent.addChild(this.screen);
-
-        // Create Layout Group Entity
-        const group = new pc.Entity();
-        this.inventoryGroup = group;
-        group.addComponent("element", {
-            // a Layout Group needs a 'group' element component
-            type: pc.ELEMENTTYPE_GROUP,
-            layers:[pc.LAYERID_UI],
-            anchor: [0.5, 0.05, 0.5, 0.05],
-            pivot: [0.5, 0.5],
-            // the element's width and height dictate the group's bounds
-            width: 700,
-            height: 70,
-        });
-
-        group.addComponent("layoutgroup", {
-            orientation: pc.ORIENTATION_HORIZONTAL,
-            spacing: new pc.Vec2(10, 10),
-            // fit_both for width and height, making all child elements take the entire space
-            widthFitting: pc.FITTING_BOTH,
-            heightFitting: pc.FITTING_BOTH,
-            // wrap children
-            wrap: true,
-        });
-
-        this.screen.addChild(group);
-
-        // create 9 children to show off the layout group
-        for (let i = 0; i < 9; ++i) {
-            // create a random-colored panel
-            const child = new pc.Entity("inv"+i);
-            this.beltEntities.push(child);
-            child.addComponent("element", {
-                anchor: [0.5, 0.5, 0.5, 0.5],
-                pivot: [0.5, 0.5],
-                type: 'image',
-                textureAsset: assets.quad,
-            });
-
-            child.addComponent("layoutchild", {
-                excludeFromLayout: false,
-            });
-
-            group.addChild(child);
-
-            // add a child image
-            const childImage = new pc.Entity("invImg"+i);
-            this.beltItemImages.push(childImage);
-            childImage.addComponent("element", {
-                anchor: [0.5, 0.5, 0.5, 0.5],
-                pivot: [0.5, 0.5],
-                width:64,
-                height:64,
-                type: 'image',
-                textureAsset: null,
-                useInput: true,
-                layer: pc.LAYERID_UI
-            });
-            child.addChild(childImage);
-            childImage.element.index = i;
-        }
-        */
-    }
 }
 
 var Inventory_Old = pc.createScript('inventory');
@@ -538,11 +461,7 @@ Inventory_Old.prototype.toggleInventory_Old = function() {
     this.inventoryGroupYTarget = this.inventoryShown ? 350 : 0;
     this.inventoryGroupAnimating = true;
     if (this.inventoryShown){
-        Player.freeze();
-        Mouse.UnlockCursor();
     } else {
-        Player.unfreeze();
-        Mouse.LockCursor(); 
     }
     // Logic for opening and closing inventory goes here
     // This may involve showing or hiding UI elements and changing the mouse lock state

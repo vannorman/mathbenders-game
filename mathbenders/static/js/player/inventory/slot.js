@@ -93,7 +93,7 @@ export default class InventorySlot {
 
     updateText(){
         if (this.itemProperties) {
-            console.log(this.itemProperties);
+            // console.log(this.itemProperties);
         } 
         // call this after modifyOp.
         const frac = Object.values(this.itemProperties).find(x=>x instanceof Fraction);

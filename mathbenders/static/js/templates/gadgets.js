@@ -1,4 +1,6 @@
-export class Gadget {
+import Template from './template.js';
+import HeldItem from './heldItem.js';
+export class Gadget extends Template {
     static icon = assets.textures.ui.trash;
     static pickupSound = assets.sounds.getGadget;
     static texture = assets.textures.gadget;
@@ -9,6 +11,7 @@ export class Gadget {
     #mouseHeld;
 
     constructor(){
+        super();
         this.entity = new pc.Entity("Gadget "+this.constructor.name);
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
@@ -23,12 +26,7 @@ export class Gadget {
         console.log('SUP select');
    }
 
-    createHeldItemGfx(){
-        this.heldItemGfx = this.constructor.model.resource.instantiateRenderEntity();
-        ApplyTextureAssetToEntity({entity:this.heldItemGfx,textureAsset:assets.textures.gadget});
-    
-        console.log('SUP crt held item gfx');
-        return this.heldItemGfx;
+    static createHeldItem(){
     }
 
     destroyHeldItemGfx(){
@@ -54,15 +52,29 @@ export class Gadget {
 }
 
 export class Multiblaster extends Gadget {
+    // Specifically not a template
+    // In no case will this ever exist except when player has it or selects it in inventory
+    // This conflicts with the way Slot handles Template so ok it is a template
     static icon = assets.textures.ui.icons.multiblaster;
     static model = assets.models.gadgets.multiblaster;
     #lastFiredTime=0;
     #bulletScale=0.6;
 
     constructor(){
-
+        super();
     }
 
+    static createHeldItem(){
+        const heldItemGfx = Multiblaster.model.resource.instantiateRenderEntity();
+        ApplyTextureAssetToEntity({entity:heldItemGfx,textureAsset:assets.textures.gadget});
+    
+        console.log('SUP crt held item gfx');
+        return new HeldItem({
+            entity:heldItemGfx,
+        });
+
+
+    }
 
     onMouseDown(){
         if (this.ammo.length > 0){
