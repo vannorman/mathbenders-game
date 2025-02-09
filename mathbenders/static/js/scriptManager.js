@@ -99,7 +99,6 @@ var ScriptManager = {
         "/static/js/objectProperties.js",
         "/static/js/gadget.js",
         "/static/js/gadgetZooka.js",
-        "/static/js/gadgetMultiblaster.js",
         "/static/js/gadgetBow.js",
         "/static/js/gadgetSword.js",
         "/static/js/machineHoop.js",
