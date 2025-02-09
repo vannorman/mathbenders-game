@@ -114,7 +114,13 @@ class RealmEditor {
         // To re-load the existing level ..
         const realmData = JSON.stringify(this.#RealmData); // copy existing realm data
         this.#RealmData.Clear(); // delete everything
-        pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{x.entity.destroy();}); // clean up extraneous numbers
+        pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{
+            // if(!x.entity.getComponentInParent('thirdPersonController')){
+                // awkward fix to avoid destroying inventory numbers like heldItem AmmoGfx; since they are "disabled" it skips them here
+                // nevermind just redraw it on inventory enable.
+                x.entity.destroy();
+            //} 
+        }); // clean up extraneous numbers
         this.LoadJson(realmData);
  
     }

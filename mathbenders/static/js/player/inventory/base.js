@@ -14,7 +14,6 @@ export default class Inventory {
 
     beltSlots;
     backpackSlots;
-    // backpackSlots = Array.from({ length: 1 }, (_, index) => new InventorySlot({index:index}));
     get allSlots() { return [ ...this.beltSlots, ...this.backpackSlots]; }
     get firstAvailableSlot() { return this.allSlots.find(x=> !x.isUsed) || null; }
 
@@ -33,27 +32,13 @@ export default class Inventory {
 
 
         this.Player.screen.addChild(group);
-        //this.setupScript(); // old script
-        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         pc.app.keyboard.on(pc.EVENT_KEYDOWN, this.onKeyDown, this);
 
+        this.selectSlot(this.beltSlots[0]);
+
     }
 
-    setupScript() {
-        // TODO : WE don't need a 'script' / entity here; since inventory "lives" on the player 
-        // and has no physical manifestation it needs no entity script (Monobehaviour)
-
-         this.script = this.Player.entity.script.create('inventory',{attributes:{
-            pivot:this.Player.pivot,
-            player:this.Player.entity,
-            droppedPosition:this.Player.droppedPosition,
-            getItemFn : (x)=>{AudioManager.play({source:assets.sounds.getItem});},
-            placeItemFn : (x)=>{AudioManager.play({source:assets.sounds.placeItem});},
-            throwSoundFn : (x)=>{AudioManager.play({source:assets.sounds.throwItem});},
-            selectItemFn : (x)=>{AudioManager.play({source:assets.sounds.selectItem});},
-    //        placeItemDownFn : (x)=>{AudioManager.play({source:assets.sounds.thud});},
-        }});
-    }
+    
 
     getSelectedItem(){
         return this.selectedSlot?.Template;
@@ -131,6 +116,7 @@ export default class Inventory {
             this.heldGadget = gadget; //bind fire here?
             this.updateHeldItem(); // awkward back and forth here, but ..
             this.heldGadget.updateAmmoGfx(); // awkward .. for this to be here i think
+            this.heldGadget.popFxAmmo();
         } else {
 
             this.updateHeldItem();
@@ -141,8 +127,8 @@ export default class Inventory {
     loadNumberIntoGadget(frac){
 
         if (this.heldGadget.loadNumber({fraction:frac})){
-            this.updateHeldItem();
-            this.heldGadget.updateAmmoGfx(); // awkward .. for this to be here i think
+            //this.updateHeldItem();
+            // this.heldGadget.updateAmmoGfx(); // awkward .. for this to be here i think
             this.selectedSlot.itemProperties = this.heldGadget.properties; // ahh I hate how this is everyhwere? awkward
             return true;
         } else {
@@ -157,12 +143,11 @@ export default class Inventory {
             this.heldItem = null;
         }
          
-        if (this.selectedSlot.Template){
+        if (this.selectedSlot?.Template){
             this.heldItem = this.selectedSlot.Template.createHeldItem(this.selectedSlot.itemProperties);
             Player.pivot.addChild(this.heldItem.entity);
             this.heldItem.onHeld();
         } else {
-            // console.log("%c ERR: no Template on slot "+i,"color:red;font-weight:bold;");
         }
 
         // At this point, "selected" item is created visibly to the user (no collision or interaction.)
@@ -223,14 +208,15 @@ export default class Inventory {
 
     hide(){
         this.ui.enabled=false;
-//        this.script.enabled=false;
         this.enabled=false;
     }
 
     show(){
         this.ui.enabled=true;
-        // this.script.enabled=true;
         this.enabled=true;
+        this.updateHeldItem();
+        this.heldGadget?.updateAmmoGfx(); // awkward .. for this to be here i think
+        this.heldGadget?.popFxAmmo();
     }
 
 

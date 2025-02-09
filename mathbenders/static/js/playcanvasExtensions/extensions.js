@@ -227,6 +227,15 @@ pc.Entity.prototype.getScriptsWithAttribute  = function(attribute) {
     return scripts;
 }
 
+pc.Entity.prototype.getComponentInParent = function(componentName,depth=20) {
+    if (depth <= 0) return null;
+    if (this.parent){
+        const c = this.parent.getComponent(componentName)     
+        if (c.length > 0) return c[0];
+        else return this.parent.getComponentInParent(componentName,--depth);
+    }
+}
+
 pc.Entity.prototype.getComponentsInChildren = function(componentName) {
     // checks for scripts (user defined) and components (like 'render', 'meshInstances')
     var components = [];

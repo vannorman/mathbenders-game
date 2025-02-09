@@ -4,8 +4,7 @@ SinePop.attributes.add('popTime', { type: 'number', default: 0.35 });
 
 SinePop.prototype.initialize = function(){
     this.startTime = Date.now();
-    this.startScaleX = this.entity.getLocalScale().x;
-
+    this.startScaleX = this.entity.getLocalScale().clone().x;
     // dislike but, special case for numberinfo ..
     // alternative strategy is to simply have the numberinfo have its own sinepop fn..
 };
@@ -20,7 +19,7 @@ SinePop.prototype.update = function(dt){
     //console.log("t:"+t+", amp:"+amp.toFixed(2)+", thispop:"+this.popAmount+", scale;"+scale.toFixed(2));
     this.entity.setLocalScale(new pc.Vec3(scale,scale,scale)); //pc.Vec3.ONE.mulScalar(scale));
     if (t >= this.popTime * 1000){
-       this.entity.setLocalScale(pc.Vec3.ONE.mulScalar(this.startScaleX));
+       this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(this.startScaleX));
        this.entity.script.destroy('sinePop');
     }
 };

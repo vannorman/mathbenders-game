@@ -89,9 +89,14 @@ class PlayerClass {
         pc.app.root.addChild(this.screen);
 
         this.inventory = new Inventory({Player:this});
+        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
+        this.entity.collision.on('collisionstart', this.onCollisionStart, this);
 
     }
 
+    onMouseDown(){
+        if (this.entity.enabled) this.inventory.onMouseDown();
+    }
 
 
     freeze(){
@@ -230,10 +235,24 @@ class PlayerClass {
             } else {
                 console.log("Player failed to get gadg");
             }
-            // this.inventory.collectTemplate(gadget);
+        } else {
+            console.log(`Player interact failed on:${entity.name}`);
+            
         }
-        // console.log("obj.");
     }
+
+   onCollisionStart(result){
+        if (result.other.tags.list().includes(Constants.Tags.PlayerCanPickUp)){  // new way
+            if (result.other.script?.numberInfo) {
+                this.interactWithNumber({entity:result.other});
+            } else {
+                this.interactWithObject({entity:result.other});
+            }
+        }
+
+};
+
+ 
 
 }
 

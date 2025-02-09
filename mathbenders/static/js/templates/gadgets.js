@@ -19,10 +19,10 @@ export class Gadget extends Template {
 
    onPickup(){
         AudioManager.play({source:assets.sounds.getGadget});
-        console.log('SUP pickup');
    }
 
-   onSelect(){
+   onSelect(){  
+        // Hmm this never gets called currently. Inventory has its own "Select"?
         console.log('SUP select');
    }
 
@@ -120,7 +120,6 @@ export class Multiblaster extends Gadget {
         });
         const timeSinceLastFired = Date.now() - this.#lastFiredTime;
         if (timeSinceLastFired > this.fireTimeDelta * 1000) {
-            console.log('hi');
             let frac = this.ammo.pop();
             const firePos = this.heldItemGfx.getPosition().clone().add(this.heldItemGfx.down);
             const sc = this.#bulletScale;
@@ -154,8 +153,14 @@ export class Multiblaster extends Gadget {
 
             this.ammo = Array(10).fill(fraction);
             this.updateAmmoGfx();
+            this.popFxAmmo();
             return true;
         }
+
+    }
+
+    popFxAmmo(){
+        this.ammoGfx?.forEach(x=>{x.addComponent('script');x.script.create('sinePop');});
 
     }
 
@@ -182,7 +187,8 @@ export class Multiblaster extends Gadget {
 
         // Ammo (0) in the hopper is big and centered so you can see it.
         let b = Game.Instantiate.NumberSphere(options);
-        b.setLocalScale(new pc.Vec3(0.45,0.45,0.45)),
+        b.setLocalScale(new pc.Vec3(0.45,0.45,0.45));
+        Game.hi = this.heldItemGfx;
         this.heldItemGfx.addChild(b);
         b.setLocalPosition(0,0.2,0);
         this.ammoGfx.push(b);
