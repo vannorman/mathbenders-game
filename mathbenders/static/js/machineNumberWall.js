@@ -32,8 +32,6 @@ MachineNumberWall.prototype.setSize = function(size){
 
 MachineNumberWall.prototype.rebuildWall = function(){
     // clear existing wall.
-    this.entity.children.forEach(x => {x.destroy();x.remove();});
-
     this.existingWallObjects.forEach(x =>{x.destroy();x.remove();});
     this.existingWallObjects = [];
 
@@ -43,7 +41,7 @@ MachineNumberWall.prototype.rebuildWall = function(){
             position:pos,
             numberInfo:{ fraction:frac,}
         }
-        return Game.Instantiate.NumberCubeFixed(args);
+        return new NumberCube(args).entity;//Game.Instantiate.NumberCubeFixed(args);
                       
     }
     let count = 0;
@@ -55,10 +53,10 @@ MachineNumberWall.prototype.rebuildWall = function(){
         const c = createCube(p,frac);
         this.entity.addChild(c);
         this.existingWallObjects.push(c);
-        c.setLocalPosition(new pc.Vec3(x*s,y*s+s/2.0,z*s));
+        c.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(x*s,y*s+s/2.0,z*s)));
         count++;
     }}};
-    this.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+    // this.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
     this.onChangeFn();
 };
 

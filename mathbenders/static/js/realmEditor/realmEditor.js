@@ -105,14 +105,30 @@ class RealmEditor {
         }
    } 
  
+    get levelClosestToPlayer() {
+        let min = Infinity;
+        let closest = null;
+        this.#RealmData.Levels.forEach(level=>{
+            let d = pc.Vec3.distance(
+                Camera.main.entity.getPosition(),
+                level.terrain.entity.getPosition()); // equivalent to terrainData.terrainEntity.getPosition()?
+            if(d < min){
+                min = d;
+                closest = level;
+            }
+        });
+        return closest;
+     
+    }
+    
     enable() {
         this.#isEnabled = true;
         this.toggle('normal');
         this.gui.enable();
         AudioManager.play({source:assets.sounds.ui.open});
-        this.camera.translate({source:"enable",targetPivotPosition:this.RealmData.currentLevel.terrain.centroid});
+        this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
         // To re-load the existing level ..
-        const realmData = JSON.stringify(this.#RealmData); // copy existing realm data
+        const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
         this.#RealmData.Clear(); // delete everything
         pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{
             // if(!x.entity.getComponentInParent('thirdPersonController')){
@@ -185,14 +201,15 @@ class RealmEditor {
             levelJson.templateInstances.forEach(x=>{
 
                 let obj = this.InstantiateTemplate({level:level,ItemTemplate:templateNameMap[x.templateName]});
-                obj.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+                console.log(x.position);
+                obj.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
  
         });
     }
     
     LoadJson(realmJson){
-        realmJson = Utils.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
+        realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true});
@@ -207,7 +224,7 @@ class RealmEditor {
 //            levelJson._placedItems.forEach(x=>{
             levelJson.templateInstances.forEach(x=>{
                 let obj = this.InstantiateTemplate({level:thisLevel,ItemTemplate:templateNameMap[x.templateName],properties:x.properties});
-                obj.entity.moveTo(JsonUtil.ArrayToVec3(x.position).add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+                obj.entity.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
             })
        });
         const loadedRealmGuid = realmJson.guid; 
@@ -291,6 +308,9 @@ class RealmEditor {
         this.#mode.mapClicked();
     }
 
+    clickOffMap(){
+        this.#mode.clickOffMap();
+    }
 
     UpdateData(data){
         this.RealmData.name = data['name'];

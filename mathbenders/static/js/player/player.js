@@ -9,7 +9,7 @@ class PlayerClass {
     constructor(args={}){
         const { startingPosition = pc.Vec3.ZERO } = args;
         // TODO: Remove global refs e.g. to Game.
-        // TODO: separate 
+        // TODO: Add separate class instance/ listeners for (e..g) numberpickup, gadgetpickup, ladder  .. 
 
         // root player entity
         this.entity = new pc.Entity("Player");
@@ -56,7 +56,7 @@ class PlayerClass {
 
         let handEntity = new pc.Entity();
         pc.app.root.addChild(handEntity);
-        handEntity.reparent(Game.player);
+        handEntity.reparent(this.entity);
         handEntity.setLocalPosition(0, 0, 1);
         this.hand = handEntity;
         this.entity.script.create('playerPickup',{attributes:{
@@ -72,7 +72,6 @@ class PlayerClass {
         this.entity.moveTo(startingPosition.clone());//.add(new pc.Vec3(rx,0.5+ry,rz)));
         
         GameManager.subscribe(this,this.onGameStateChange);
-        Game.player = this.entity;
 
 
         // GUI screen for player
@@ -91,6 +90,11 @@ class PlayerClass {
         this.inventory = new Inventory({Player:this});
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         this.entity.collision.on('collisionstart', this.onCollisionStart, this);
+
+        this.entity.moveTo(Game.c.getPosition());
+        let portalCam = new PortalCam();
+
+
 
     }
 
@@ -186,12 +190,14 @@ class PlayerClass {
     interactWithNumber({entity:entity}){
 
         if (this.inventory.heldGadget){
+            // Player holding gadget
             const frac = entity._template.fraction;
             const collected = this.inventory.loadNumberIntoGadget(frac);
             if (collected) {
+                // Player gadget successfully laoded number
                 entity.destroy();
-                 
             } else {
+                // Player gadget did not load number, so put number into backpack
                 const collected2 = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
                 if (collected2) { // awkward.. but.. multiple switchings happening
                     entity.destroy();
@@ -199,7 +205,7 @@ class PlayerClass {
 
             }
         } else { 
-            // console.log(`Number ${entity.script.numberInfo.fraction} added to inventory`);
+            // Player not holding gadget, put number into backpack
             const collected = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
             if (collected) {
                 entity.destroy();
@@ -228,8 +234,9 @@ class PlayerClass {
     interactWithObject({entity:entity}){
         const template = entity._template;
         if (template instanceof GadgetPickup){
-            const Gadget = template.constructor.onCollect();
-            if (this.inventory.collectGadget(Gadget)){
+            const Gadget = template.constructor.onCollect(); // Ask the Pickup which Gadget I'm supposed to get 
+            const collected = this.inventory.collectGadget(Gadget);
+            if (collected){ 
                 entity._template = null;
                 entity.destroy();
             } else {
@@ -249,14 +256,12 @@ class PlayerClass {
                 this.interactWithObject({entity:result.other});
             }
         }
-
-};
-
- 
-
+    }
 }
 
+ 
 window.Player = new PlayerClass();
-PlayerMessenger.build(); 
-PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
-Player.entity.moveTo(Game.c.getPosition());
+
+        PlayerMessenger.build(); 
+        PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
+

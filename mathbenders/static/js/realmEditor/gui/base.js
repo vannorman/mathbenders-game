@@ -93,6 +93,7 @@ export default class GUI {
         let raycastResult = this.realmEditor.camera.cameraComponent.screenPointToRay(Mouse.x-adjust,Mouse.y);
         // Whew ok bs math is over
         if (raycastResult) {
+            // console.log("hit "+raycastResult.entity.name+", wp:"+raycastResult.point.y.toFixed(2));
             worldPointUnderCursor = raycastResult.point;
             this.#lastCameraDistance = pc.Vec3.distance(worldPointUnderCursor,this.realmEditor.camera.entity.getPosition());
         } else {
@@ -194,7 +195,19 @@ export default class GUI {
             opacity:1,
             useInput : true,
         });
-        this.#mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()})
+        this.#mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()}) // i don't love binding this here, awkward.
+
+        // and worse,
+        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
+            // console.log("Mouse x:"+Mouse.x/pc.app.graphicsDevice.canvas.clientWidth);
+            // If we click to the left of the map, e.g. anywhere on the builder panels etc, set mode to normal.
+            // Will conflic twith toggle('draggingitem') if we clicked an icon tho.
+            if (Mouse.x/pc.app.graphicsDevice.canvas.clientWidth < 0.29){
+                this.realmEditor.clickOffMap(); 
+            }
+
+        }, this);
+
 
         gui.addChild(this.#mapPanel);
 

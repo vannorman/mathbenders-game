@@ -1,7 +1,6 @@
 export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
-    get entity(){ console.log("deprecate plz"); return this.template.entity; }
 
     constructor(args){
         const {template,onChangeFn,getCurValFn,buttonIndex,valueType}=args;
@@ -115,37 +114,69 @@ export class ScaleProperty extends Property {
 
 
         var y=0;
-        const elementGrid = UI.createElementGrid({rowDim:3, colDim:5});
-        elementGrid.elements.forEach(x=>{
-            console.log("x;"+x);
-            x.element.useInput = true;
-            UI.HoverColor({element:x.element});
-            x.on('mousedown',function(){console.log('click:'+y);});
-            y++;
-        });
+        const rowDim = 3;
+        const colDim = 5;
+        const elementGrid = UI.createElementGrid({rowDim:rowDim, colDim:colDim, spacing:[10,40],defaultSize:[20,20]});
+
+        var text0;
+        var text1;
+        var text2;
+
+        function setSizeText(size){
+            text0.text = size.x.toFixed(1);
+            text1.text = size.y.toFixed(1);
+            text2.text = size.z.toFixed(1);
+        }
+        
+        function modScale(scale){
+            let size = $this.getCurValFn($this.template).clone();
+            size = size.clone().add(scale);
+            $this.onChangeFn($this.template,size);
+            setSizeText(size);
+        }
+
+        function text(el){
+            return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
+        }
+        
+        const deltaScale = 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
+
+        for(let i=0;i<colDim;i++){
+            for(let j=0;j<rowDim;j++){
+                const index = (j * colDim) + i;
+                const el = elementGrid.elements[index];
+                UI.HoverColor({element:el.element});
+                el.element.useInput = true;
+                // text(({parent:el}).element.text=index;
+               // const text2 = text(({anchor:[0.5,0.8,0.5,0.8],parent:panel});
+                switch(i){
+                case 0: text(el).text = "<<";break;
+                case 1: text(el).text = "<";break;
+                case 2: break;
+                case 3: text(el).text = ">";break;
+                case 4: text(el).text = ">>";break;
+                }
+
+                switch(index){
+                case 0: el.element.on('mousedown',function(){modScale(new pc.Vec3(-deltaScale*5,0,0))}); break;
+                case 1: el.element.on('mousedown',function(){modScale(new pc.Vec3(-deltaScale,0,0))}); break;
+                case 2: text0 = text(el); text0.text="?";break; 
+                case 3: el.element.on('mousedown',function(){modScale(new pc.Vec3(+deltaScale,0,0))}); break;
+                case 4: el.element.on('mousedown',function(){modScale(new pc.Vec3(+deltaScale*5,0,0))}); break;
+
+                case 7: text1 = text(el); 
+
+                case 12: text2 = text(el);
+
+                }
+            }
+        }
 
         panel.addChild(elementGrid.group);
-
-        const text0 = Property.text({anchor:[0.5,0.2,0.5,0.2],parent:panel});
-        const text1 = Property.text({anchor:[0.5,0.5,0.5,0.5],parent:panel});
-        const text2 = Property.text({anchor:[0.5,0.8,0.5,0.8],parent:panel});
-        function setSizeText(size){
-            text0.element.text = size[0];
-            text1.element.text = size[1];
-            text2.element.text = size[2];
-        }
-        const size = this.getCurValFn(this.entity);
+        
+        const size = this.getCurValFn(this.template);
         setSizeText(size);
 
-        const upBtn = Property.upBtn({anchor:[0.2,0.2,0.2,0.2]});
-        const deltaScale = 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
-        upBtn.element.on('mousedown',function(){
-            let size = $this.getCurValFn($this.entity).clone();
-            size.x += deltaScale;
-            $this.onChangeFn($this.entity,size);
-            setSizeText(size);
-        });
-        panel.addChild(upBtn);
         this.ui=panel;
  
     }
@@ -162,7 +193,7 @@ export class MoveProperty extends Property {
         const moveButton = UI.SetUpItemButton({
             parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
             width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
-            mouseDown:function(){realmEditor.BeginDraggingEditedObject();} // pass entity instead?
+            mouseDown:function(){realmEditor.BeginDraggingEditedObject();} 
         });
         return moveButton;
     }
@@ -182,7 +213,7 @@ export class RotateProperty extends Property {
             parentEl:container,
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
             anchor:[.2,.5,.2,.5],
-            mouseDown:function(){   $this.entity.rotate(45);    }
+            mouseDown:function(){   $this.template.entity.rotate(45);    }
         });
 
         // Set up Rotate Right button
@@ -190,7 +221,7 @@ export class RotateProperty extends Property {
             parentEl:container,
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
             anchor:[.8,.5,.8,.5],
-            mouseDown:function(){   $this.entity.rotate(-45);    }
+            mouseDown:function(){   $this.template.entity.rotate(-45);    }
         });
 
         return container;
@@ -214,15 +245,15 @@ export class FractionProperty extends Property {
         function setFracText(frac){
             fracText.element.text = frac.numerator + "/" + frac.denominator;
         }
-        setFracText(this.getCurValFn($this.entity));
+        setFracText(this.getCurValFn($this.template));
  
         const upBtn = Property.upBtn();
         upBtn.element.on('mousedown',function(){
             // Where is the fraction stored here ? Do we double store it (once for the UI) or do we dig deep for the frac every time?
             // Let's dig deep why not
-            let curFrac = $this.getCurValFn($this.entity);
+            let curFrac = $this.getCurValFn($this.template);
             let newFrac = new Fraction(curFrac.numerator+1,curFrac.denominator);
-            $this.onChangeFn($this.entity,newFrac);
+            $this.onChangeFn($this.template,newFrac);
             setFracText(newFrac);
         });
 
@@ -251,14 +282,14 @@ export class SizeProperty extends Property {
             text1.element.text = size[1];
             text2.element.text = size[2];
         }
-        const size = this.getCurValFn(this.entity);
+        const size = this.getCurValFn(this.template);
         setSizeText(size);
 
         const upBtn = Property.upBtn({anchor:[0.2,0.2,0.2,0.2]});
         upBtn.element.on('mousedown',function(){
-            let size = $this.getCurValFn($this.entity);
+            let size = $this.getCurValFn($this.template);
             size[0]++;
-            $this.onChangeFn($this.entity,size);
+            $this.onChangeFn($this.template,size);
             setSizeText(size);
         });
         panel.addChild(upBtn);

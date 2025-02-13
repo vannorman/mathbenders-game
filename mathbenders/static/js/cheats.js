@@ -311,7 +311,18 @@ $(document).on("keydown", function (e) {
   //      let p = player.droppedPosition;
 //        cb = Game.Instantiate.NumberCube({position:p});
     }
-    if (ee == 'X'){
+    if (ee == 'C'){
+        const num = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? 1000 : 2;
+        const frac = new Fraction(-num,1);
+        const options = {
+            position : Player.droppedPosition,
+            properties : {
+                NumberSphere : frac
+            }
+        } 
+        const ns = new NumberSphere(options);
+     }
+     if (ee == 'X'){
         const num = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? 1000 : 2;
         const frac = new Fraction(num,1);
         const options = {

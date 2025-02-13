@@ -119,7 +119,7 @@ Portal.prototype.ConnectTo = function(portal2){
 
 Portal.prototype.update = function(dt){
     let thresholdRadius = 200;
-    let radius = pc.Vec3.distance(Game.player.getPosition(),this.entity.getPosition);
+    let radius = pc.Vec3.distance(Player.entity.getPosition(),this.entity.getPosition);
     if (radius < thresholdRadius){
        Camera.portal.staticObjSource = this.entity;
        Camera.portal.staticObjTarget = this.dest;

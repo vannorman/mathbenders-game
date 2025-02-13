@@ -20,6 +20,7 @@ NumberInfo.Shape = {
 
 NumberInfo.prototype.initialize = function() {
     const $this=this;
+
 }
 
 
@@ -137,7 +138,12 @@ NumberInfo.prototype.updateNumberText  = function(properties, context){
 
 
 NumberInfo.prototype.onCollisionStart = function (result) {
-    if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return;
+    // if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return; //huh?
+    if (this.entity._template.constructor.name == "NumberCube" && result.other._template.constructor.name == "NumberCube"){
+        console.log("Cubes");
+        // cubes don't combine
+        return;
+    }
     this.OfflineCollision(result);
 
 
@@ -193,6 +199,12 @@ NumberInfo.ResolveCollisionOffline = function(data){
 
         // get resulting number and produce it
         const collisionResult = NumberInfo.GetCollisionResolutionOffline({obj1:obj1,obj2:obj2});
+        if (!collisionResult) {
+            console.log("skip col");
+            return;
+        }
+
+        // Create the number
         NumberInfo.ProduceCollisionResult(collisionResult);
        
         // destroy collided objects, remove them from collisionPairs
@@ -204,26 +216,30 @@ NumberInfo.ResolveCollisionOffline = function(data){
 }
 NumberInfo.ProduceCollisionResult = function(collisionResult){
     
-    const templateName = collisionResult.templateNameToClone;
+    const TemplateToClone = collisionResult.TemplateToClone;
+    const fractionKey = TemplateToClone.name;
     const maxNumber = collisionResult.maxNumber;
     const options = {
         position : JsonUtil.JsonToVec3(collisionResult.position),
         rotation : JsonUtil.JsonToVec3(collisionResult.rotation),
         rigidbodyType : collisionResult.rigidbodyType,
         rigidbodyVelocity : collisionResult.resultVelocity,
-        numberInfo : {fraction : collisionResult.resultFrac },
-//        extraScripts : [{scriptName:'sinePop',scriptAttributes:{popTime:2},expirationDate:Date.now()+1500}],
+        properties : {},
     }
-    if (options.numberInfo.fraction.numerator == 0) {
+    options.properties[TemplateToClone.name]=collisionResult.resultFrac;
+    if (options.properties[TemplateToClone.name].numerator == 0) {
         NumberInfo.destroyNumberFx({position:options.position,maxNumber:maxNumber});
     } else {
-        // console.log("Sinepop:"+templateName);
-        const result = new NumberSphere(options); //Game.Instantiate[templateName](options); // TODO: Replace with Promise return
-        result.script.create('sinePop');
+        const result = new TemplateToClone(options);
+        // @Eytan here we have (competing / awkward) a data issue where NumberSphere and NumberCube have different "keys" for Fraction 
+        // (as defined by editablePropertiesMap)
+        // NumberSphere(options); //Game.Instantiate[templateName](options); // TODO: Replace with Promise return
+
+        result.entity.script.create('sinePop');
 
         // Awkward way to propagate "destroy after seconds" which was detected if both parent numbers had destroyAfterSEconds
         if (collisionResult.destroyAfterSecondsScript){
-            result.script.create('destroyAfterSeconds',{attributes:{seconds:collisionResult.destroyAfterSeconds}});
+            result.script.entiy.create('destroyAfterSeconds',{attributes:{seconds:collisionResult.destroyAfterSeconds}});
         }
 
         AudioManager.play({source:assets.sounds.numberEat,position:options.position,positional:true,refDist:20});
@@ -301,7 +317,7 @@ NumberInfo.ResolveCollision = function(data){
     const collisionResult = data.collisionResult;
     //console.log("resolve collision");
     
-    const templateName = collisionResult.templateNameToClone;
+    const templateName = collisionResult.TemplateToClone;
     const options = {
         position : JsonUtil.JsonToVec3(collisionResult.position),
         rigidbodyType : collisionResult.rigidbodyType,
@@ -397,8 +413,16 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         midpoint = obj2.getPosition();
         wasKin2 = true;
     }
+    if (wasKin1 && wasKin2) {
+    //    console.log("kin1, kin2 true");
+    } else {
+        // console.log("k1:"+wasKin1+", k2:"+wasKin2);
+    }
+
+    // Somehow need to prevent collision between two kinematic numbers .. in general
     const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    const templateNameToClone = wasKin1 ? obj1.name : obj2.name; // object name is set to templateName in Game.Instantiate, should be stored on an objectInfo script, it is stored in networkObjectInfo but we're offline so shrugg 
+    const TemplateToClone = wasKin1 ? obj1._template.constructor : obj2._template.constructor; // object name is set to templateName in Game.Instantiate, should be stored on an objectInfo script, it is stored in networkObjectInfo but we're offline so shrugg 
+    // console.log("TTC:"+TemplateToClone.name);
     const rot = wasKin1 ? obj1.getEulerAngles() : wasKin2 ? obj2.getEulerAngles : pc.Vec3.ZERO;
 
     // Did both numbers have "destroy after seconds"? If so, this new one has it too
@@ -422,7 +446,7 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         resultFrac : resultFrac,
         rigidbodyType : rbType,
         resultVelocity : resultVelocity,
-        templateNameToClone : templateNameToClone,
+        TemplateToClone : TemplateToClone,
         rotation : rot,
         position : JsonUtil.Vec3ToJson(midpoint), // because we pass to server and back, server prefers json over vec3 obj
         maxNumber : Math.abs(frac1.numerator/frac1.denominator),
@@ -448,7 +472,8 @@ NumberInfo.GetCollisionResolution = function(collisionData){
         wasKin2 = true;
     }
     const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    const templateNameToClone = wasKin1 ? obj1.script.networkObjectInfo.objectProperties.templateName : obj2.script.networkObjectInfo.objectProperties.templateName; // dislike cloning one of the two, just make a fresh one?
+    const TemplateToClone = wasKin1 ? obj1._template.constructor : obj2._template.constructor;
+    //obj1.script.networkObjectInfo.objectProperties.templateName : obj2.script.networkObjectInfo.objectProperties.templateName; // dislike cloning one of the two, just make a fresh one?
 
     // If two objs collide and one wasn't pick-uppable, then the result is not pick-uppable
     let pickup = true;
@@ -465,7 +490,7 @@ NumberInfo.GetCollisionResolution = function(collisionData){
         resultFrac : resultFrac,
         rigidbodyType : rbType,
         resultVelocity : resultVelocity,
-        templateNameToClone : templateNameToClone,
+        TemplateToClone : TemplateToClone,
         position : JsonUtil.Vec3ToJson(midpoint), // because we pass to server and back, server prefers json over vec3 obj
     }
 

@@ -2,20 +2,10 @@ import InventorySlot from './slot.js';
 
 export default class Inventory {
 
-    // New architecutre
-    // class PlayerItemCollisionDetector which broadcasts item collision events (e..g player walks into a Multiblaster or Number)
-    // Inventory subscribes to collision events to decide what to do with them
-
-    /*
-        subscribe(Player.collisionDetector.
-
-    */
-
-
     beltSlots;
     backpackSlots;
     get allSlots() { return [ ...this.beltSlots, ...this.backpackSlots]; }
-    get firstAvailableSlot() { return this.allSlots.find(x=> !x.isUsed) || null; }
+    get firstAvailableSlot() { return this.allSlots.find(x=> x.isEmpty) || null; }
 
     constructor(args={}){
         const {Player}=args;
@@ -37,11 +27,11 @@ export default class Inventory {
         this.selectSlot(this.beltSlots[0]);
 
     }
-
     
 
     getSelectedItem(){
-        return this.selectedSlot?.Template;
+        // return null if no Template
+        return this.selectedSlot.Template;
     }
 
     collectGadget(Template){
@@ -72,6 +62,8 @@ export default class Inventory {
             availableSlot.placeItem({Template:Template,properties:properties});
             if (this.beltSlots.find(x=>x==availableSlot)){
                 // The available slot was a belt slot, so select it.
+                // IF the newly picked up item has a higher priority than the previously held item.
+                // No current way to check whether NumberSphere priority is higher than heldGadget
                 this.selectSlot(availableSlot);
             }
             return true;
@@ -206,6 +198,14 @@ export default class Inventory {
     
     }
 
+    dropItemOntoSlot(){
+
+    }
+
+    swapTwoSlots(slot1,slot2){
+        // if 
+    }
+
     hide(){
         this.ui.enabled=false;
         this.enabled=false;
@@ -219,6 +219,28 @@ export default class Inventory {
         this.heldGadget?.popFxAmmo();
     }
 
+    modifyInventoryNumbers(modifyOp){
+        this.allSlots.filter(x => !x.isEmpty).forEach(slot => {
+
+            Object.entries(slot.itemProperties).forEach(([key,value]) => {
+                if (value instanceof Fraction){
+                    const result = modifyOp(value);
+                    slot.itemProperties[key] = result; // this is awkward af lol
+                    slot.popFx();
+                    if (this.selectedSlot == slot){
+                        this.heldItemPopFx();
+                    }
+                }
+            })
+                
+        });
+
+    }
+
+    heldItemPopFx(){
+        this.heldItem.entity.addComponent('script');
+        this.heldItem.entity.script.create('sinePop');
+    }
 
 }
 

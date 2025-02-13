@@ -1,7 +1,8 @@
 export default class Template {
 
     static name="TemplateSuper";
-    static icon;
+    static _icon;
+    static icon(properties={}) { return this._icon};
     static editablePropertiesMap=[];
     static isThrowable = false;
     colliders = new Map();
@@ -19,6 +20,8 @@ export default class Template {
     static get isGadget(){ return false;  }
 
     constructor(args={}) {
+        // NOTE: "properties" arg will contain the specific settings per template (e.g. Fraction) 
+        // and must match editablePropertyMap as defined per template
         const {
             position=pc.Vec3.ZERO,
             rotation=pc.Vec3.ZERO,
@@ -32,6 +35,7 @@ export default class Template {
         pc.app.root.addChild(this.entity);
         this.entity.moveTo(position,rotation);
         if (rigidbodyType != 'none'){
+            //console.log("T;"+rigidbodyType+" on:"+this.name);
             this.entity.addComponent('rigidbody',{type:rigidbodyType});
             this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
         }

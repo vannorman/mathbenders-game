@@ -13,6 +13,7 @@ export default class Level {
             newTerrain.generate();
             this._terrain = newTerrain;
 
+
         }
     }
     get terrain(){ return this._terrain;}

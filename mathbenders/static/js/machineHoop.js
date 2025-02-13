@@ -8,7 +8,7 @@
 var MachineHoop = pc.createScript('machineHoop');
 MachineHoop.attributes.add('numberTextBack', { type: 'entity' });
 MachineHoop.attributes.add('numberTextFront', { type: 'entity' });
-MachineHoop.attributes.add('modifyOp', { type: 'string', default: '' });
+// MachineHoop.attributes.add('modifyOp', { type: 'string', default: '' });
 MachineHoop.attributes.add('audioManager', { type: 'object' }); 
 MachineHoop.attributes.add('popSound', { type: 'object' }); 
 MachineHoop.attributes.add('onCrossFn', { type: 'function' }); 
@@ -48,8 +48,16 @@ MachineHoop.prototype.init = function () {
     arch.render.meshInstances[0].material = Materials.red;
     arch.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC})
 
-    this.setFraction(new Fraction(2,1));
+    //this.setFraction(new Fraction(2,1));
 };
+
+Object.defineProperty(MachineHoop.prototype, "modifyOp", {
+        get: function modifyOp() {
+            return (frac) => { Fraction.Multiply(this.fraction, frac, true);};
+            // code
+        }
+    });
+
 
 MachineHoop.prototype.setFraction = function(frac){
     this.fraction = Fraction.ReduceOverIntegers(frac);
@@ -96,12 +104,13 @@ MachineHoop.prototype.Cross = function (options){
    } else {
         // console.log("HUH? No number hmmmmmmmmmm");
         // probably thirdpersoncontroller, need to pop all my invs
-        Player.inventory.script.modifyInventoryNumbers(x => {
+        Player.inventory.modifyInventoryNumbers(x => {
             return MachineHoop.ModifyNumber({direction:direction,fracToModify:x,hoopFrac:context.fraction});
         });
     }
     delete(this.crossingObjs[obj.getGuid()]); // "This" refers to the CrossingDetector script instance; since Cross is called from there
 }
+
 
 
 MachineHoop.prototype.getModifiedFraction = function (original) {

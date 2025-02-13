@@ -135,7 +135,7 @@ class UISlider {
 
 const UI = {
     createElementGrid(options={}){
-        const {rowDim=3,colDim=3,spacing,defaultSize={x:50,y:50}}=options;
+        const {rowDim=3,colDim=3,spacing=[10,10],defaultSize=[50,50]}=options;
     // Validate input
         if (rowDim <= 0 || colDim <= 0) {
             throw new Error("rowDim and colDim must be greater than 0");
@@ -144,16 +144,20 @@ const UI = {
         // Create the parent layout group entity
         const layoutGroup = new pc.Entity("LayoutGroup");
         layoutGroup.addComponent("element", {
-            type: "group",
-            anchor: [0, 0, 1, 1],
+            type: "image",
+            anchor: [0.5, 0.5, 0.5, 0.5],
             pivot: [0.5, 0.5],
+            width: (colDim * defaultSize[0]) + ((colDim-1) * spacing[0]), 
+            height:(rowDim * defaultSize[1]) + ((rowDim-1) * spacing[1]),
         });
+
+        Game.l = layoutGroup;
         
         // Add layout group component
         layoutGroup.addComponent("layoutgroup", {
             orientation: pc.ORIENTATION_HORIZONTAL, // Horizontal layout by default
-            spacing:new pc.Vec2(spacing,spacing),
-            widthFitting: pc.FITTING_BOTH,
+            spacing:spacing,
+            widthFitting: pc.FITTING_NONE,
             heightFitting: pc.FITTING_BOTH,
             wrap: true // Wrap to form rows and columns
         });
@@ -161,16 +165,19 @@ const UI = {
         const elements = [];
 
         // Create elements and add them to the layout group
+        let color = new pc.Color(0.2,0.4,0.6);
         for (let i = 0; i < rowDim; i++) {
             for (let j = 0; j < colDim; j++) {
                 const element = new pc.Entity(`Element-${i}-${j}`);
                 element.addComponent("element", {
                     type: "image",
-                    anchor: [0, 0, 0, 0], // No anchor to avoid stretching
+                    anchor: [0, 0, 0, 0],
                     pivot: [0.5, 0.5],
-                    width: defaultSize.x, // Example fixed width (can be adjusted as needed)
-                    height: defaultSize.y // Example fixed height (can be adjusted as needed)
+                    width: defaultSize[0],
+                    height: defaultSize[1], 
+                    color:color,
                 });
+                color = new pc.Color((color.x+.1)%1,(color.y-1)%1,(color.z*2)%1);
                 element.addComponent('layoutchild');
                 // Add the element to the layout group
                 layoutGroup.addChild(element);

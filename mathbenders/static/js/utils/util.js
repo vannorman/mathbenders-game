@@ -512,18 +512,18 @@ function NetworkNumberCube(p){
 }
 
 
-function NumberCube(p,s){
-//    console.log("OLD");
-    let cube = Cube(p,s,true,'dynamic');
+//function NumberCube(p,s){
+////    console.log("OLD");
+//    let cube = Cube(p,s,true,'dynamic');
+//    
+//    cube.addComponent('script');
+//    cube.script.create('numberInfo',{});
+//    cube.script.create('pickUpItem');
+//    cube.script.pickUpItem.icon = assets.textures.numberCube1;
+//    cube.script.create('recordPosition');
+//    return cube;
     
-    cube.addComponent('script');
-    cube.script.create('numberInfo',{});
-    cube.script.create('pickUpItem');
-    cube.script.pickUpItem.icon = assets.textures.numberCube1;
-    cube.script.create('recordPosition');
-    return cube;
-    
-}
+//}
 
 function ToonCube(p,s,rigid=true){
     let cube = Cube(p,s,rigid);

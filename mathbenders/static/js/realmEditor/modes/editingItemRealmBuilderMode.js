@@ -49,7 +49,14 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         // TODO: for placed Entity UI / data / behavior, document what is needed / and one specific example : Eytan
     }
 
+    clickOffMap(){
+        // User clicked away from map and no longer wants to edit this item; close the tray
+        this.toggle('poppingOut');
+
+    }
+
     mapClicked(){
+        // User clicked on the map, but did not hit the tray, so the map was clicked; close the tray
         this.toggle('poppingOut');
     }
 

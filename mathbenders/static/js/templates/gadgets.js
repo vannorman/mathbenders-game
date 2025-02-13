@@ -1,7 +1,7 @@
 import Template from './template.js';
 import HeldItem from './heldItem.js';
 export class Gadget extends Template {
-    static icon = assets.textures.ui.trash;
+    static _icon; //= assets.textures.ui.trash;
     static pickupSound = assets.sounds.getGadget;
     static texture = assets.textures.gadget;
     static model;
@@ -66,10 +66,8 @@ export class Gadget extends Template {
 }
 
 export class Multiblaster extends Gadget {
-    // Specifically not a template
-    // In no case will this ever exist except when player has it or selects it in inventory
-    // This conflicts with the way Slot handles Template so ok it is a template
-    static icon = assets.textures.ui.icons.multiblaster;
+    
+    static _icon = assets.textures.ui.icons.multiblaster;
     static model = assets.models.gadgets.multiblaster;
     ammo = [];
     ammoGfx = [];
@@ -90,7 +88,7 @@ export class Multiblaster extends Gadget {
         return new HeldItem({
             entity:heldItemGfx,
             position:new pc.Vec3(0.7,0.5,-0.8),
-            rotation:new pc.Vec3(90,0,0),
+            rotation:new pc.Vec3(115,0,0),
         });
 
 

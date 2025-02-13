@@ -81,7 +81,7 @@ class InstantiationDraggingMode {
 
 class PreInstantiationDragMode extends InstantiationDraggingMode {
     onEnter(){
-        realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon);
+        realmEditor.gui.setCustomCusror(this.dragger.ItemTemplate.icon());
     }
     onExit(){
         realmEditor.gui.setNormalCursor();

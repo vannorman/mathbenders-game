@@ -20,13 +20,13 @@ PortalCameraRenderTexture.attributes.add('renderPlane', {type: 'entity'});// a t
 // look at vec3 delta between player camera and portal we're standing next to, 
 // then position this object equivalently, relative to the target portal
 
-class PortalCameraService {
-    static init(){
-        PortalCameraRenderTexture.prototype.init();
-    }
-}
+//class PortalCameraService {
+//    static init(){
+//        PortalCameraRenderTexture.prototype.init();
+//    }
+//}
 
-PortalCameraRenderTexture.prototype.init = function(){
+PortalCameraRenderTexture.prototype.initialize = function(){
     this.sourceCam = Camera.main.entity;
     //console.log('init, maincam:'+Camera.main.entity);
     this.sourceTracker = new pc.Entity("sourceTracker");
@@ -146,9 +146,9 @@ PortalCameraRenderTexture.prototype.postUpdate = function(dt){
     if (this.checkPortalTimer < 0 && pc.app.root.getComponentsInChildren('portal').length > 0){
         const interval = 0;//Math.random()*0.5;
         this.checkPortalTimer = interval;
-        const nearestPortal = Game.player.getNearestObjectOfType('portal').entity;
-        const distToNearestPortal = Game.player.getPosition().distance(nearestPortal.getPosition());
-        const distToCurrentPortal = this.currentPortal ? Game.player.getPosition().distance(this.currentPortal.getPosition()) : Infinity;
+        const nearestPortal = Player.entity.getNearestObjectOfType('portal').entity;
+        const distToNearestPortal = Player.entity.getPosition().distance(nearestPortal.getPosition());
+        const distToCurrentPortal = this.currentPortal ? Player.entity.getPosition().distance(this.currentPortal.getPosition()) : Infinity;
         if (distToNearestPortal < distToCurrentPortal){
             this.currentPortal = nearestPortal;
             // we're near a different portal, so switch camera approps

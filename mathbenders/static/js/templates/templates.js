@@ -17,7 +17,7 @@ class NumberHoop extends Template {
 
     ]
   
-    static icon = assets.textures.ui.icons.hoop;
+    static _icon = assets.textures.ui.icons.hoop;
 
     setup(){
         const scale = 1.5;
@@ -38,12 +38,11 @@ class NumberHoop extends Template {
                 },
                 hoopMeshRenderAsset : assets.numberHoop.resource.renders[1],
                 hoopTextureAsset : assets.textures.hoop,
-
                 }});
         hoop.setEulerAngles(new pc.Vec3(-90,0,0));                        
         hoop.script.machineHoop.init();
         this.script = hoop.script.machineHoop;
-
+        this.script.setFraction(new Fraction(2,1));
     }
 
     get fraction(){ return this.script.fraction; }
@@ -53,7 +52,7 @@ class NumberHoop extends Template {
 
 class NumberFaucet extends Template {
 
-    static icon = assets.textures.ui.icons.faucet;
+    static _icon = assets.textures.ui.icons.faucet;
     static editablePropertiesMap = [
          {  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -101,7 +100,7 @@ class NumberFaucet extends Template {
 }
 
 class PlayerStart extends Template {
-    static icon = assets.textures.ui.builder.start;
+    static _icon = assets.textures.ui.builder.start;
 
     setup () {
         const childOffset = new pc.Vec3(0,0,0.5)
@@ -122,7 +121,7 @@ class PlayerStart extends Template {
                 break;
             case GameState.Playing:
                 //console.log("Levelbuilder off");
-                Game.player.moveTo($this.entity.getPosition().clone().add(pc.Vec3.UP.clone().mulScalar(10)));
+                Player.entity.moveTo($this.entity.getPosition().clone().add(pc.Vec3.UP.clone().mulScalar(2)));
                 $this.entity.enabled=false;
                 break;
             }
@@ -139,20 +138,20 @@ class PlayerStart extends Template {
 }
 
 class NumberWall extends Template {
-    static icon = assets.textures.ui.icons.numberWall;
+    static _icon = assets.textures.ui.icons.numberWall;
     static editablePropertiesMap = [
          {  
             name : "Fraction1",
             property : FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction = value; }, 
-            getCurValFn : (template) => { return template.fraction; }, 
+            onChangeFn : (template,value) => { template.fraction1 = value; }, 
+            getCurValFn : (template) => { console.log("getvalonnumberwall:"+template.name); return template.fraction1; }, 
          },
 
          {  
             name : "Fraction2",
             property : FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction = value; }, 
-            getCurValFn : (template) => { return template.fraction; }, 
+            onChangeFn : (template,value) => { template.fraction2 = value; }, 
+            getCurValFn : (template) => { return template.fraction2; }, 
          },
          {  
             name : "Size",
@@ -175,7 +174,7 @@ class NumberWall extends Template {
         this.entity.script.create('machineNumberWall');
         // @Eytan, I have a PlacedItem problem here. PlacedItem 
         const $this = this;
-        this.entity.script.machineNumberWall.onChangeFn = function(){$this.updateColliderMap(); }
+        this.entity.script.machineNumberWall.onChangeFn = function(){console.log("ch.");$this.updateColliderMap(); }
         this.entity.script.machineNumberWall.rebuildWall();
         this.script = this.entity.script.machineNumberWall;
     }
@@ -183,7 +182,7 @@ class NumberWall extends Template {
 }
 
 class PlayerPortal extends Template {
-    static icon = assets.textures.ui.builder.portal;
+    static _icon = assets.textures.ui.builder.portal;
 
     setup(){
         this.entity.addComponent("script");
@@ -196,7 +195,7 @@ class PlayerPortal extends Template {
 }
 
 class CastleTurret extends Template {
-    static icon = assets.textures.ui.icons.turret1;
+    static _icon = assets.textures.ui.icons.turret1;
 
     setup(){
         // Castle Pillar
@@ -240,7 +239,7 @@ class CastleTurret extends Template {
 }
 
 class CastleWall extends Template {
-    static icon = assets.textures.ui.icons.wall;
+    static _icon = assets.textures.ui.icons.wall;
 
     setup(){ 
         
@@ -261,7 +260,7 @@ class CastleWall extends Template {
 }
 
 class BigConcretePad extends Template {
-    static icon = assets.textures.ui.builder.concretePadBig;
+    static _icon = assets.textures.ui.builder.concretePadBig;
 
     static editablePropertiesMap = [
          {  
@@ -269,7 +268,7 @@ class BigConcretePad extends Template {
             name : ScaleProperty.constructor.name,
             property : ScaleProperty,
             // valueType : pc.Vec3,
-            onChangeFn : (template,value) => { template.scale = value; },
+            onChangeFn : (template,value) => {  template.scale = value; },
             getCurValFn : (template) => { return template.scale },
          },
     ];
@@ -301,14 +300,24 @@ class BigConcretePad extends Template {
 
 }
 
-class NumberSphere extends Template {
-    static icon = assets.textures.ui.numberSpherePos;
-    static icon_neg = assets.textures.ui.numberSphereNeg;
-    static isThrowable=true;
+class NumberCube extends Template {
+
+    // TODO: Exclude collision bewteen cubes and cubes
+    // Currently, when numberSphere collides with Numbercube, the sphere may remain; this is wrong; hiearchy should be cube remains.
+    static _icon = assets.textures.ui.numberCubePos;
+    static _icon_neg = assets.textures.ui.numberCubeNeg;
+    static icon(properties){
+        const pos = Object.values(properties).find(x=>x instanceof Fraction).numerator > 0;
+        if (pos) return this._icon;
+        else return this._icon_neg;
+    }
+    static isNumber = true;
+    static isThrowable=false; // delete and have a map of throwable items?
+
     static editablePropertiesMap = [
          {  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
-            name : "NumberSphere", // if this changes, data will break
+            // awkward but, we follow the pattern that the name is my constructor name unless otherwise noted.
+            name : this.name, // if this changes, data will break 
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction = value; }, 
             getCurValFn : (template) => { return template.fraction; }, 
@@ -316,6 +325,78 @@ class NumberSphere extends Template {
     ]
     
     constructor(args={}) {
+        // args['rigidbodyType'] = pc.RIGIDBODY_TYPE_KINEMATIC;
+        super(args);
+    }
+ 
+    setup(){
+        let cube =this.entity;
+        // cube.tags.add(Constants.Tags.PlayerCanPickUp);
+        cube.addComponent("render",{ type : "box" });
+        // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
+        const s = cube.getLocalScale.x;
+        cube.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        cube.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE.clone().mulScalar(0.5)});//new pc.Vec3(s/2, s/2, s/2)});
+        cube.addComponent('script');
+        // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
+        // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
+        // Anyway, playerPickupService can check if collided with Number tag..?
+        cube.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
+        cube.script.numberInfo.Setup();
+        cube.script.numberInfo.setFraction(new Fraction(2,1));
+
+        this.script = cube.script.numberInfo;
+    }
+
+    get fraction(){ return this.script.fraction; }
+    set fraction(value) { this.script.setFraction(value); }
+
+    static createHeldItem(properties){
+        // awkward conflict between the version of this template that is graphics only or not... ughhh
+        // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
+        // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
+        // const {fraction=new Fraction(3,1)}=args;
+        const fraction = properties[this.name]; // awkward data model.
+        const cube = new pc.Entity("helditem");
+        cube.addComponent("render",{ type : "box" });
+        cube.addComponent('script');
+        cube.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
+        cube.script.numberInfo.Setup();
+        cube.script.numberInfo.setFraction(fraction);
+        return new HeldItem({
+            entity:cube,
+        });
+    }
+}
+
+
+class NumberSphere extends Template {
+    static _icon = assets.textures.ui.numberSpherePos;
+    static _icon_neg = assets.textures.ui.numberSphereNeg;
+    static icon(properties){
+        const pos = Object.values(properties).find(x=>x instanceof Fraction).numerator > 0;
+        if (pos) return this._icon;
+        else return this._icon_neg;
+    }
+    static isNumber = true;
+
+//    static getIcon(properties={}){
+//        return this.fraction.numerator > 0 ? icon : icon_neg; }
+
+    static isThrowable=true;
+    static editablePropertiesMap = [
+         {  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : this.name, // if this changes, data will break // Should be Fraction1?
+            property : FractionProperty, 
+            onChangeFn : (template,value) => { template.fraction = value; }, 
+            getCurValFn : (template) => { return template.fraction; }, 
+         },
+    ]
+    
+    constructor(args={}) {
+//        console.log("args:")
+//        console.log(args)
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args);
     }
@@ -349,7 +430,7 @@ class NumberSphere extends Template {
         // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
         // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
         // const {fraction=new Fraction(3,1)}=args;
-        const fraction = properties.NumberSphere; // awkward data model.
+        const fraction = properties[this.name];//NumberSphere; // awkward data model.
         const sphere = new pc.Entity("helditem");
         sphere.addComponent("render",{ type : "sphere" });
         sphere.addComponent('script');
@@ -365,7 +446,7 @@ class NumberSphere extends Template {
 class GadgetPickup extends Template {}
 window['GadgetPickup'] = GadgetPickup; //awkward
 class MultiblasterPickup extends GadgetPickup {
-    static icon = assets.textures.ui.icons.multiblaster;
+    static _icon = assets.textures.ui.icons.multiblaster;
 
     static onCollect(){
         return Multiblaster;
@@ -391,11 +472,20 @@ class MultiblasterPickup extends GadgetPickup {
 
 
 
+// i can't make this work in modules sadly
+function getAllSubclasses(baseClass) {
+    return Reflect.ownKeys(globalThis)  // Get all global properties
+        .map(key => globalThis[key])    // Convert keys to values (classes)
+        .filter(value => 
+            typeof value === "function" &&  // Ensure it's a function (class)
+            value.prototype instanceof baseClass // Check inheritance
+        );
+}
 
 window.templateNameMap = {
     "Template" : Template,
-
     "NumberSphere" : NumberSphere,
+    "NumberCube" : NumberCube,
     "NumberFaucet" : NumberFaucet,
     "NumberHoop" : NumberHoop,
     "NumberWall" : NumberWall,
@@ -408,6 +498,4 @@ window.templateNameMap = {
 }
 
 // Export all templates to global scope for use in rest of app
-Object.entries(window.templateNameMap).forEach(([key,value])=>{
-      window[key] = value;
-    });
+Object.entries(window.templateNameMap).forEach(([key,value])=>{window[key]=value});

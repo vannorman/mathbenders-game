@@ -1,20 +1,19 @@
 export default class InventorySlot {
    
-    Template;
+    Template=null;
     itemProperties;
     index; // for debugging
     slotBackground;
     itemImageEntity;
 
     constructor(args={}){
+        // Currently we don't pass values for any Template or Properties here; simply create empty slots for init
+        // Currently no method to inflate inventory after a save.
         const {index=-1}=args;
         this.index=index;
         this.createGui();
         this.createText();
         this.selected=false;
-        // Always empty args, always create inv slot as empty before populating.
-        // Unless it has properties??
-        // Utility of create then populate properties vs. just create and pass props if it is full? Complexity
     }
 
     placeItem(args={}){
@@ -22,7 +21,9 @@ export default class InventorySlot {
         if (this.textEl) this.textEl.entity.destroy();
         this.Template = Template;
         this.itemProperties = properties;
-        this.itemImageEntity.element.textureAsset = Template.icon;
+        this.itemImageEntity.element.textureAsset = Template.icon(properties);
+         
+        
         // console.log("placed "+Template.name+" in slot "+this.index);
         this.updateText();
    }
@@ -32,7 +33,6 @@ export default class InventorySlot {
         this.itemProperties = null;
         this.itemImageEntity.element.texture = null;
         this.clearText();
-        
     }
 
     createGui(){
@@ -111,15 +111,20 @@ export default class InventorySlot {
     }
 
     onSelect(){
+        this.selected = true;
+        this.popFx();
+    }
+
+    popFx(){
         this.itemImageEntity.addComponent('script');
         this.itemImageEntity.script.create('sinePop');
-        this.selected = true;
+
     }
     deSelect(){
         this.selected = false;
     }
 
-    get isUsed() { return this.Template != null; }
+    get isEmpty() { return this.Template === null; }
 }
 
 

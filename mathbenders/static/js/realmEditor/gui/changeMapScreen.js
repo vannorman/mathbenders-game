@@ -100,7 +100,7 @@ export default class ChangeMapScreen {
                         level.Clear();
                         const levelIndex = realmEditor.RealmData.Levels.indexOf(level);
                         realmEditor.RealmData.Levels.splice(levelIndex,1);
-                        $this.UpdateMapIcons();
+                        $this.UpdateMapIcons({levels:realmEditor.RealmData.Levels});
                     }
                 }
             });

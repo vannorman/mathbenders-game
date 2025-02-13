@@ -24,7 +24,9 @@ Object.defineProperty(pc.ElementComponent.prototype, "screenCornersCenter", {
         // code
     }
 });
-
+setTimeout(function(){pc.Vec3.prototype.toJSON = function() {
+    return { Vec3: { x: this.x, y: this.y, z: this.z } };
+};},1000); // I hate this but if i don't settimeout it doesn't write it properly.
 pc.Vec3.prototype.distanceToSquared = function(b) {
 	var dx = b.x - this.x;
 	var dy = b.y - this.y;

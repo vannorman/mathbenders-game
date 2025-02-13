@@ -112,32 +112,15 @@ export default class BuilderPanel {
             width:64,
             height:64,
             type: 'image',
-            textureAsset: ItemTemplate.icon,
+            textureAsset: ItemTemplate.icon(),
             useInput: true,
             layer: pc.LAYERID_UI,
         });
         child.addChild(childImage);
         UI.HoverColor({element:childImage.element});
 
-        // add a text element
-//        const textElement = new pc.Entity('Text');
-//        textElement.addComponent('element', {
-//            type: 'text',
-//            text: text,
-//            fontAsset: assets.fonts.montserrat, // Replace with your font asset id
-//            autoFitWidth:true, // not work
-//            autoFitHeight:true, // not work
-//            fontSize : 12,
-//            color: new pc.Color(0,0,0), // 
-//            width: 50,
-//            height: 100,
-//            pivot: new pc.Vec2(0.5, 2.0), // Center pivot
-//            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5), // Center anchor
-//        });
-//        childImage.addChild(textElement);
         
         childImage.element.on('mousedown',function(){
-            //realmEditor.BeginDraggingNewObject({templateName:templateName,iconTextureAsset:textureAsset});
             realmEditor.BeginDraggingNewObject({ItemTemplate:ItemTemplate});//,iconTextureAsset:textureAsset});
 
         }); 

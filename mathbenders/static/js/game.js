@@ -75,7 +75,6 @@ var Game = {
         // let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         let skyCam = new RealmBuilderCamera();
-        let portalCam = new PortalCam();
         // let axis = new DebugAxis();
 
         // Bootstrapped starting area (temporary) -- Platform for player to stand.

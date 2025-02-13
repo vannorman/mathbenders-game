@@ -1,63 +1,3 @@
-/*
-### TERRAIN
-- provides functions to generate procedural Terrain mesh
-- provides way to apply a predefined texture to the generated Terrain mesh 
-- provieds for procedural shader with fading texture in different heights to apply to generated mesh
-- This script is pretty messy, but in high level here's what it can do in example:
--- generate a square Terrain with perlin noise and apply faded texture based on height using a shader defined here (grassy hills)
--- generate a square Terrain with truncated perlin noise (blocky) and apply a single texture to that (black grid environment)
--- generate a Terrain as above, then "add" a canyon to it, either straight or shaped like a sine wave when looking from above
-
-*/
-
-/* TODO :Implement Ammojs btHeightFieldTerrain for more efficient terrain collision!
-via Claude
-// Create a height-field terrain
-const terrainWidth = 100;
-const terrainDepth = 100;
-const terrainResolution = 1;
-const heightData = new Float32Array(terrainWidth * terrainDepth);
-
-// Fill heightData with your terrain heights...
-
-const shape = new Ammo.btHeightfieldTerrainShape(
-    terrainWidth,
-    terrainDepth,
-    heightData,
-    1, // heightScale
-    -100, // minHeight
-    100, // maxHeight
-    1, // upAxis (1 for Y-up)
-    false // flipQuadEdges
-);
-
-// Set the local scaling to match your PlayCanvas scale
-const localScaling = new Ammo.btVector3(terrainResolution, 1, terrainResolution);
-shape.setLocalScaling(localScaling);
-
-// Create the rigid body
-const mass = 0; // Static body
-const transform = new Ammo.btTransform();
-transform.setIdentity();
-transform.setOrigin(new Ammo.btVector3(0, 0, 0));
-const motionState = new Ammo.btDefaultMotionState(transform);
-const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, shape);
-const body = new Ammo.btRigidBody(rbInfo);
-
-// Add the body to your ammo.js world
-physicsWorld.addRigidBody(body);
-
-// Create a PlayCanvas entity for visualization
-const terrainEntity = new pc.Entity();
-terrainEntity.addComponent('render', {
-    type: 'plane',
-    material: terrainMaterial
-});
-terrainEntity.setLocalScale(terrainWidth, 1, terrainDepth);
-
-// Add the entity to your PlayCanvas scene
-app.root.addChild(terrainEntity);
-*/
 TerrainGenerator = {
     terrains : [], // other scripts use this var - to deprecate
     Terrains : [], // only we use this var 
@@ -353,7 +293,7 @@ TerrainGenerator = {
 
         entity.addComponent('rigidbody', {
             friction: 0.5,
-            type: 'static'
+            type: 'kinematic'
         });
 
         app.root.addChild(entity);
