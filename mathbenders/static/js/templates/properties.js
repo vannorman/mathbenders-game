@@ -1,14 +1,29 @@
+export class PropertyMap {
+    constructor(args){
+        const  {template,name,property,onChangeFn,getCurValFn,min=1,max=10} = args;
+        this.template = template;
+        this.name = name;
+        this.property = property;
+        this.onChangeFn = onChangeFn;
+        this.getCurValFn = getCurValFn;
+        this.min = min;
+        this.max = max;
+    }
+
+}
 export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
 
     constructor(args){
-        const {template,onChangeFn,getCurValFn,buttonIndex,valueType}=args;
+        const {template,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
         this.template = template;
-        this.onChangeFn = onChangeFn;
+        this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
         this.getCurValFn = getCurValFn;
         this.buttonIndex = buttonIndex;
         this.valueType=valueType; // vec3, string, array?
+        this.min = min;
+        this.max = max;
         // What of setting Scale .. a type that isn't easily serializable/deserializable on json to and fro?
     }
 
@@ -36,6 +51,48 @@ export class Property {
         if (this.ui) this.ui.destroy();
     }
 
+    allowChange(value){
+        var result = null;
+        const min = this.min;
+        const max = this.max;
+        if (value instanceof pc.Vec3){
+            // We're attemptting to mod a Vec3, was each x y z within min max bounds?
+            console.log("Value:"+value);
+            if (value.x < min || value.x > max || value.y < min || value.y > max || value.z < min || value.z > max){
+                return false;
+            } else {
+                return true;
+            }
+             
+
+        } else if (value instanceof Array){
+            // We're attemptting to mod an array, was each element result within min max bounds?
+            result = true;
+            for(let i=0;i<value.length;i++){
+                if (value[i] < min || value[i] > max){
+                    result = false;
+                    return;
+                }
+            }
+            return result;
+        } else if (typeof(value) == 'number') {
+            // We're modding a number, was it within min max bounds?
+            result = true;
+            if (value < min || value > max) {
+                result = false;
+            }
+            return result;
+        } else {
+            return false;
+        }
+     
+    }
+
+    onChangeFn(template,value){
+        if (this.allowChange(value)){
+            this.onChangeFn2(template,value);
+        }
+    }
 
 
     static panel(){
@@ -130,8 +187,9 @@ export class ScaleProperty extends Property {
         
         function modScale(scale){
             let size = $this.getCurValFn($this.template).clone();
-            size = size.clone().add(scale);
-            $this.onChangeFn($this.template,size);
+            let newSize = size.clone().add(scale);
+            $this.onChangeFn($this.template,newSize);
+            size = $this.getCurValFn($this.template).clone();
             setSizeText(size);
         }
 
@@ -163,10 +221,19 @@ export class ScaleProperty extends Property {
                 case 2: text0 = text(el); text0.text="?";break; 
                 case 3: el.element.on('mousedown',function(){modScale(new pc.Vec3(+deltaScale,0,0))}); break;
                 case 4: el.element.on('mousedown',function(){modScale(new pc.Vec3(+deltaScale*5,0,0))}); break;
+                
+                case 5: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,-deltaScale*5,0))}); break;
+                case 6: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,-deltaScale,0))}); break;
+                case 7: text1 = text(el); text1.text="?";break; 
+                case 8: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,+deltaScale,0))}); break;
+                case 9: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,+deltaScale*5,0))}); break;
 
-                case 7: text1 = text(el); 
+                case 10: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,0,-deltaScale*5))}); break;
+                case 11: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,0,-deltaScale))}); break;
+                case 12: text2 = text(el); text2.text="2";break;
+                case 13: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,0,+deltaScale))}); break;
+                case 14: el.element.on('mousedown',function(){modScale(new pc.Vec3(0,0,+deltaScale*5))}); break;
 
-                case 12: text2 = text(el);
 
                 }
             }
@@ -267,34 +334,86 @@ export class SizeProperty extends Property {
     constructor(args){
         super(args);
     }
-
     buildUi(){
-
-        // TODO: Move this to super.buildGridOf3x3()
+        // TODO: Combine this with SizeProperty UI (they're the same almost);
         const $this = this;
         const panel = Property.panel();
 
-        const text0 = Property.text({anchor:[0.5,0.2,0.5,0.2],parent:panel});
-        const text1 = Property.text({anchor:[0.5,0.5,0.5,0.5],parent:panel});
-        const text2 = Property.text({anchor:[0.5,0.8,0.5,0.8],parent:panel});
+
+        var y=0;
+        const rowDim = 3;
+        const colDim = 3;
+        const elementGrid = UI.createElementGrid({
+            rowDim:rowDim, 
+            colDim:colDim, 
+            spacing:[15,40],
+            defaultSize:[20,20]
+        });
+
+        var text0;
+        var text1;
+        var text2;
+
         function setSizeText(size){
-            text0.element.text = size[0];
-            text1.element.text = size[1];
-            text2.element.text = size[2];
+            text0.text = size[0];
+            text1.text = size[1];
+            text2.text = size[2];
         }
+        
+        function modSize(m){
+            let size = $this.getCurValFn($this.template);
+            let newSize = Array.from(size);
+            for(let i=0;i<newSize.length;i++){
+                newSize[i] += m[i];
+            }
+            $this.onChangeFn($this.template,newSize);
+            size = $this.getCurValFn($this.template);
+            setSizeText(size);
+        }
+
+        function text(el){
+            return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
+        }
+        
+        const deltaSize = 1;
+
+        for(let i=0;i<colDim;i++){
+            for(let j=0;j<rowDim;j++){
+                const index = (j * colDim) + i;
+                const el = elementGrid.elements[index];
+                UI.HoverColor({element:el.element});
+                el.element.useInput = true;
+                switch(i){
+                case 0: text(el).text = "<";break;
+                case 1: break;
+                case 2: text(el).text = ">";break;
+                }
+
+                switch(index){
+                case 0: el.element.on('mousedown',function(){modSize([-deltaSize,0,0])}); break;
+                case 1: text0 = text(el); text0.text="?";break; 
+                case 2: el.element.on('mousedown',function(){modSize([+deltaSize,0,0])}); break;
+                
+                case 3: el.element.on('mousedown',function(){modSize([0,-deltaSize,0])}); break;
+                case 4: text1 = text(el); text1.text="?";break; 
+                case 5: el.element.on('mousedown',function(){modSize([0,+deltaSize,0])}); break;
+
+                case 6: el.element.on('mousedown',function(){modSize([0,0,-deltaSize])}); break;
+                case 7: text2 = text(el); text2.text="2";break;
+                case 8: el.element.on('mousedown',function(){modSize([0,0,+deltaSize])}); break;
+
+
+                }
+            }
+        }
+
+        panel.addChild(elementGrid.group);
+        
         const size = this.getCurValFn(this.template);
         setSizeText(size);
 
-        const upBtn = Property.upBtn({anchor:[0.2,0.2,0.2,0.2]});
-        upBtn.element.on('mousedown',function(){
-            let size = $this.getCurValFn($this.template);
-            size[0]++;
-            $this.onChangeFn($this.template,size);
-            setSizeText(size);
-        });
-        panel.addChild(upBtn);
         this.ui=panel;
+ 
     }
-
 }
 

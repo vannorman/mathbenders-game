@@ -1,19 +1,19 @@
 import HeldItem from './heldItem.js';
 import Template from './template.js';
 import {Gadget,Multiblaster} from './gadgets.js';
-import {Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+import {PropertyMap,Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
 const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberHoop",
             property : FractionProperty, 
             onChangeFn : (template,value) => {  template.fraction=value; },
             getCurValFn : (template) => { return template.fraction },
-         },
+         }),
 
     ]
   
@@ -53,14 +53,14 @@ class NumberHoop extends Template {
 class NumberFaucet extends Template {
 
     static _icon = assets.textures.ui.icons.faucet;
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "Fraction",
             property : FractionProperty, 
             onChangeFn : (template,value) => {  template.fraction=value; },
             getCurValFn : (template) => { return template.fraction },
-         },
+         }),
 
     ]
 
@@ -139,26 +139,28 @@ class PlayerStart extends Template {
 
 class NumberWall extends Template {
     static _icon = assets.textures.ui.icons.numberWall;
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             name : "Fraction1",
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction1 = value; }, 
             getCurValFn : (template) => { console.log("getvalonnumberwall:"+template.name); return template.fraction1; }, 
-         },
+         }),
 
-         {  
+         new PropertyMap({  
             name : "Fraction2",
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction2 = value; }, 
             getCurValFn : (template) => { return template.fraction2; }, 
-         },
-         {  
+         }),
+         new PropertyMap({  
             name : "Size",
             property : SizeProperty, 
+            min : 1,
+            max : 10,
             onChangeFn : (template,value) => { template.size = value; },
             getCurValFn : (template) => { return template.size; }
-         },
+         }),
     ]
 
     get fraction1() { return this.script.fraction1;}
@@ -174,7 +176,7 @@ class NumberWall extends Template {
         this.entity.script.create('machineNumberWall');
         // @Eytan, I have a PlacedItem problem here. PlacedItem 
         const $this = this;
-        this.entity.script.machineNumberWall.onChangeFn = function(){console.log("ch.");$this.updateColliderMap(); }
+        this.entity.script.machineNumberWall.onChangeFn = function(){$this.updateColliderMap(); }
         this.entity.script.machineNumberWall.rebuildWall();
         this.script = this.entity.script.machineNumberWall;
     }
@@ -262,15 +264,17 @@ class CastleWall extends Template {
 class BigConcretePad extends Template {
     static _icon = assets.textures.ui.builder.concretePadBig;
 
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : ScaleProperty.constructor.name,
             property : ScaleProperty,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  template.scale = value; },
             getCurValFn : (template) => { return template.scale },
-         },
+            min:0.5,
+            max:100,
+         }),
     ];
 
     get scale(){ return this.pad.getLocalScale(); }
@@ -306,14 +310,14 @@ class NumberCube extends Template {
     static isNumber = true;
     static isThrowable=false; // delete and have a map of throwable items?
 
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             // awkward but, we follow the pattern that the name is my constructor name unless otherwise noted.
             name : this.name, // if this changes, data will break 
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction = value; }, 
             getCurValFn : (template) => { return template.fraction; }, 
-         },
+         }),
     ]
     
     constructor(args={}) {
@@ -376,14 +380,14 @@ class NumberSphere extends Template {
 //        return this.fraction.numerator > 0 ? icon : icon_neg; }
 
     static isThrowable=true;
-    static editablePropertiesMap = [
-         {  
+    static propertiesMap = [
+         new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction = value; }, 
             getCurValFn : (template) => { return template.fraction; }, 
-         },
+         }),
     ]
     
     constructor(args={}) {

@@ -87,18 +87,20 @@ export default class EditItemTray {
         const moveBtn = moveProperty.buildUiButton();
         this.buttonContainers[0].addChild(moveBtn);
 
-        const rotateProperty = new RotateProperty({template:entity._template}); 
+        const rotateProperty = new RotateProperty({template:entity._templateInstance}); 
         const rotateBtn = rotateProperty.buildUiButton();
         this.buttonContainers[3].addChild(rotateBtn);
 
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)
-        ItemTemplate.editablePropertiesMap.forEach(x => {
+        ItemTemplate.propertiesMap.forEach(x => {
             const property = new x.property({
-                template:entity._template, 
+                template:entity._templateInstance, 
                 onChangeFn:x.onChangeFn,
                 getCurValFn:x.getCurValFn,
                 buttonIndex:buttonIndex,
+                min:x.min,
+                max:x.max,
             });
 
             property.buildUi();

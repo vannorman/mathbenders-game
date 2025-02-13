@@ -289,7 +289,6 @@ $(document).on("keydown", function (e) {
             }
         }
         const ns = new NumberSphere(options);
-        Game.Instantiate.NumberSphere(options);
         
     }
      if (ee == 'G'){

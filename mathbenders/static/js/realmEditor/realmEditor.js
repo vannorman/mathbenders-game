@@ -296,7 +296,7 @@ class RealmEditor {
         }
         const entity = this.#mode.entity;
         // const item = this.RealmData.currentLevel.getPlacedItemByEntity(entity);
-        const itemTemplate = entity._template; 
+        const itemTemplate = entity._templateInstance; 
         this.toggle('draggingObject');
         const data = { templateName:itemTemplate.constructor.name};
         this.#mode.setData(data);

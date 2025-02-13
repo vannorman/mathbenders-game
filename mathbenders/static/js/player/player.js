@@ -191,14 +191,14 @@ class PlayerClass {
 
         if (this.inventory.heldGadget){
             // Player holding gadget
-            const frac = entity._template.fraction;
+            const frac = entity._templateInstance.fraction;
             const collected = this.inventory.loadNumberIntoGadget(frac);
             if (collected) {
                 // Player gadget successfully laoded number
                 entity.destroy();
             } else {
                 // Player gadget did not load number, so put number into backpack
-                const collected2 = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
+                const collected2 = this.inventory.collectTemplate(entity._templateInstance.constructor,entity._templateInstance.properties);
                 if (collected2) { // awkward.. but.. multiple switchings happening
                     entity.destroy();
                 }
@@ -206,7 +206,7 @@ class PlayerClass {
             }
         } else { 
             // Player not holding gadget, put number into backpack
-            const collected = this.inventory.collectTemplate(entity._template.constructor,entity._template.properties);
+            const collected = this.inventory.collectTemplate(entity._templateInstance.constructor,entity._templateInstance.properties);
             if (collected) {
                 entity.destroy();
             }
@@ -232,12 +232,12 @@ class PlayerClass {
 
 
     interactWithObject({entity:entity}){
-        const template = entity._template;
+        const template = entity._templateInstance;
         if (template instanceof GadgetPickup){
             const Gadget = template.constructor.onCollect(); // Ask the Pickup which Gadget I'm supposed to get 
             const collected = this.inventory.collectGadget(Gadget);
             if (collected){ 
-                entity._template = null;
+                entity._templateInstance = null;
                 entity.destroy();
             } else {
                 console.log("Player failed to get gadg");

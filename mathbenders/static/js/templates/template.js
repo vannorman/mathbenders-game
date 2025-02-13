@@ -3,7 +3,7 @@ export default class Template {
     static name="TemplateSuper";
     static _icon;
     static icon(properties={}) { return this._icon};
-    static editablePropertiesMap=[];
+    static propertiesMap=[];
     static isThrowable = false;
     colliders = new Map();
 
@@ -40,7 +40,7 @@ export default class Template {
             this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
         }
         this.entity.addComponent('script');
-        this.entity._template = this;
+        this.entity._templateInstance = this;
         this.name = this.constructor.name;
         this.entity.name = this.constructor.name;
 
@@ -80,7 +80,7 @@ export default class Template {
         // awkward that this is irrelevant for gadgets being held in inventory
         // and that we overwrite this in Gadget get properties() {return this.ammo....}
         const props = {};
-        this.constructor.editablePropertiesMap.forEach(x=>{
+        this.constructor.propertiesMap.forEach(x=>{
            props[x.name] = x.getCurValFn(this) 
         });
         return props;
@@ -98,7 +98,7 @@ export default class Template {
 
     setProperties(properties) {
         // Note that all data here is stored in the *game entity* not in the template instance.
-        this.constructor.editablePropertiesMap.forEach(x=>{
+        this.constructor.propertiesMap.forEach(x=>{
             if (properties[x.name] !== undefined){
                 const val = properties[x.name];
                 x.onChangeFn(this,val);

@@ -139,7 +139,7 @@ NumberInfo.prototype.updateNumberText  = function(properties, context){
 
 NumberInfo.prototype.onCollisionStart = function (result) {
     // if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return; //huh?
-    if (this.entity._template.constructor.name == "NumberCube" && result.other._template.constructor.name == "NumberCube"){
+    if (this.entity._templateInstance.constructor.name == "NumberCube" && result.other._templateInstance?.constructor.name == "NumberCube"){
         console.log("Cubes");
         // cubes don't combine
         return;
@@ -169,7 +169,6 @@ NumberInfo.prototype.OfflineCollision = function (result){
     const resultNi = result.other?.script?.numberInfo;
     if (this.allowCombination && resultNi && resultNi.allowCombination){
         this.entity.enabled = false;
-    
         NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
     } else {
         // console.log('no ni:"'+resultNi+", alow:"+this.allowCombination+", resl al:"+resultNi?.allowCombination);
@@ -313,29 +312,7 @@ NumberInfo.TryResolveCollision = function(data) {
     }
 }
 
-NumberInfo.ResolveCollision = function(data){
-    const collisionResult = data.collisionResult;
-    //console.log("resolve collision");
-    
-    const templateName = collisionResult.TemplateToClone;
-    const options = {
-        position : JsonUtil.JsonToVec3(collisionResult.position),
-        rigidbodyType : collisionResult.rigidbodyType,
-        rigidbodyVelocity : collisionResult.resultVelocity,
-        numberInfo : {fraction : collisionResult.resultFrac },
-//        extraScripts : [{scriptName:'sinePop',scriptAttributes:{popTime:2},expirationDate:Date.now()+1500}],
-    }
-    if (options.numberInfo.fraction.numerator == 0) {
-        //Fx.Shatter({position:options.position});  // network??
-        //AudioManager.play({source:assets.sounds.shatter});// depends on audiomanager instance?
-    } else {
-        //console.log("Sinepop");
-        options.ancestors = [data.objId1,data.objId2];
-        const result = Network.Instantiate[templateName](options); // TODO: Replace with Promise return
-        result.script.create('sinePop');
-        AudioManager.play({source:assets.sounds.numberEat,position:options.position});
-    }
-}
+
 
 
 NumberInfo.prototype.setFractionAfterSeconds = function(fraction, ms){
@@ -421,7 +398,7 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
 
     // Somehow need to prevent collision between two kinematic numbers .. in general
     const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    const TemplateToClone = wasKin1 ? obj1._template.constructor : obj2._template.constructor; // object name is set to templateName in Game.Instantiate, should be stored on an objectInfo script, it is stored in networkObjectInfo but we're offline so shrugg 
+    const TemplateToClone = wasKin1 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
     // console.log("TTC:"+TemplateToClone.name);
     const rot = wasKin1 ? obj1.getEulerAngles() : wasKin2 ? obj2.getEulerAngles : pc.Vec3.ZERO;
 
@@ -454,46 +431,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         destroyAfterSeconds : destroyAfterSeconds,
     }
     //console.log(resultData);
-    return resultData;
-}
-
-NumberInfo.GetCollisionResolution = function(collisionData){
-    const { obj1, obj2 } = collisionData;
-
-    let midpoint = obj1.getPosition().clone().add(obj2.getPosition()).mulScalar(0.5);
-    // Ensure kinematic wins in dynamic+kinematic combo
-    let wasKin1 = false;
-    let wasKin2 = false;
-    if (obj1.rigidbody && obj1.rigidbody.type == pc.RIGIDBODY_TYPE_KINEMATIC) {
-        midpoint = obj1.getPosition();
-        wasKin1 = true;
-    } else if (obj2.rigidbody && obj2.rigidbody.type == pc.RIGIDBODY_TYPE_KINEMATIC) {
-        midpoint = obj2.getPosition();
-        wasKin2 = true;
-    }
-    const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    const TemplateToClone = wasKin1 ? obj1._template.constructor : obj2._template.constructor;
-    //obj1.script.networkObjectInfo.objectProperties.templateName : obj2.script.networkObjectInfo.objectProperties.templateName; // dislike cloning one of the two, just make a fresh one?
-
-    // If two objs collide and one wasn't pick-uppable, then the result is not pick-uppable
-    let pickup = true;
-    if (!obj1.script.pickUpItem || !obj2.script.pickUpItem) pickup = false;
-    var resultVelocity = pc.Vec3.ZERO;
-    if (obj1.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC && obj2.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC) {
-        resultVelocity = obj1.rigidbody.linearVelocity.clone().add(obj2.rigidbody.linearVelocity).mulScalar(0.5);
-    }
-    // Determine resulting frac from add
-    const frac1 = obj1.script.numberInfo.fraction;
-    const frac2 = obj2.script.numberInfo.fraction;
-    const resultFrac = Fraction.Add(frac1,frac2);
-    const resultData = {
-        resultFrac : resultFrac,
-        rigidbodyType : rbType,
-        resultVelocity : resultVelocity,
-        TemplateToClone : TemplateToClone,
-        position : JsonUtil.Vec3ToJson(midpoint), // because we pass to server and back, server prefers json over vec3 obj
-    }
-
     return resultData;
 }
 
