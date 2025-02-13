@@ -274,28 +274,20 @@ class BigConcretePad extends Template {
     ];
 
     get scale(){ return this.pad.getLocalScale(); }
-    set scale(value) { this.pad.setLocalScale(value); }
+    set scale(value) { this.pad.setLocalScale(value); this.updateHalfExtents(); }
 
+    updateHalfExtents(){
+        this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
+    }
     setup(){
         const pad = new pc.Entity();
         pad.addComponent("render", {  type: "box" }); 
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
-        pad.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE});
+        pad.addComponent("collision", { type: "box"});
         this.pad = pad;
-        this.setScale(new pc.Vec3(10,10,10));
+        this.scale = new pc.Vec3(10,10,10);
         this.entity.addChild(pad);
 
-    }
-
-    setScale(scale){
-        // after serialization, vec3(1,2,3) becomes [1,2,3]
-        // Custom set properties due to SCALE being serialized as JSON and needing to be inflated as Vec3.
-        // TODO: Property should have a TYPE so that it knows how to be deserialized.  @Eytan
-        if (scale instanceof pc.Vec3 == false) {
-            scale = JsonUtil.ArrayToVec3(scale);
-        }
-        this.pad.setLocalScale(scale);
-        this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(1/2);
     }
 
 }
