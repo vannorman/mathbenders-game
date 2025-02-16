@@ -1,4 +1,23 @@
 const interview = {
+    // Sun Feb 16 2025
+    /*
+        It's incredible how much difference having Eytan on the team has made. I found many technical blockers to become more visible and Eytan seems to always have a cleaner and more organized approach to the architecture. Refactoring LevelBuilder (now RealmEditor), moving away from what I called "Prefabs" before and into Templates, and many other small changes have made the code base much more manageable. However, quite a bit of work still lies ahead. NumberInfo has become a focal point as numbers are everywhere and demand many interactions, from physical collisions and triggers to loading as ammo into a gadget, being picked up, combining with each other, and more. Further, it is now a consideration to consolidate all number logic into a manager rather than having a script on each entity, and to potentially use a shader to represent the number rather than an additional text entity that "faces player", due to the enormous computational load of rendering and calculating 1,000s of numbers at a time. However, this may not be critical path; an MVP may only need to have 100s of numbers at a time, which is fairly manageable now with per-number architecture.
+
+        As of today, I can create a level with walls numbers and a gadget, configure those walls and numbers through a Property class{} driven UI, save and load, and all works seamlessly. Immediate features I want (besides simply having more objects to place into the world) are more control over the terrain. I must decide whether to add more buttons and slider, and how many, and what they should do ;; and whether I should consider "manual" modifiers such as physical manipulatives that would live over the terrain in world space and "bend it", for example droppging an "S" onto the world as a Terrain Modifier object with its own configurable properties such as depth, spread, etc. to create an S-shaped river or mountain range. Also, I'd want multiple overalpping scales of perlin, with ^2 or ^x changes to make more organic and varied looking mountain ranges. I also need to configure my Ground Fog Shader to adjust its height on a per-terrain basis so that as you enter a new terrain the fog always looks "right" even if the world position is at a different altitude. 
+
+        If I didn't have other obligations I'm confident I could release this product by September 2025. As it is, I'll be lucky to make significant progress on the realmEditor engine and game interactions without overcomplicating or overscoping it too much. Once these features are sufficient it will be time to begin building the "story" of the game, with wizards and magic, aliens and resource gathering, war and infinity. I don't feel quite ready to start the story yet-- or rather, the app isn't ready --when I think about doing basic things like "Set up a terrain with a castle on a hill and several challenges to it along the way" for example, Terrain control stands out as a blocker to quickly creating this level. I'm sure other blockers will arise as I try to imagine and create levels with increasing depth, variety and speed. In general I am quite happy with the look and feel of the basic building blocks of the world, and so I feel that from here it's a matter of having enough control and variety over terrains, enough entities and objects to create a good puzzle set, and a seamless and polished feeling set of effects such as sounds and particles.
+
+        Finally, let's discus story and core game mechanic. Basically adding to zero breaks something, but I want this to have an effect like a small black hole on the world. Eventually, super large (10,000,000?) will be enough to rip the world up so you can expose somewhere new to go. Meanwhile the story of "you are in a spaceship told to gather resources from these planets and don't interact with the locals" to "you interact with the locals, make friends, bring contraband onboard, get fired, join locals, switch side, war ensues, discover infinity" path seems "right" to me. As you play, you'll discover more and more that the bigger number interactions happen, the bigger the rip, which will eventually lead to "ripping" as a core way to get to a new place in the world.
+
+
+
+
+
+
+
+
+    */
+
     // Sat Oct 12 2024
     // LevelBuilder is coming along nicely. Figured out how I'm going to do the data model, I think. Anyway I'm getting closer
     // to simply being able to build levels.
