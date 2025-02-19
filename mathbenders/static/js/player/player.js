@@ -261,7 +261,7 @@ class PlayerClass {
 
 
 const startPos = realmEditor.RealmData.Levels[0].terrain.centroid.clone()
-                .add(pc.Vec3.UP.clone().mulScalar(10));
+                .add(pc.Vec3.UP.clone().mulScalar(20));
 window.Player = new PlayerClass({startingPosition:startPos});
 
         PlayerMessenger.build(); 

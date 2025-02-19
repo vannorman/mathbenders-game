@@ -60,7 +60,7 @@ let perlin = {
         },
     ],
     get2dPerlinArr : function(options){
-        const { dim, sampleResolution, deterministicFloatSeed = 42 } = options;
+        const { dim, sampleResolution, deterministicFloatSeed = 0.5 } = options;
         this.gradients=[];
         this.memory = {};
         this.deterministicFloatSeed = Math.round(deterministicFloatSeed*10000); // integer

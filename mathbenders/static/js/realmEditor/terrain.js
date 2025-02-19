@@ -7,20 +7,26 @@ export default class Terrain {
     constructor(args={}){
         let data = {
             name : "New Terrain", 
-            heightTruncateInterval : 0.0, // 0 : smooth, 1 : blocky
-            textureOffset : 0,
-            heightScale : 0.5, // how tall hills
-            seed : 0.5,  
-            dimension : 16, // x^2 verts
-            sampleResolution : 0.004, // higher values : more coarse terrain
-            size : 50, // world scale
+            heightTruncateInterval : Math.random()*.1, // 0 : smooth, 1 : blocky
+            textureOffset : Math.round((Math.random()-0.5)*64),
+            heightScale : Math.random()*0.5+0.5, // how tall hills
+            seed : Math.random(),  
+            dimension : Math.round(Math.random()*32)+8, // x^2 verts
+            sampleResolution : Math.random()/100, // higher values : more coarse terrain
+            size : Math.max(8,Math.round(Math.random()*256)), // world scale
             placeTrees : true,
-            treeCount : 2,
+            treeCount : 0,
+
+            // Overlay a second terrain
+            resolution2 : 0,
+            heightScale2 : 0,
+            exp : 0,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
         Object.keys(args).forEach(k => {
             data[k] = args[k];
         });
+        // data.textureOffset -= 128; // normalize 0-256 range to -128 to 128; shouldn't be hardcoded here but i don't have <0 range for this slider yet
         this._data = data;
         this.placeTreeFn = null;
     }

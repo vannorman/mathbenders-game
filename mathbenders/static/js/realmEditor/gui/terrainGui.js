@@ -21,7 +21,7 @@ export default class TerrainGui {
             type:'image',
             anchor:[0.5,0.5,0.5,0.5],
             pivot:[0.5,0.5],
-            height:330,
+            height:Constants.Resolution.height,
             width:150,
             opacity:0.5,
             color:pc.Color.GREEN,
@@ -39,7 +39,7 @@ export default class TerrainGui {
         //const realmData = realmEditor.RealmData; 
         // @Eytan is it better to pass realmEditor or realmData reference around rather than acces the global?
 
-        function CreateTerrainEditingslider(args){
+        function CreateTerrainEditingSlider(args){
             const slider = UI.createSlider({
                 labelText:args.key,
                 width:150,
@@ -64,18 +64,37 @@ export default class TerrainGui {
         // We keep a reference to this.#TerarinTools because later, we will udpate the tool state when a terrain is loaded.
             // relies on terrain tools keys having same name as terrain data keys
 
-        // TODO: make this grouped e.g. this.terrainTools ={}
-        this.#TerrainTools.dimension = CreateTerrainEditingslider({key:'dimension',maxVal:128,minStep:1});
-        this.#TerrainTools.resolution = CreateTerrainEditingslider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
-        this.#TerrainTools.seed = CreateTerrainEditingslider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
-        this.#TerrainTools.size= CreateTerrainEditingslider({key:'size',minVal:16,maxVal:1024,minStep:10});
-        this.#TerrainTools.heightScale = CreateTerrainEditingslider({key:'heightScale',maxVal:4,minStep:0.02});
-        this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingslider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
-        this.#TerrainTools.textureOffset = CreateTerrainEditingslider({key:'textureOffset',minVal:-2000,maxVal:2000,minStep:1});
+        function spacer(){
+            const obj = {};
 
+            obj.group = new pc.Entity(); 
+            obj.group.addComponent('element',{
+                type:'image',
+                height:12,
+                width:80,
+                opacity:0,
+            }); 
+            return obj;
+        }
+
+        // TODO: make this grouped e.g. this.terrainTools ={}
+        this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});
+        this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
+        this.#TerrainTools.seed = CreateTerrainEditingSlider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
+        this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:512,minStep:10});
+        this.#TerrainTools.heightScale = CreateTerrainEditingSlider({key:'heightScale',maxVal:4,minStep:0.02});
+        this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingSlider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
+        this.#TerrainTools.textureOffset = CreateTerrainEditingSlider({key:'textureOffset',maxVal:256,minStep:1});
+//        this.#TerrainTools.spacer = spacer();
+        this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
+        this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
+        this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
+
+        
         Object.keys(this.#TerrainTools).forEach(key=>{
-            // addChild them to gui so they show up
-            this.screen.addChild(this.#TerrainTools[key].group);
+            // Add them to the screen UI to make each tool visible.
+            const group = this.#TerrainTools[key].group;
+            if (group) this.screen.addChild(group);
         });
 
         // Map icon in bottom left allows for terrain selection / addition menu

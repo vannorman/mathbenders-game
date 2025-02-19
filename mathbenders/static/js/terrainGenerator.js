@@ -17,43 +17,62 @@ TerrainGenerator = {
             treeCount=100,
 //            extraFn = null,
             terrainInstance = null,
+            resolution2=0,
+            heightScale2=0,
+            exp=0,
             heights =  (() => {
                 const heights2d = perlin.get2dPerlinArr({
                     dim:options.dimension,
                     sampleResolution:resolution,
-                    deterministicFloatSeed:seed
+                    deterministicFloatSeed:seed,
                 });
+
+
                 var heights = heights2d.flat();
+                if (options.resolution2 != 0) {
+                    heights = TerrainGenerator.SecondLayerWithExponentialHeights({
+                        heights:heights,
+                        exp:options.exp,
+                        dim:options.dimension,
+                        resolution2:options.resolution2,
+                        heightScale2:options.heightScale2
+                    });
+               }
                 heights = TerrainGenerator.ModHeights({heights:heights,interval:heightTruncateInterval,heightScale:heightScale})
                 return heights;
             })(),
+
         } = options;
         this.textureOffset = textureOffset;
-        // console.log("o:"+textureOffset);
 
-        // Ugh .. horrible code where we're declaring the index of something in a list when the thing hasn't been added to the list
         const newTerrain = { entity : null };
         this.Terrains.push(newTerrain);
-        const terrainPosition = centroid;//this.getTerrainWorldPosByIndex(this.Terrains.length - 1).mulScalar(this.terrainSpacing);
+        const terrainPosition = centroid;
         let [terrainEntity, positions]  = this.Mesh3({position:terrainPosition,heights:heights,size:size});
         terrainEntity.name = name;
-        
-        // Trees
-       
-//        if (extraFn) {
-//            const opts = { terrainInstance : terrainInstance, centroid : terrainPosition, terrainEntity : terrainEntity };
-//            extraFn(opts);
-//        }
 
         terrainEntity.tags.add(Constants.Tags.Terrain);
-        // Game.printLoadTime('#77f','Terrain '+name+", with centroid:"+centroid.trunc())
         newTerrain['entity'] = terrainEntity;
         terrainEntity.tags._list.push(Constants.Tags.Terrain);
-        terrainEntity.addComponent('script');
-        terrainEntity.script.create('taggable');
-        terrainEntity.script.create('terrainTracker');
-//        console.log("Terrain created! "+pc.app.root.getComponentsInChildren('terrainTracker').length+" total terrains");
         return terrainEntity;
+    },
+    SecondLayerWithExponentialHeights(options){
+        const {exp,heights,dim,resolution2,heightScale2} = options;
+        console.log(options);
+        // Second layer of heights
+        const heights2d2 = perlin.get2dPerlinArr({
+            dim:dim,
+            sampleResolution:resolution2,
+            });
+        var heights2 = heights2d2.flat();
+        for(let i=0;i<heights.length;i++){
+             
+            const d = Math.pow(heights2[i]*heightScale2,exp);
+            //console.log('h:'+heights2[i]+', d:'+d+', exp:'+exp);
+            heights[i] += d;
+            //console.log('d:'+d);
+        }
+        return heights;
     },
     AddSineCanyonToPerlinTerrain2d(options){
         const { 
@@ -220,9 +239,18 @@ TerrainGenerator = {
         let index = 0;
         for (let x = 0; x < resolution; x++) {
             for (let z = 0; z < resolution; z++) {
+                
+                // x
                 positions[3 * index] = scale * (x - resolution * 0.5);
-                positions[3 * index + 1] = height * scale * options.heights[index]; // the height comes from the value of each vert in the array of verts
+               
+                // y
+                // the height comes from the value of each vert in the array of verts
+                positions[3 * index + 1] = height * scale * options.heights[index]; 
+
+                // z
                 positions[3 * index + 2] = scale * (z - resolution * 0.5);
+
+                // UVs for texture 
                 uvs[2 * index] = x / resolution;
                 uvs[2 * index + 1] = 1 - z / resolution;
                 index++;
