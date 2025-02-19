@@ -6,8 +6,13 @@ export default class TerrainGui {
     changeMapScreen;
 
     // Todo
-        // Add secondary "dimension" with exp gain.
-        // Add Texture Height Offset
+        // Add "exp" to regular heights
+        // Add "exp2" to regular heights (how "flat" do I want overall terrain, don't exp except for extreme values?)
+        // 
+        // X Add secondary "dimension" with exp gain.
+        // X Add Texture Height Offset
+
+
         // Add Terrain Height Offset
         // Add Fog Height Offset (can we see Fog from sky cam?);:
 
