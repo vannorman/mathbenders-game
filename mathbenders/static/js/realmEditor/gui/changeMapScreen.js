@@ -87,7 +87,8 @@ export default class ChangeMapScreen {
                         targetPivotPosition:tempCamPivotPosition,
                         targetZoomFactor:level.terrain.scale*1.5
                     });
-                    realmEditor.gui.UpdateTerrainToolValues({terrainData:level.terrain.data});
+                    realmEditor.currentLevel = level;
+                    realmEditor.gui.terrain.UpdateTerrainToolValues({terrainData:level.terrain.data});
                    },
                 cursor:'pointer',
             });
@@ -138,8 +139,11 @@ export default class ChangeMapScreen {
             mouseDown:function(){
                 // Create new level AND new terrain by GUI interaction
 
-                realmEditor.createNewLevel();
-                realmEditor.gui.UpdateTerrainToolValues();
+                const level = realmEditor.createNewLevel();
+                realmEditor.currentLevel = level;
+                realmEditor.camera.translate({source:"new terrain",targetPivotPosition:realmEditor.currentLevel.terrain.centroid,targetZoomFactor:50});
+
+                realmEditor.gui.terrain.UpdateTerrainToolValues();
                 realmEditor.toggle('normal');
 
             },

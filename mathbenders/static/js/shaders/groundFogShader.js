@@ -2,6 +2,17 @@
 
 // still trying glsl height fog post effect
 // https://www.terathon.com/lengyel/Lengyel-UnifiedFog.pdf
+
+const currentTerrainHeightManager = {
+    currentTerrainHeight : 0,
+    get adjustedPlayerHeight() {
+        if (realmEditor)
+            return realmEditor.RealmData.Levels[0].terrain.centroid.y;
+        else return 0;
+    }
+    
+}
+
 var warpFxByPointManager; // surely a better way than to declare this global to define and reference later?
 //--------------- POST EFFECT DEFINITION------------------------//
 // includes fog.
@@ -57,6 +68,8 @@ pc.extend(pc, function () {
             
             scope.resolve('uMat3Count').setValue(warpFxByPointManager.mat3List.length);
             scope.resolve('uPlayerPos').setValue(this.playerEntity.getPosition().clone().data);
+            scope.resolve('uAdjustedPlayerHeight').setValue(currentTerrainHeightManager.adjustedPlayerHeight);
+           // this.playerEntity.getPosition().clone().data);
 
             // Surely there's a way to have a listener for these events rather than checking a bool each frame?
 //            scope.resolve("uWorldAngryA").setValue(Game.worldAngryA);

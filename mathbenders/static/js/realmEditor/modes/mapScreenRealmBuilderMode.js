@@ -18,13 +18,13 @@ export default class MapScreenRealmBuilderMode extends RealmBuilderMode {
     }
 
     onEnter(){
-        realmEditor.gui.changeMapScreen.group.enabled=true;
-        realmEditor.gui.changeMapScreen.UpdateMapIcons({levels:realmEditor.RealmData.Levels});
+        realmEditor.gui.terrain.changeMapScreen.group.enabled=true;
+        realmEditor.gui.terrain.changeMapScreen.UpdateMapIcons({levels:realmEditor.RealmData.Levels});
     }
 
 
     onExit(){
-        realmEditor.gui.changeMapScreen.group.enabled=false;
+        realmEditor.gui.terrain.changeMapScreen.group.enabled=false;
     }
 }
 

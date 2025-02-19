@@ -3,7 +3,6 @@ import EditorCamera from './camera.js';
 // import PlacedItem from './placedItem.js';
 import Level from './level.js';
 import RealmData from './realmData.js';
-import TerrainCentroidManager from './terrainCentroidManager.js';
 import Terrain from './terrain.js';
 export {
     GUI,
@@ -11,7 +10,6 @@ export {
   //  PlacedItem,
     Level,
     RealmData,
-    TerrainCentroidManager,
     Terrain
 };
 

@@ -1,6 +1,7 @@
 import BuilderPanel from './builderPanel.js';
 import EditItemTray from './editItemTray.js';
-import ChangeMapScreen from './changeMapScreen.js'; 
+import TerrainGui from './terrainGui.js';
+
 export default class GUI {
 
     // Note: 'backboard', 'screen', 'panel', 'window' terminology to be merged/truncated
@@ -10,12 +11,10 @@ export default class GUI {
     #screen; // base entity holding all UI
 
     // Various buttons and ui elements
-    #changeMapBtn;
-    changeMapScreen;
     #saveBtn;
     #loadBtn;
     #mapControlPanel;
-    #mapPanel;
+    mapPanel;
     #mapIcons;
     #customCursorIcon;
     get customCursorIcon(){return this.#customCursorIcon;}
@@ -28,9 +27,6 @@ export default class GUI {
     #navList;
     get navList() {return this.#navList;}
   
-    // Terrain
-    #editTerrainScreen;
-    #TerrainTools = {};
 
     // Save Load
     #loadRealmScreen;// parent 
@@ -51,9 +47,6 @@ export default class GUI {
     constructor(params={}){
         this.realmEditor = params.realmEditor;
         this.buildUi();
-//        this.createMap() // static? Once only
-//        this.createbuilderPanels();
-//        this.createMapButtons();
         GameManager.subscribe(this, this.onGameStateChange);
     }
 
@@ -68,7 +61,7 @@ export default class GUI {
 
     // Move to RealmEditorMouse?
     get isMouseOverMap() {
-        const is = Mouse.isMouseOverEntity(this.#mapPanel) 
+        const is = Mouse.isMouseOverEntity(this.mapPanel) 
 
 //        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
 //        && !Mouse.isMouseOverEntity(this.#changeMapBtn)
@@ -184,8 +177,8 @@ export default class GUI {
 
 
         // Add an empty element to the "map" part of the screen. This will let the app know if the mouse cursor is over this part of screen
-        this.#mapPanel = new pc.Entity("mappanel");
-        this.#mapPanel.addComponent("element", {
+        this.mapPanel = new pc.Entity("mappanel");
+        this.mapPanel.addComponent("element", {
             type: "image",
             anchor: [0, 0, 1, 1],   
             pivot: [0, 0],
@@ -195,7 +188,7 @@ export default class GUI {
             opacity:1,
             useInput : true,
         });
-        this.#mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()}) // i don't love binding this here, awkward.
+        this.mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()}) // i don't love binding this here, awkward.
 
         // and worse,
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
@@ -209,11 +202,11 @@ export default class GUI {
         }, this);
 
 
-        gui.addChild(this.#mapPanel);
+        gui.addChild(this.mapPanel);
 
         // Link render texture from camera to map
-        this.#mapPanel.element.texture = this.realmEditor.camera.renderTexture; // shows a tiled skybox (broken)
-        this.#mapPanel.on('mouseleave',function(){console.log('breakmap');});
+        this.mapPanel.element.texture = this.realmEditor.camera.renderTexture; // shows a tiled skybox (broken)
+        this.mapPanel.on('mouseleave',function(){console.log('breakmap');});
 
 
         // Define panels where the builder icons go.
@@ -322,7 +315,7 @@ export default class GUI {
             opacity:1,
             useInput:true
             }); // not sure why x-max-anchor needs to be 0.7 here and not 1.0, but 1.0 pushes it beyond the parent width somehow
-        this.#mapPanel.addChild(this.#mapControlPanel);
+        this.mapPanel.addChild(this.#mapControlPanel);
 
         // Set up Rotate Map Left button
         UI.SetUpItemButton({
@@ -342,17 +335,8 @@ export default class GUI {
             cursor:'pointer',
         });
 
-        this.#editTerrainScreen = new pc.Entity();
-        this.#editTerrainScreen.addComponent('element',{
-            type:'image',
-            anchor:[0.5,0.5,0.5,0.5],
-            pivot:[0.5,0.5],
-            height:330,
-            width:150,
-            opacity:0.5,
-            color:pc.Color.GREEN,
-        }); 
-        
+    
+       
         this.#builderPanels = []
         const realmInfoPanel = new BuilderPanel({ gui:this,  name:"Realm Info"});
         this.realmInfoScreen = this.CreateRealmInfoScreen();
@@ -384,9 +368,12 @@ export default class GUI {
                     { ItemTemplate:CastleWall } ,
                     { ItemTemplate:BigConcretePad} ,
             ],}));
-        const editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
-        editTerrainPanel.panel.addChild(this.#editTerrainScreen);
-        this.#builderPanels.push(editTerrainPanel);
+        
+        // Set up terrain panel
+        this.editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
+        this.terrain = new TerrainGui({guiBase:this});
+        this.editTerrainPanel.panel.addChild(this.terrain.screen);
+        this.#builderPanels.push(this.editTerrainPanel);
 
         // Now that each builder panel was created, add it to the hierarcy.
         this.#builderPanels.forEach(panel=>{
@@ -395,81 +382,9 @@ export default class GUI {
         });
         this.#builderPanels[0].select();
 
-        editTerrainPanel.navButton.element.on('click',function(){
-            // TODO: Move outside of UI?
-            // console.log("select terrain 1");
-            const terrainPos = realmEditor.RealmData.currentLevel.terrain.entity.getPosition();
-            const terrainScale = realmEditor.RealmData.currentLevel.terrain.scale;
-            realmEditor.camera.translate({source:"click ter",targetPivotPosition:terrainPos, targetZoomFactor:terrainScale * 2.2});
-//            editTerrainPanel.select();
-            $this.UpdateTerrainToolValues('navoncl');
-
-        });
-
-        this.#editTerrainScreen.addComponent("layoutgroup", {
-            orientation: pc.ORIENTATION_VERTICAL,
-            spacing: new pc.Vec2(-20, 0),
-            alignment: new pc.Vec2(0.5,0.5),
-            widthFitting: pc.FITTING_NONE,
-            heightFitting: pc.FITTING_NONE,
-        });
-
-
-        //const realmData = realmEditor.RealmData; 
-        // @Eytan is it better to pass realmEditor or realmData reference around rather than acces the global?
-
-        function CreateTerrainEditingslider(args){
-            const slider = UI.createSlider({
-                labelText:args.key,
-                width:150,
-                height:40,
-                sliderWidth:100,
-                sliderIndicatorWidth:7,
-                sliderHeight:6,
-                maxVal:args.maxVal,
-                minStep:args.minStep,
-                precision:args.precision || 2,
-                onChangeFn:(val)=>{
-                    const curTer = realmEditor.RealmData.currentLevel.terrain;
-                    curTer.data[args.key] = val;
-                    curTer.RegenerateWithDelay({realmEditor:realmEditor});
-               },
-            });
-            return slider;
-        }
-
-
-        // Create the TerrainTools; they are added to UI and no longer referenced in code
-        // We keep a reference to this.#TerarinTools because later, we will udpate the tool state when a terrain is loaded.
-            // relies on terrain tools keys having same name as terrain data keys
-
-        // TODO: make this grouped e.g. this.terrainTools ={}
-        this.#TerrainTools.dimension = CreateTerrainEditingslider({key:'dimension',maxVal:128,minStep:1});
-        this.#TerrainTools.resolution = CreateTerrainEditingslider({key:'resolution',maxVal:1.0,minStep:.001,precision:3});
-        this.#TerrainTools.seed = CreateTerrainEditingslider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
-        this.#TerrainTools.size= CreateTerrainEditingslider({key:'size',maxVal:256,minStep:10});
-        this.#TerrainTools.heightScale = CreateTerrainEditingslider({key:'heightScale',maxVal:4,minStep:0.02});
-        this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingslider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
-
-        Object.keys(this.#TerrainTools).forEach(key=>{
-            // addChild them to gui so they show up
-            this.#editTerrainScreen.addChild(this.#TerrainTools[key].group);
-        });
-
-        // Map icon in bottom left allows for terrain selection / addition menu
-        this.#changeMapBtn = UI.SetUpItemButton({
-            parentEl:this.#mapPanel,
-            width:60,height:60,
-            textureAsset:assets.textures.ui.builder.changeMapBtn,
-            anchor:[0.92,0,0.92,0],
-            pivot:[0.5,0],
-            mouseDown:function(){realmEditor.toggle('mapScreen')},
-            cursor:'pointer',
-        });
-
         // Save icon
          this.#saveBtn = UI.SetUpItemButton({
-            parentEl:this.#mapPanel,
+            parentEl:this.mapPanel,
             width:60,height:60,
             anchor:[0.885, 0.86, 0.925, 0.9],
             pivot:[0.5,0],
@@ -482,7 +397,7 @@ export default class GUI {
 
         // Load icon
         this.#loadBtn = UI.SetUpItemButton({
-            parentEl:this.#mapPanel,
+            parentEl:this.mapPanel,
             width:60,height:60,
             anchor:[0.885, 0.76, 0.925, 0.8],
             pivot:[0.5,0],
@@ -564,11 +479,7 @@ export default class GUI {
         this.#loadRealmWindow.addChild(loadText);
  
 
-        // Change Map screen (Terrain )
-        this.changeMapScreen = new ChangeMapScreen();
-        this.#mapPanel.addChild(this.changeMapScreen.group);
-
-        // Edit item
+                // Edit item
         this.editItemTray = new EditItemTray({leftMargin:this.leftMargin});
 
 
@@ -586,19 +497,6 @@ export default class GUI {
  
 
     }
-
-    UpdateTerrainToolValues(args={}){
-        const {terrainData=realmEditor.RealmData.currentLevel.terrain.data}=args;
-        // console.log('update ter val from:'+source);
-        Object.keys(this.#TerrainTools).forEach(key=>{
-            // relies on terrain tools keys having same name as terrain data keys
-            if (terrainData[key]){
-                const val = terrainData[key] / this.#TerrainTools[key]._maxVal; 
-                this.#TerrainTools[key].SetVal({resultX:val,fireOnChangeFn:false});
-            }
-        });
-    } 
-    
 
     OpenLoadRealmUI(){
         this.realmEditor.toggle('loadScreen');

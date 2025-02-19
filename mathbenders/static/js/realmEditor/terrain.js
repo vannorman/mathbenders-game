@@ -1,6 +1,5 @@
 export default class Terrain {
-
-    // TODO :Remove references to centroid here. use getPosition(). ref centroid only when you generate()
+    
 
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
     // The Terrain is created when the Level is created, and can be modified using BuilderPanel Terrain.
@@ -9,6 +8,7 @@ export default class Terrain {
         let data = {
             name : "New Terrain", 
             heightTruncateInterval : 0.0, // 0 : smooth, 1 : blocky
+            textureOffset : 0,
             heightScale : 0.5, // how tall hills
             seed : 0.5,  
             dimension : 16, // x^2 verts
@@ -69,7 +69,7 @@ export default class Terrain {
 
     }
     postGenerationFunction() { 
-        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y});
+        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y+this._data.textureOffset});
         this.entity.render.meshInstances[0].material = mat;
         this.placeTrees();
     }
@@ -84,7 +84,7 @@ export default class Terrain {
     set entity(value){ this._entity = value; }
     get centroid() {
         if (!this._data.centroid){
-            this._data.centroid = terrainCentroidManager.getCentroid();
+            this._data.centroid = Terrain.getCentroid();
         }
         return this._data.centroid;
     }
@@ -131,10 +131,37 @@ export default class Terrain {
     }
 
     destroy(){
-        terrainCentroidManager.relinquishCentroid(this._data.centroid);
+        Terrain.relinquishCentroid(this._data.centroid);
         this.clearTimeouts();
         this.entity.destroy();
 
+    }
+
+    // CENTROID MANAGEMENT
+    // When placing terrains, they all exist in the same "scene" and so must be spaced away from each other.
+    // To manage placement of new, deletion of old, and reshuffling of terrain positions
+    // we use "centroids", a static list of vec3 defining a 3d grid where at most one terrain fits on each vec3.
+    static spacing = 1000;
+    static centroids = [];
+    static {
+        const dim = 4;
+        const arr = Array.from({ length: dim }, () => Array.from({ length: dim }, () => Array.from({length:dim})));
+        arr.forEach((layer, x) => layer.forEach((row, y) => row.forEach((element, z) => {
+            Terrain.centroids.push(new pc.Vec3(x-1,y-1,z-1).mulScalar(Terrain.spacing)); 
+            // -1,-1,-1 to 1,1,1 (a total of 27 positions in a 3x3x3 cube) 
+        })))
+
+    }
+    static getCentroid () {
+        if (Terrain.centroids.length <= 0){ //this.centroids.index - 1) {
+            console.log("%c ERROR : Too many terrains!","color:red,font-weight:bold");
+            return new pc.Vec3(0,150,0); // a spacing likely to be visually seen by the user as an error
+        }
+        return Terrain.centroids.pop();//[this.index++];
+    }
+    static relinquishCentroid(centroid){
+        // Terrain will call this when it's destroyed.
+        Terrain.centroids.push(centroid);
     }
 }
 

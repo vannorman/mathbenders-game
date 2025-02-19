@@ -169,11 +169,11 @@ var Shaders = {
         varying float vY;
         varying float wR;
         varying float wG;
-        uniform float waterLevel;
+        uniform float uWaterLevel;
         void main(void) {
             vec4 color;
             float y =  vY - `+yOffset+`;
-            if (y < waterLevel) { // Water
+            if (y < uWaterLevel) { // Water
                 vec2 uv = vWorldPosition.xz / 15.0;
                 color = texture2D(uTexture3, uv);
             } else if (y < 10.0) { // Grass
@@ -192,17 +192,6 @@ var Shaders = {
                 color = vec4(1,1,1,1); //1.0 * wR, 1.0 * wG, 1.0, 1.0);
             }
             gl_FragColor = color;
-            // Calculate the fog factor
-            float distance = length(vPosition.xyz);
-//            float fogFactor = exp(-pow(distance * fogDensity, 2.0));
-            float fogAmount = (log(distance)) * fogDensity; //distInFog * c) - 1) * b;
-
-
-            // Blend the original color with the fog color
-            //vec4 finalColor = mix(color, fogColor, fogFactor);
-
-            //gl_FragColor = finalColor;
-            //vec4(finalColor, 1.0);
         }`;
         let shaderDefinition = {
             attributes: {
@@ -242,12 +231,13 @@ var Shaders = {
         return material;
     },
     GrassDirtByHeight(options={}) {
-        const {yOffset=0}=options;
+        const {yOffset=0,waterLevel=10}=options;
 
         let material = new pc.Material();
         material.setParameter('uTexture3',assets.textures.terrain.grass.resource);
         material.setParameter('uTexture1',assets.textures.terrain.grass.resource);
         material.setParameter('uTexture2',assets.textures.terrain.dirt.resource);
+        material.setParameter('uWaterLevel',waterLevel);
         material.shader = Shaders.DefaultShader1({yOffset:yOffset});
         material.name = "grassdirt";
         return material;

@@ -26,21 +26,21 @@ export default class RealmData {
         }
     }
 
-    get currentLevel(){
-        // Estimate!
-        let min = Infinity;
-        let closest = null;
-        this.Levels.forEach(level=>{
-            let d = pc.Vec3.distance(
-                realmEditor.camera.entity.getPosition(),
-                level.terrain.entity.getPosition()); // equivalent to terrainData.terrainEntity.getPosition()?
-            if(d < min){
-                min = d;
-                closest = level;
-            }
-        });
-        return closest;
-    }
+//    get currentLevel(){
+//        // Estimate!
+//        let min = Infinity;
+//        let closest = null;
+//        this.Levels.forEach(level=>{
+//            let d = pc.Vec3.distance(
+//                realmEditor.camera.entity.getPosition(),
+//                level.terrain.entity.getPosition()); // equivalent to terrainData.terrainEntity.getPosition()?
+//            if(d < min){
+//                min = d;
+//                closest = level;
+//            }
+//        });
+//        return closest;
+//    }
  
 }
 

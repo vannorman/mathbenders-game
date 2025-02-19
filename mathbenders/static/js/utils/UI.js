@@ -89,7 +89,7 @@ class UISlider {
     }
 
     SetVal(options){
-        const { resultX, fireOnChangeFn=true} = options;
+        var { resultX, fireOnChangeFn=true} = options;
         if (resultX < 0) resultX = 0;
         else if (resultX > 1) resultX = 1;
         // console.log("resultx;"+resultX+", thisval:"+$this._val+", minst;"+$this._minStep);

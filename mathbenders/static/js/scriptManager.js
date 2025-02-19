@@ -42,9 +42,8 @@ var ScriptManager = {
 //        "/static/js/shaders/claudeFogOutlineShader.js",
 
         "/static/js/shaders.js",
-        "/static/js/terrainTracker.js",
         "/static/js/terrain3d.js",
-        "/static/js/terrain.js",
+        "/static/js/terrainGenerator.js",
         "/static/js/network.js",
         "/static/js/utils/utils2.js",
         "/static/js/utils/physics.js",
@@ -63,9 +62,6 @@ var ScriptManager = {
          //"/static/js/player/inventory/base.js", 
          "/static/js/debug.js", 
          "/static/js/game.js", 
-//         "/static/js/RealmBuilder/classes.js", 
-//         "/static/js/RealmBuilder/ui.js", 
-//         "/static/js/RealmBuilder/realmBuilder.js", 
           "/static/js/cheats.js", 
          "/static/js/tests.js", 
 
@@ -126,15 +122,6 @@ var ScriptManager = {
 
           "/static/js/player/inventory/base.js",
           "/static/js/player/player.js",
-//         "/static/js/charlie/modes/draggingObjectRealmBuilderMode.js",
-//        "/static/js/charlie/modes/index.js",
-//         "/static/js/charlie/modes/normalRealmBuilderMode.js",
-//        "/static/js/charlie/modes/editingItemRealmBuilderMode.js",
-//        "/static/js/charlie/modes/loadScreenRealmBuilderMode.js",
-//        "/static/js/charlie/modes/orbitRealmBuilderMode.js",
-//        "/static/js/charlie/modes/handPanRealmBuilderMode.js",
-//        "/static/js/charlie/modes/mapScreenRealmBuilderMode.js",
-//        "/static/js/charlie/modes/realmBuilderMode.js",
         ],
     loaderScripts : [
         "/static/js/startup/applicationLoader.js",

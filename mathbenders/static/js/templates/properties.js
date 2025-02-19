@@ -57,7 +57,6 @@ export class Property {
         const max = this.max;
         if (value instanceof pc.Vec3){
             // We're attemptting to mod a Vec3, was each x y z within min max bounds?
-            console.log("Value:"+value);
             if (value.x < min || value.x > max || value.y < min || value.y > max || value.z < min || value.z > max){
                 return false;
             } else {
@@ -291,6 +290,51 @@ export class RotateProperty extends Property {
             mouseDown:function(){   $this.template.entity.rotate(-45);    }
         });
 
+        const moveUp = UI.SetUpItemButton({
+            parentEl:container,
+            width:18,height:18,textureAsset:assets.textures.ui.builder.moveUp,
+            anchor:[-1,.8,-1,.8],
+            mouseDown:function(){   
+                var p = $this.template.entity.getPosition();
+                p.add(new pc.Vec3(0,0.5,0));
+                $this.template.entity.moveTo(p);
+            }
+        });
+
+         const moveUpBig = UI.SetUpItemButton({
+            parentEl:container,
+            width:18,height:18,textureAsset:assets.textures.ui.builder.moveUpBig,
+            anchor:[-.5,.8,-.5,.8],
+            mouseDown:function(){   
+                var p = $this.template.entity.getPosition();
+                p.add(new pc.Vec3(0,10,0));
+                $this.template.entity.moveTo(p);
+            }
+        });
+
+        const moveDown = UI.SetUpItemButton({
+            parentEl:container,
+            width:18,height:18,textureAsset:assets.textures.ui.builder.moveDown,
+            anchor:[-1,.2,-1,.2],
+            mouseDown:function(){   
+                var p = $this.template.entity.getPosition();
+                p.add(new pc.Vec3(0,-0.5,0));
+                $this.template.entity.moveTo(p);
+            }
+        });
+
+        const moveDownBig = UI.SetUpItemButton({
+            parentEl:container,
+            width:18,height:18,textureAsset:assets.textures.ui.builder.moveDownBig,
+            anchor:[-.5,0.2,-0.5,0.2],
+            mouseDown:function(){   
+                var p = $this.template.entity.getPosition();
+                p.add(new pc.Vec3(0,-10,0));
+                $this.template.entity.moveTo(p);
+            }
+        });
+
+  
         return container;
     }
 }

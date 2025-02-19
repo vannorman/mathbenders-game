@@ -60,8 +60,10 @@ let perlin = {
         },
     ],
     get2dPerlinArr : function(options){
-        const { dim, sampleResolution, deterministicFloatSeed = 42 } = options
-        this.deterministicFloatSeed = deterministicFloatSeed; // integer
+        const { dim, sampleResolution, deterministicFloatSeed = 42 } = options;
+        this.gradients=[];
+        this.memory = {};
+        this.deterministicFloatSeed = Math.round(deterministicFloatSeed*10000); // integer
         let heights2d = []
         for (let i=0;i<dim;i++){
             heights2d[i] = []

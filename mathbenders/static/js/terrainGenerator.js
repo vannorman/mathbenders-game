@@ -6,6 +6,7 @@ TerrainGenerator = {
         var  {
             name = "Undefined",
             heightTruncateInterval = 0.0,
+            textureOffset = 0,
             heightScale = 0.5,
             resolution = 0.05,
             seed = 0.5,
@@ -27,7 +28,8 @@ TerrainGenerator = {
                 return heights;
             })(),
         } = options;
-
+        this.textureOffset = textureOffset;
+        // console.log("o:"+textureOffset);
 
         // Ugh .. horrible code where we're declaring the index of something in a list when the thing hasn't been added to the list
         const newTerrain = { entity : null };

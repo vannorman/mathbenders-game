@@ -14,7 +14,6 @@ import {
     //PlacedItem,
     Level,
     RealmData,
-    TerrainCentroidManager,
     Terrain
 } from  "./index.js";
 
@@ -29,6 +28,7 @@ class RealmEditor {
     #RealmData;
     get RealmData() {return this.#RealmData;}
     #UpdateInitialized=false;
+    currentLevel;
 
     get mode(){return this.#mode}
 
@@ -61,11 +61,9 @@ class RealmEditor {
         GameManager.subscribe(this,this.onGameStateChange);
 
 
-        window.terrainCentroidManager = new TerrainCentroidManager(); // awkward as fuck to create this global thing here .. :) 
-        // BUT, if I don't, I run into dependency loops which to resolve I have to pass references everywhere
 
         this.#RealmData = new RealmData();
-
+        this.currentLevel = this.#RealmData.Levels[0];
         // but this creates infintie?
         // pc.app.on('update',this.update);
 
@@ -216,7 +214,7 @@ class RealmEditor {
             levels.push(thisLevel);
             
             let terrainData = levelJson.terrain;
-            terrainData.centroid = terrainCentroidManager.getCentroid();
+            terrainData.centroid = Terrain.getCentroid();
             thisLevel.terrain = new Terrain(terrainData);
             const $this = this;
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
@@ -229,10 +227,11 @@ class RealmEditor {
        });
         const loadedRealmGuid = realmJson.guid; 
         this.#RealmData = new RealmData({levels:levels,guid:loadedRealmGuid,name:realmJson.name});
+        this.currentLevel = this.RealmData.Levels[0];
         this.gui.CloseLoadRealmUI();
 
         const zoomFactor = 100;
-        const newTerrainPos = this.RealmData.currentLevel.terrain.entity.getPosition();
+        const newTerrainPos = this.currentLevel.terrain.entity.getPosition();
         this.camera.translate({source:"terrain",targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
         this.gui.realmNameText.text=this.RealmData.name;
     }
@@ -258,20 +257,21 @@ class RealmEditor {
     NewRealm(){
         this.#RealmData.Clear();
         this.#RealmData = new RealmData();
+        this.currentLevel = this.RealmData.Levels[0];
 
     }
 
     createNewLevel(){
         const level = new Level({skipTerrainGen:true});
         this.#RealmData.Levels.push(level);
-        const newTerrainPos = terrainCentroidManager.getCentroid();
+        const newTerrainPos = Terrain.getCentroid();
         
         level.terrain = new Terrain({centroid:newTerrainPos,seed:Math.random()});
         level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
         
         const zoomFactor = 100;
         realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
-        
+        return level;    
     }
 
     SetEditableItemMode() {
@@ -295,7 +295,6 @@ class RealmEditor {
             console.log("mode:"+typeof(this.#mode));
         }
         const entity = this.#mode.entity;
-        // const item = this.RealmData.currentLevel.getPlacedItemByEntity(entity);
         const itemTemplate = entity._templateInstance; 
         this.toggle('draggingObject');
         const data = { templateName:itemTemplate.constructor.name};
@@ -323,7 +322,7 @@ class RealmEditor {
         // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
         // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
         const {
-            level=this.RealmData.currentLevel, 
+            level=this.currentLevel, 
             ItemTemplate, 
             position=pc.Vec3.ZERO, 
             rotation=pc.Vec3.ZERO, 

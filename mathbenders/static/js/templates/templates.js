@@ -144,7 +144,7 @@ class NumberWall extends Template {
             name : "Fraction1",
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction1 = value; }, 
-            getCurValFn : (template) => { console.log("getvalonnumberwall:"+template.name); return template.fraction1; }, 
+            getCurValFn : (template) => { return template.fraction1; }, 
          }),
 
          new PropertyMap({  

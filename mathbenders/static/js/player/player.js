@@ -8,6 +8,7 @@ class PlayerClass {
 
     constructor(args={}){
         const { startingPosition = pc.Vec3.ZERO } = args;
+        console.log("SP:"+startingPosition);
         // TODO: Remove global refs e.g. to Game.
         // TODO: Add separate class instance/ listeners for (e..g) numberpickup, gadgetpickup, ladder  .. 
 
@@ -91,7 +92,6 @@ class PlayerClass {
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
         this.entity.collision.on('collisionstart', this.onCollisionStart, this);
 
-        this.entity.moveTo(Game.c.getPosition());
         let portalCam = new PortalCam();
 
 
@@ -259,8 +259,10 @@ class PlayerClass {
     }
 }
 
- 
-window.Player = new PlayerClass();
+
+const startPos = realmEditor.RealmData.Levels[0].terrain.centroid.clone()
+                .add(pc.Vec3.UP.clone().mulScalar(10));
+window.Player = new PlayerClass({startingPosition:startPos});
 
         PlayerMessenger.build(); 
         PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");

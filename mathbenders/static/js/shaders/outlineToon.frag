@@ -11,6 +11,7 @@ uniform mat4 uProjectionMatrix; // fog
 uniform float uFarClip; // fog
 uniform vec3 uSunDir; // cel shading
 uniform vec3 uPlayerPos; // cel shading
+uniform float uAdjustedPlayerHeight;
 uniform vec3 uCameraPos; // cel shading
 uniform vec3 uCameraDir; // cel shading
 uniform float uWorldAngryA; // world warp effect on grid
@@ -240,8 +241,9 @@ void main() {
 
     // Apply fog depth
     vec3 fog_color = vec3(1.0,1.0,1.0); // white fog
-    if (worldPos.y < 25.0){
-        gl_FragColor = vec4(mix(color,fog_color,-(worldPos.y-25.0)*0.005),1.0);
+    float adjY = worldPos.y-uAdjustedPlayerHeight;
+    if (adjY < 25.0){
+        gl_FragColor = vec4(mix(color,fog_color,-(adjY-25.0)*0.005),1.0);
     } else {
         gl_FragColor = vec4(color,1.0);
     }
