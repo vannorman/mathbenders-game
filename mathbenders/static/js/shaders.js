@@ -231,12 +231,12 @@ var Shaders = {
         return material;
     },
     GrassDirtByHeight(options={}) {
-        const {yOffset=0,waterLevel=10}=options;
+        const {yOffset=0,waterLevel=1}=options;
 
         let material = new pc.Material();
-        material.setParameter('uTexture3',assets.textures.terrain.grass.resource);
         material.setParameter('uTexture1',assets.textures.terrain.grass.resource);
         material.setParameter('uTexture2',assets.textures.terrain.dirt.resource);
+        material.setParameter('uTexture3',assets.textures.terrain.water.resource);
         material.setParameter('uWaterLevel',waterLevel);
         material.shader = Shaders.DefaultShader1({yOffset:yOffset});
         material.name = "grassdirt";
