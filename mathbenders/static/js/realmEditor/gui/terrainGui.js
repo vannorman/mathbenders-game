@@ -4,6 +4,7 @@ export default class TerrainGui {
     #TerrainTools={};
     #changeMapBtn;
     changeMapScreen;
+    width=150;
 
     // Todo
         // Add "exp" to regular heights
@@ -21,13 +22,13 @@ export default class TerrainGui {
     constructor(args={}){
         const {guiBase}=args;
         this.guiBase = guiBase;
-        this.screen = new pc.Entity();
+        this.screen = new pc.Entity("Terrain screen");
         this.screen.addComponent('element',{
             type:'image',
             anchor:[0.5,0.5,0.5,0.5],
             pivot:[0.5,0.5],
             height:Constants.Resolution.height,
-            width:150,
+            width:this.width,
             opacity:0.5,
             color:pc.Color.GREEN,
         }); 
@@ -83,24 +84,84 @@ export default class TerrainGui {
         }
 
         // TODO: make this grouped e.g. this.terrainTools ={}
-        this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});
-        this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
-        this.#TerrainTools.seed = CreateTerrainEditingSlider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
+        // Global group properties
+        function toggleButton(args={}){
+            const { menu } = args;
+            const tb = new pc.Entity();
+            tb.addComponent("element", { 
+                type: "image", 
+                anchor: [0,0,0,0],
+                pivot: [0.5, 0.5], 
+                width: 40, 
+                height: 40,
+                color:pc.Color.BLACK,
+                useInput:true,
+            });
+            tb.element.on("mousedown", () => {
+                tb.element.text = menu.enabled ? ">" : "v"
+                menu.enabled = !menu.enabled; // Toggle menu visibility
+            });
+            // UI.HoverColor({element:tb.element});
+            return tb; 
+        }
+
+        const globals = new pc.Entity("global group");
+        globals.addComponent('element',{
+              type:'image',
+            anchor:[0.5,0.5,0.5,0.5],
+            pivot:[0.5,0.5],
+            height:Constants.Resolution.height,
+            width:this.width,
+            opacity:0.5,
+            color:pc.Color.RED,
+        });
+        globals.addComponent('layoutgroup',{
+           orientation: pc.ORIENTATION_VERTICAL,
+            spacing: new pc.Vec2(-20, 0),
+            alignment: new pc.Vec2(0.5,0.5),
+            widthFitting: pc.FITTING_NONE,
+            heightFitting: pc.FITTING_NONE,
+        });
+        const toggleGlobals = toggleButton({menu:globals});
+        this.screen.addChild(toggleGlobals);
+        this.screen.addChild(globals);
+
         this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:512,minStep:10});
+        this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});
+        this.#TerrainTools.seed = CreateTerrainEditingSlider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
+        this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale = CreateTerrainEditingSlider({key:'heightScale',maxVal:4,minStep:0.02});
         this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingSlider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
         this.#TerrainTools.textureOffset = CreateTerrainEditingSlider({key:'textureOffset',maxVal:256,minStep:1});
+        globals.addChild(this.#TerrainTools.size.group);
+        globals.addChild(this.#TerrainTools.dimension.group);
+        globals.addChild(this.#TerrainTools.seed.group);
+        globals.addChild(this.#TerrainTools.resolution.group);
+        globals.addChild(this.#TerrainTools.heightScale.group);
+        globals.addChild(this.#TerrainTools.heightTruncateInterval.group);
+        globals.addChild(this.#TerrainTools.textureOffset.group);
+
 //        this.#TerrainTools.spacer = spacer();
+        const seconds = new pc.Entity("seconds group",{type:'group'});
+        const toggleSeconds = toggleButton({menu:seconds});
+        this.screen.addChild(toggleSeconds);
+        this.screen.addChild(seconds);
+
         this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
-
-        
-        Object.keys(this.#TerrainTools).forEach(key=>{
-            // Add them to the screen UI to make each tool visible.
-            const group = this.#TerrainTools[key].group;
-            if (group) this.screen.addChild(group);
-        });
+        seconds.addChild(this.#TerrainTools.resolution2.group);
+        seconds.addChild(this.#TerrainTools.heightScale2.group);
+        seconds.addChild(this.#TerrainTools.exp.group);
+       
+       this.globals = globals;
+       this.seconds = seconds;
+       this.toggleGlobals=toggleGlobals; 
+//        Object.keys(this.#TerrainTools).forEach(key=>{
+//            // Add them to the screen UI to make each tool visible.
+//            const group = this.#TerrainTools[key].group;
+//            if (group) this.screen.addChild(group);
+//        });
 
         // Map icon in bottom left allows for terrain selection / addition menu
         this.changeMapBtn = UI.SetUpItemButton({
