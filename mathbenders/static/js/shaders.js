@@ -126,6 +126,7 @@ var Shaders = {
         yOffset = parseFloat(yOffset).toFixed(2);
      // Generate a shader that textures mesh in layers based on world yvalue
         let vertexShaderSource = `
+        precision mediump float;
         attribute vec3 aPosition;
         attribute vec3 aNormal;
         uniform mat4 matrix_viewProjection;
@@ -157,10 +158,11 @@ var Shaders = {
         }`;
     let fragmentShaderSource = `
 
+        precision mediump float;
         uniform sampler2D uTexture3;
         uniform sampler2D uTexture1;
         uniform sampler2D uTexture2;
-        precision mediump float;
+        uniform float uTime;
         varying vec4 vPosition;
         varying vec3 vNormal;
         varying vec3 vWorldPosition; 
@@ -170,12 +172,33 @@ var Shaders = {
         varying float wR;
         varying float wG;
         uniform float uWaterLevel;
+        float smoothNoise(float x) {
+            return fract(sin(x) * 43758.5453);
+        }
         void main(void) {
             vec4 color;
             float y =  vY - `+yOffset+`;
+
+            // Create a water effect
+            float wave = sin(vWorldPosition.x  + uTime/300.0 * 0.5) * 0.1 + 
+                         cos(vWorldPosition.z  + uTime/300.0 * 0.7) * 0.1;
+            
+            float blueShade = 0.5 + wave * 0.5; // Keep within range [0,1]
+
+            // Generate white ripple lines that move randomly but smoothly
+            //float ripple = smoothstep(0.4, 0.42, fract(vWorldPosition.x * 0.1 + sin(uTime * 0.2))) + 
+            //               smoothstep(0.4, 0.42, fract(vWorldPosition.z * 0.1 + cos(uTime * 0.2)));
+            float ripple = 0.0;
+
+
+            vec3 waterColor = vec3(0.0, 0.0, blueShade) + ripple * 0.5; // Add white ripples
+
+
+
             if (y < uWaterLevel) { // Water
                 vec2 uv = vWorldPosition.xz / 15.0;
-                color = texture2D(uTexture3, uv);
+                color = vec4(waterColor, 1.0);
+                // color = texture2D(uTexture3, uv);
             } else if (y < 10.0) { // Grass
                 vec2 uv = vWorldPosition.xz / 15.0;
                 color = texture2D(uTexture1, uv);
@@ -239,6 +262,9 @@ var Shaders = {
         material.setParameter('uTexture3',assets.textures.terrain.water.resource);
         material.setParameter('uWaterLevel',waterLevel);
         material.shader = Shaders.DefaultShader1({yOffset:yOffset});
+        pc.app.on('update',function(dt){
+            material.setParameter('uTime',pc.app._time);
+        });
         material.name = "grassdirt";
         return material;
     },
