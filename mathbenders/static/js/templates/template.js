@@ -5,6 +5,7 @@ export default class Template {
     static icon(properties={}) { return this._icon};
     static propertiesMap=[];
     static isThrowable = false;
+    static isStaticCollider = false;
     colliders = new Map();
 
     entity; // stores scale, position, and rotation;
@@ -61,6 +62,14 @@ export default class Template {
         this.colliders = new Map();
         this.entity.getComponentsInChildren('collision').forEach(collisionComponent =>{
             this.colliders.set(collisionComponent,collisionComponent.enabled);
+            const r = collisionComponent.entity.rigidbody;
+            if (r && this.constructor.isStaticCollider){
+//                console.log("static:"+this.entity.name);
+                // static colliders do not collide each other; set rigidbody group and mask accordingly
+                r.group = Constants.CollisionLayers.FixedObjects;
+                r.mask = pc.BODYMASK_ALL & ~r.group;
+                collisionComponent.on('collisionstart',function(result){console.log(this.entity.name+" hit "+result.other.name);});     
+            }
         });
     }
 

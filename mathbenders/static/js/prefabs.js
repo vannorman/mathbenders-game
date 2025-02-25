@@ -1,4 +1,5 @@
 var m;
+/*
 var Prefabs = {
     // @Eytan - this will be a key area of next architectural evolution
     // All prefabs should inherit from a superclass (or interface?) 
@@ -408,4 +409,4 @@ var Prefabs = {
     }
 }
 
-
+*/

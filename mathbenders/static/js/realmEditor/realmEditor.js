@@ -222,7 +222,7 @@ class RealmEditor {
 //            levelJson._placedItems.forEach(x=>{
             levelJson.templateInstances.forEach(x=>{
                 let obj = this.InstantiateTemplate({level:thisLevel,ItemTemplate:templateNameMap[x.templateName],properties:x.properties});
-                obj.entity.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+                obj.entity.moveTo(x.position.add(thisLevel.terrain.centroid),x.rotation);
             })
        });
         const loadedRealmGuid = realmJson.guid; 

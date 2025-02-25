@@ -6,6 +6,7 @@ const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,Sc
 globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {
+    static isStaticCollider = true;
     static propertiesMap = [
          new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -51,6 +52,7 @@ class NumberHoop extends Template {
 }
 
 class NumberFaucet extends Template {
+    static isStaticCollider = true;
 
     static _icon = assets.textures.ui.icons.faucet;
     static propertiesMap = [
@@ -100,6 +102,7 @@ class NumberFaucet extends Template {
 }
 
 class PlayerStart extends Template {
+    static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.start;
 
     setup () {
@@ -184,6 +187,7 @@ class NumberWall extends Template {
 }
 
 class PlayerPortal extends Template {
+    static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.portal;
 
     setup(){
@@ -197,21 +201,14 @@ class PlayerPortal extends Template {
 }
 
 class CastleTurret extends Template {
+    static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.turret1;
 
     setup(){
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
-        let pillarCollision = Game.addMeshCollider(pillarRender,pillarAsset,pc.RIGIDBODY_TYPE_KINEMATIC); // TODO performance: move to a box collider.
-
-        // Set up collision groups and masks for castles not to intersect each other
-        var COLLISION_GROUP_1 = 1;
-        var COLLISION_GROUP_2 = 2;
-        var ALL_GROUPS = 0xFFFFFFFF;
-
-        pillarCollision.group = COLLISION_GROUP_1;
-        pillarCollision.mask = ALL_GROUPS ^ COLLISION_GROUP_2;
+        let pillarCollision = Utils.addMeshCollider(pillarRender,pillarAsset,pc.RIGIDBODY_TYPE_KINEMATIC); // TODO performance: move to a box collider.
 
         pillarRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         ApplyTextureAssetToEntity({entity:pillarRender,textureAsset:assets.textures.stone90}); 
@@ -219,12 +216,7 @@ class CastleTurret extends Template {
         // Castle Top
         const topAsset = assets.models.castle_top;
         const topRender = topAsset.resource.instantiateRenderEntity();
-        let topCollision = Game.addMeshCollider(topRender,topAsset,pc.RIGIDBODY_TYPE_STATIC); // todo performance change to box collider
-
-
-        // Set up collision groups and masks for castles not to intersect each other
-        topCollision.group = COLLISION_GROUP_1;
-        topCollision.mask = ALL_GROUPS ^ COLLISION_GROUP_2;
+        let topCollision = Utils.addMeshCollider(topRender,topAsset,pc.RIGIDBODY_TYPE_STATIC); // todo performance change to box collider
 
         topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
         ApplyTextureAssetToEntity({entity:topRender,textureAsset:assets.textures.stone90}); 
@@ -241,6 +233,7 @@ class CastleTurret extends Template {
 }
 
 class CastleWall extends Template {
+    static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.wall;
 
     setup(){ 
@@ -262,8 +255,8 @@ class CastleWall extends Template {
 }
 
 class BigConcretePad extends Template {
+    static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.concretePadBig;
-
     static propertiesMap = [
          new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -284,7 +277,7 @@ class BigConcretePad extends Template {
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
     }
     setup(){
-        const pad = new pc.Entity();
+        const pad = new pc.Entity("concrete pad");
         pad.addComponent("render", {  type: "box" }); 
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
         pad.addComponent("collision", { type: "box"});
@@ -365,6 +358,35 @@ class NumberCube extends Template {
     }
 }
 
+class NumberSphereGfxOnly extends Template {
+    static propertiesMap = [
+         new PropertyMap({  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : this.name, // if this changes, data will break // Should be Fraction1?
+            property : FractionProperty, 
+            onChangeFn : (template,value) => { template.fraction = value; }, 
+            getCurValFn : (template) => { return template.fraction; }, 
+         }),
+    ]
+
+     setup(){
+        let sphere = this.entity;
+        sphere.addComponent("render",{ type : "sphere" });
+        const s = sphere.getLocalScale.x;
+        sphere.addComponent('script');
+        let fraction = new Fraction(2,1);
+        sphere.script.create('numberInfo',{attributes:{
+            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
+            fraction:fraction,
+            }});
+        sphere.script.numberInfo.Setup();
+        this.script = sphere.script.numberInfo;
+    }
+
+    get fraction(){ return this.script.fraction; }
+    set fraction(value) { this.script.setFraction(value); }
+
+}
 
 class NumberSphere extends Template {
     static _icon = assets.textures.ui.numberSpherePos;
@@ -468,19 +490,11 @@ class MultiblasterPickup extends GadgetPickup {
 
 
 
-// i can't make this work in modules sadly
-function getAllSubclasses(baseClass) {
-    return Reflect.ownKeys(globalThis)  // Get all global properties
-        .map(key => globalThis[key])    // Convert keys to values (classes)
-        .filter(value => 
-            typeof value === "function" &&  // Ensure it's a function (class)
-            value.prototype instanceof baseClass // Check inheritance
-        );
-}
 
 window.templateNameMap = {
     "Template" : Template,
     "NumberSphere" : NumberSphere,
+    "NumberSphereGfxOnly" : NumberSphereGfxOnly,
     "NumberCube" : NumberCube,
     "NumberFaucet" : NumberFaucet,
     "NumberHoop" : NumberHoop,

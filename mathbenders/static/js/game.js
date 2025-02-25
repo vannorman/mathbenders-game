@@ -214,14 +214,14 @@ async function CreateTemplates(){
 
     Game.addMeshCollider = function(clone,asset,rbType){
         //console.log("a:"+clone.name+", asset:"+asset);
-        let colEnt = clone.findComponent('render').entity; // assumes only one render per asset
-        colEnt.addComponent('collision' ,{type:'mesh',renderAsset:asset.resource.renders[0]}); 
-        colEnt.addComponent( 'rigidbody',{type:rbType});
-        clone.addComponent('rigidbody',{type:rbType}); // won't add twice to same obj
-        return colEnt.collision;
+//        let colEnt = clone.findComponent('render').entity; // assumes only one render per asset
+//        colEnt.addComponent('collision' ,{type:'mesh',renderAsset:asset.resource.renders[0]}); 
+//        colEnt.addComponent( 'rigidbody',{type:rbType});
+//        clone.addComponent('rigidbody',{type:rbType}); // won't add twice to same obj
+//        return colEnt.collision;
     }
 
-    Prefabs.TemplatizePrefabs(); 
+//    Prefabs.TemplatizePrefabs(); 
 }
 
 

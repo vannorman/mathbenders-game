@@ -1,4 +1,11 @@
 Utils = {
+    addMeshCollider(clone,asset,rbType){
+        let colEnt = clone.findComponent('render').entity; // assumes only one render per asset
+        colEnt.addComponent('collision' ,{type:'mesh',renderAsset:asset.resource.renders[0]}); 
+        colEnt.addComponent( 'rigidbody',{type:rbType});
+        clone.addComponent('rigidbody',{type:rbType}); // won't add twice to same obj
+        return colEnt.collision;
+    },
     randomName(){
         // List of 20 math adjectives
         const mathAdjectives = [

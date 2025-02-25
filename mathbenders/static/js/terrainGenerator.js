@@ -321,10 +321,17 @@ TerrainGenerator = {
         entity.addComponent('collision', {type:'mesh'});
         entity.collision.model = collisionModel;
 
-        entity.addComponent('rigidbody', {
+
+
+        const r = entity.addComponent('rigidbody', {
             friction: 0.5,
             type: 'kinematic'
         });
+
+        r.group = Constants.CollisionLayers.FixedObjects;
+        r.mask = pc.BODYMASK_ALL & ~r.group;
+        // console.log("R was set to fixed as well.");
+        // entity.collision.on('collisionstart',function(result){console.log("Ter col w:"+result.other.name);});
 
         app.root.addChild(entity);
         entity.moveTo(position);

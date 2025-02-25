@@ -87,8 +87,11 @@ const Materials = {
 
 // TODO rename this as Elementa Constants or something other than "Constants"
 const Constants = {
+    CollisionLayers : {
+        FixedObjects : pc.BODYGROUP_USER_1, 
+    },
     Layers : {
-        Terrain : pc.BODYGROUP_USER_1,
+        Terrain : pc.BODYGROUP_USER_1, // fixed object
         Portal : pc.BODYGROUP_USER_2,
         Walls : pc.BODYGROUP_USER_3,
         Bullets : pc.BODYGROUP_USER_4,

@@ -36,7 +36,7 @@ export class Gadget extends Template {
     updateAmmoGfx(){}
 
     clearAmmoGfx(){
-        this.ammoGfx.forEach(x=>x.destroy());
+        this.ammoGfx.forEach(x=>x.entity.destroy());
     }
  
     collectAmmo(args={}){}
@@ -134,14 +134,15 @@ export class Multiblaster extends Gadget {
             s.script.numberInfo.setFraction(frac);
             s.rigidbody.linearVelocity=this.heldItemGfx.down.clone().mulScalar(50)
             this.#lastFiredTime = Date.now();
-            this.ammoGfx.pop().destroy();
+            this.ammoGfx.pop().entity.destroy();
         }
 
         
     }
 
     loadNumber(args={}){
-
+    console.log('load?');
+    console.log(args);
 //    collectAmmo(args={}){
         const {fraction=new Fraction(-9,8)}=args;
         if (this.ammo.length == 10){
@@ -158,7 +159,7 @@ export class Multiblaster extends Gadget {
     }
 
     popFxAmmo(){
-        this.ammoGfx?.forEach(x=>{x.addComponent('script');x.script.create('sinePop');});
+        this.ammoGfx?.forEach(x=>{x.entity.addComponent('script');x.entity.script.create('sinePop');});
 
     }
 
@@ -174,21 +175,18 @@ export class Multiblaster extends Gadget {
         }
         let num = this.ammo[0];
         let count = this.ammo.length;
-        this.ammoGfx.forEach(x=>x.destroy());
-
-        const options = {
-            noCollision :true, 
-            numberInfo : {
-                fraction : num
+        this.clearAmmoGfx();
+        const frac = new Fraction(num,1);
+        const options =  {
+            properties : {
+               NumberSphereGfxOnly : frac
             }
         } 
-
-        // Ammo (0) in the hopper is big and centered so you can see it.
-        let b = Game.Instantiate.NumberSphere(options);
-        b.setLocalScale(new pc.Vec3(0.45,0.45,0.45));
+        let b = new NumberSphereGfxOnly(options);
+        b.entity.setLocalScale(new pc.Vec3(0.45,0.45,0.45));
         Game.hi = this.heldItemGfx;
-        this.heldItemGfx.addChild(b);
-        b.setLocalPosition(0,0.2,0);
+        this.heldItemGfx.addChild(b.entity);
+        b.entity.setLocalPosition(0,0.2,0);
         this.ammoGfx.push(b);
 
         // Ammo (1-9) in a circle at base
@@ -196,10 +194,10 @@ export class Multiblaster extends Gadget {
         const circle = Utils.GetCircleOfPoints3d({degreesToComplete:360,radius:.3,scale:.18,autoCount:false,count:9});
         circle.forEach(pos => { 
             if (--count > 0){
-                let b = Game.Instantiate['NumberSphere'](options);
-                b.setLocalScale(ammoScale),
-                this.heldItemGfx.addChild(b);
-                b.setLocalPosition(pos); 
+                let b = new NumberSphereGfxOnly(options);
+                b.entity.setLocalScale(ammoScale),
+                this.heldItemGfx.addChild(b.entity);
+                b.entity.setLocalPosition(pos); 
                 this.ammoGfx.push(b);
             }
         });

@@ -8,7 +8,6 @@ class PlayerClass {
 
     constructor(args={}){
         const { startingPosition = pc.Vec3.ZERO } = args;
-        console.log("SP:"+startingPosition);
         // TODO: Remove global refs e.g. to Game.
         // TODO: Add separate class instance/ listeners for (e..g) numberpickup, gadgetpickup, ladder  .. 
 
@@ -260,9 +259,20 @@ class PlayerClass {
 }
 
 
-const startPos = realmEditor.RealmData.Levels[0].terrain.centroid.clone()
-                .add(pc.Vec3.UP.clone().mulScalar(20));
-window.Player = new PlayerClass({startingPosition:startPos});
+function GetDefaultTerrainStartPos(){
+    const terPos = realmEditor.RealmData.Levels[0].terrain.centroid.clone();
+    var from = terPos.clone().add(new pc.Vec3(0,300,0));
+    var to = terPos.clone().add(new pc.Vec3(0,-300,0));
+    var result = pc.app.systems.rigidbody.raycastFirst(from, to);
+    if (result) {
+        return result.point.clone().add(new pc.Vec3(0,10,0));
+    } else {
+        console.log("Failed to find terrain start!:( fr:"+from.trunc()+", to:"+to.trunc());
+        return from;
+    }
+}
+
+window.Player = new PlayerClass({startingPosition:GetDefaultTerrainStartPos()});
 
         PlayerMessenger.build(); 
         PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
