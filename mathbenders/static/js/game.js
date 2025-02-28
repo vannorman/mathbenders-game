@@ -62,6 +62,22 @@ var Game = {
 
         await CreateTemplates();
 
+        const light = new pc.Entity("Sun (DirectionalLight)");
+        light.addComponent("light", {
+            type: "directional",
+            color: new pc.Color(1, 1, 1),
+            castShadows: true,
+            shadowBias:0.5,
+            shadowResolution:2048,
+        });
+        
+        light.setLocalEulerAngles(45, 30, 0);
+        Game.sun = light;
+//        Game.sunDir = -light.up;
+        pc.app.root.addChild(light);
+
+
+
 //        Levels.CreateSpaceship();
         pc.app.systems.rigidbody.gravity.set(0, -25, 0); // -20 seems to work better than default -9.8 
 

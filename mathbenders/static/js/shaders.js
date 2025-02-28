@@ -256,16 +256,70 @@ var Shaders = {
     GrassDirtByHeight(options={}) {
         const {yOffset=0,waterLevel=1}=options;
 
-        let material = new pc.Material();
+        let material = new pc.StandardMaterial(); // StandardMaterial gives shadows but doesn't let you set textures.
+        // Solution: Create standard material, then overwrite materials.chunks.diffusePS and material.chunks.startVS 
+        // But, we need to start with playcanvas's original diffuseos/startvs since we cant just overwrite it with our random one
+        // because it breaks things in the long and complex shaderchunks chain (
+            // https://forum.playcanvas.com/t/shader-chunks-compilation-order/34918
+            // https://gist.github.com/JohannesDeml/1124520e5618f6c0ec736c48790d929c
+
+        // So, to get the original diffuseps startvs chunks, grab it from any standardmaterial object e.g. concrete pad meshinstance_shaders[0] and shaders[5] (not sure why there are two but they are diff shaders!) then copy the shader.definition.vshader and fshader to edit. 
+
+        // material.shader = Shaders.DefaultShader1({yOffset:yOffset});
+        material.chunks.startVS=vs;
+        material.chunks.diffusePS=`
+            precision highp float;
+            uniform vec3 material_diffuse;
+            uniform sampler2D uTexture1;
+            uniform sampler2D uTexture2;
+            uniform sampler2D uTexture3;
+            uniform float uWaterLevel;
+            varying vec2 uvv;
+            uniform float uTime;
+            uniform float uYoffset;
+            void getAlbedo() {
+                float y = vPositionW.y - uYoffset;
+                vec4 color;
+                float wave = sin(vPositionW.x  + uTime/300.0 * 0.5) * 0.1 + 
+                             cos(vPositionW.z  + uTime/300.0 * 0.7) * 0.1;
+                float blueShade = 0.5 + wave * 0.5; // Keep within range [0,1]
+                vec3 waterColor = vec3(0.0, 0.0, blueShade); 
+                if (y < uWaterLevel) { // Water
+                    vec2 uv = vPositionW.xz / 15.0;
+                    color = vec4(waterColor, 1.0);
+                    // color = texture2D(uTexture3, uv);
+                } else if (y < 10.0) { // Grass
+                    vec2 uv = vPositionW.xz / 15.0;
+                    color = texture2D(uTexture1, uv);
+                } else if (y < 20.0) { // Blend
+                    vec2 uv = vPositionW.xz / 15.0;
+                    float t = (y - 10.0) / (20.0 - 10.0); // normalize vY to the range [0, 1]
+                    vec4 color1 = texture2D(uTexture1, uv);
+                    vec4 color2 = texture2D(uTexture2, uv);
+                    color = mix(color1, color2, t); // mix the colors based on vY
+                } else if (y < 30.0) { // Rock
+                    vec2 uv = vPositionW.xz / 15.0;
+                    color = texture2D(uTexture2, uv);
+                } else { // Snow
+                    color = vec4(1,1,1,1); //1.0 * wR, 1.0 * wG, 1.0, 1.0);
+                }
+                dAlbedo = color.rgb;
+ 
+
+
+
+
+            }`;
         material.setParameter('uTexture1',assets.textures.terrain.grass.resource);
         material.setParameter('uTexture2',assets.textures.terrain.dirt.resource);
         material.setParameter('uTexture3',assets.textures.terrain.water.resource);
+        material.setParameter('uYoffset',yOffset);
         material.setParameter('uWaterLevel',waterLevel);
-        material.shader = Shaders.DefaultShader1({yOffset:yOffset});
         pc.app.on('update',function(dt){
             material.setParameter('uTime',pc.app._time);
         });
         material.name = "grassdirt";
+        material.update();
         return material;
     },
     CreateTextureFromVerts(meshVerts){ 
@@ -322,3 +376,14 @@ var Shaders = {
     },
      
 }
+
+
+var vs = `
+varying vec2 uvv;
+varying float vy;
+void main(void) {
+    gl_Position = getPosition();
+   vPositionW    = getWorldPosition();
+    uvv = vertex_texCoord0;
+`
+

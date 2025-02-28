@@ -271,7 +271,21 @@ class BigConcretePad extends Template {
     ];
 
     get scale(){ return this.pad.getLocalScale(); }
-    set scale(value) { this.pad.setLocalScale(value); this.updateHalfExtents(); }
+    set scale(value) { 
+        this.pad.setLocalScale(value); 
+        this.updateHalfExtents(); 
+        this.updateTextureTiling();
+    }
+
+    updateTextureTiling(){
+        const mat = this.pad.render.meshInstances[0].material;
+        const x = this.pad.getLocalScale().x / 3;
+        const y = this.pad.getLocalScale().z / 3;
+        mat.diffuseMapTiling = new pc.Vec2(x,y);
+        mat.update();
+
+
+    }
 
     updateHalfExtents(){
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
@@ -281,6 +295,10 @@ class BigConcretePad extends Template {
         pad.addComponent("render", {  type: "box" }); 
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
         pad.addComponent("collision", { type: "box"});
+        let mat = ApplyTextureAssetToEntity({entity:pad,textureAsset:assets.textures.terrain.concrete1});
+        mat.diffuseMapTiling=new pc.Vec2(3,3); 
+        mat.update();
+
         this.pad = pad;
         this.scale = new pc.Vec3(10,10,10);
         this.entity.addChild(pad);

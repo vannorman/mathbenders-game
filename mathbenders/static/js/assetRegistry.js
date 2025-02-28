@@ -185,7 +185,8 @@ const assets = {
         grid_thin_green : new pc.Asset("grid_blue", "texture", { url: '/static/assets/textures/grid_thin_green2.jpg' }),
         spaceship_texture_1 : new pc.Asset("spaceship_texture_1", "texture", { url: '/static/assets/textures/spaceship_texture_1.jpg' }),
         terrain : {
-            concrete1 : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/concrete1.jpg' }),
+            concrete1 : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/concrete-tile-1.jpg' }),
+            concrete2 : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/concrete1.jpg' }),
             grass : new pc.Asset("grass", "texture", { url: '/static/assets/textures/terrain/grass1.jpg' }),
             purple : new pc.Asset("purple", "texture", { url: '/static/assets/textures/terrain/purple.jpg' }),
             dirt : new pc.Asset("dirt", "texture", { url: '/static/assets/textures/terrain/dirt.jpg' }),

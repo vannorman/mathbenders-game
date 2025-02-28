@@ -91,17 +91,6 @@ class PlayerCamera{
         pc.app.scene.ambientLight = new pc.Color(0.2, 0.2, 0.2);
 
         // make our scene prettier by adding a directional light
-        const light = new pc.Entity("Sun (DirectionalLight)");
-        light.addComponent("light", {
-            type: "directional",
-            color: new pc.Color(1, 1, 1),
-            castShadows: true,
-        });
-        light.setLocalEulerAngles(45, 30, 0);
-        Game.sun = light;
-//        Game.sunDir = -light.up;
-        pc.app.root.addChild(light);
-
         // Maybe this should not be handled globally as skyboxes will change with scene portals.
         pc.app.scene.envAtlas = assets.textures.skyboxes.helipad.resource;
         pc.app.scene.toneMapping = pc.TONEMAP_ACES;
