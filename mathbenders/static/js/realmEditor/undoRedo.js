@@ -31,10 +31,6 @@ export default class UndoRedo  {
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.redo,
         });
-
- 
- 
-
     }
     
     CaptureAndRegisterState(){
