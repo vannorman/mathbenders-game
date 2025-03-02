@@ -11,10 +11,10 @@ import {
 import {
     GUI,
     EditorCamera,
-    //PlacedItem,
     Level,
     RealmData,
-    Terrain
+    Terrain,
+    UndoRedo
 } from  "./index.js";
 
 class RealmEditor {
@@ -41,6 +41,8 @@ class RealmEditor {
         this.#realm = null;
         this.camera = new EditorCamera({realmEditor:this});
         this.gui = new GUI({ realmEditor:this });
+        this.undoRedo = new UndoRedo({ realmEditor:this });
+
         this.#modes = new Map([
             ['draggingObject', new DraggingObjectRealmBuilderMode({realmEditor: this})],
             ['editingItem', new EditingItemRealmBuilderMode({realmEditor: this})],
@@ -193,18 +195,18 @@ class RealmEditor {
     }
 
 
-    LoadData(realmData){
-        realmData.Levels.forEach(level => {
-//            levelJson._placedItems.forEach(x=>{
-            levelJson.templateInstances.forEach(x=>{
-
-                let obj = this.InstantiateTemplate({level:level,ItemTemplate:templateNameMap[x.templateName]});
-                console.log(x.position);
-                obj.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
-            })
- 
-        });
-    }
+//    LoadData(realmData){
+//        realmData.Levels.forEach(level => {
+////            levelJson._placedItems.forEach(x=>{
+//            levelJson.templateInstances.forEach(x=>{
+//
+//                let obj = this.InstantiateTemplate({level:level,ItemTemplate:templateNameMap[x.templateName]});
+//                console.log(x.position);
+//                obj.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
+//            })
+// 
+//        });
+//    }
     
     LoadJson(realmJson){
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
@@ -221,9 +223,16 @@ class RealmEditor {
  
 //            levelJson._placedItems.forEach(x=>{
             levelJson.templateInstances.forEach(x=>{
-                let obj = this.InstantiateTemplate({level:thisLevel,ItemTemplate:templateNameMap[x.templateName],properties:x.properties});
-                obj.entity.moveTo(x.position.add(thisLevel.terrain.centroid),x.rotation);
-            })
+                let obj = this.InstantiateTemplate({
+                    level:thisLevel,
+                    ItemTemplate:templateNameMap[x.templateName],
+                    properties:x.properties,
+                    position:x.position.add(thisLevel.terrain.centroid),
+                    rotation:x.rotation,
+                    captureState:false,
+                });
+            });
+            this.undoRedo.CaptureAndRegisterState();
        });
         const loadedRealmGuid = realmJson.guid; 
         this.#RealmData = new RealmData({levels:levels,guid:loadedRealmGuid,name:realmJson.name});
@@ -322,6 +331,7 @@ class RealmEditor {
         // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
         // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
         const {
+            captureState=true, // undo redo
             level=this.currentLevel, 
             ItemTemplate, 
             position=pc.Vec3.ZERO, 
@@ -329,26 +339,18 @@ class RealmEditor {
             properties={},
             } = args;
 
-        const instance = new ItemTemplate({properties:properties});
+        const instance = new ItemTemplate({position:position,rotation:rotation,properties:properties});
         const entity = instance.entity;
         entity.tags.add(Constants.Tags.BuilderItem);
-        //const entity = Game.Instantiate[templateName]({position:position,rotation:rotation});
 
-//        const placedItem = new PlacedItem({
-//            entity : entity,
-//            ItemTemplate : ItemTemplate,
-//            level : level,
-//        })
-//        level.registerPlacedItem(placedItem);
-//        placedItem.entity.on('destroy',function(){
         level.registerPlacedTemplateInstance(instance);
         instance.entity.on('destroy',function(){
-            // culprit: Adjusts array size while destroying entities in this array. oops.
             level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
-            //level.deRegisterPlacedItem(placedItem);
-        })
+        });
+        if (captureState){
+            this.undoRedo.CaptureAndRegisterState();
+        }
         return instance;
-//        return placedItem;
     }
     
     editItem(entity){

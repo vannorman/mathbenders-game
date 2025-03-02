@@ -143,6 +143,8 @@ const assets = {
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
             },
             builder : {
+                undo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/undo.png" }),
+                redo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/redo.png" }),
                 scaleItem : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/scale.png" }),
                 concretePadBig : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/concretePadBig.png" }),
                 editTerrain : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconEditTerrain.png" }),

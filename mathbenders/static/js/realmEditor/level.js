@@ -1,25 +1,22 @@
-import Terrain from './terrain.js'; // @Eytan - dislike how I'm having a complex dependency tree for each of these
-// e.g. Level relies on Terrain relies on ..
+import Terrain from './terrain.js'; 
+// A "Level" is a collection of a Terrain and LevelObjects. 
+// Multiple "Levels" exist in a single Realm and are all loaded at the same time.
+// Levels are positioned in world space apart from each other so as to prevent overlap.
+
+
+
 export default class Level {
-    // A "Level" is a collection of a Terrain and LevelObjects. 
-    // Multiple "Levels" exist in a single Realm and are all loaded at the same time.
-    // Levels are positioned in world space apart from each other so as to prevent overlap.
      constructor(opts={}) {
         const { skipTerrainGen=false } = opts; 
-//        this._placedItems = [];
         this.templateInstances = [];
         if (!skipTerrainGen){
             const newTerrain = new Terrain();
             newTerrain.generate();
             this._terrain = newTerrain;
-
-
         }
     }
     get terrain(){ return this._terrain;}
     set terrain(value) { this._terrain = value; }
-//    get placedItems() { return this._placedItems;}
-//    set placedItems(value) { this._placedItems=value;}
    
     registerPlacedTemplateInstance(templateInstance){
         this.templateInstances.push(templateInstance);
@@ -39,37 +36,6 @@ export default class Level {
             console.log("Oh dear!~ An entity was destroyed and deRegister was called, but that item wasn't found in level!!");
         }
     }
-
-//    deRegisterPlacedItem(item){
-//        const index = this.placedItems.indexOf(item);
-//        if (index > -1) { // only splice array when item is found
-//            this.placedItems.splice(index,1);
-//        } else {
-//            console.log("Oh dear!~ An entity was destroyed and deRegister was called, but that item wasn't found in level!!");
-//        }
-//    }
-
-
-//    registerPlacedItem(item){
-//        this.placedItems.push(item);
-//    }
-
-//    ClearPlacedItems(){
-//        // console.log("Clear:"+this._placedItems.length+" items");
-//        this._placedItems.forEach(x=>{
-//            x._entity.destroy();
-//        });
-//    }
-
-
-//    getPlacedItemByEntity(entity){
-//        const g = entity.getGuid();
-//        
-//        // console.log('checking by:'+g+' across '+this.placedItems.length+' items');
-//        const matches = this.placedItems.filter((x)=>{return x.entity.getGuid()===g});
-//        if (matches.length > 0) return matches[0];
-//        else return null;
-//    }
  
     toJSON(){
         const templateInstances = [];
@@ -88,7 +54,6 @@ export default class Level {
         const {deleteLevelObjects=true} = opts;
         this.terrain.destroy();
         if (deleteLevelObjects) {
-    //        this.ClearPlacedItems();
             this.ClearPlacedTemplateInstances();
         }
 
