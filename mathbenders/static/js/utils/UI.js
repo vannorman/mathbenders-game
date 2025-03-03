@@ -275,6 +275,7 @@ const UI = {
             pivot=[0.5,0.5],
             color,
             text="",
+            hoverValidationFn=null,
         }=options;
         const ent = new pc.Entity("btn");
         ent.addComponent('element',{ 
@@ -302,7 +303,7 @@ const UI = {
             ent.addChild(textA); 
         }
         if (parentEl) parentEl.addChild(ent);
-        UI.HoverColor({element:ent.element,cursor:cursor});
+        UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn});
         if (mouseDown) ent.element.on('mousedown',function(){ mouseDown(ent); });
         return ent;
     },
@@ -508,19 +509,25 @@ const UI = {
             cursor='pointer',
             opacityOn=1,
             opacityOff=1,
-            useSelectedState=false }= options;
+            useSelectedState=false,
+            validationFn=null,
+            }= options;
         element.on('mouseenter',function(){
-            if(!useSelectedState || !element.isSelected) {
-                element.color=colorOn;
-                pc.app.graphicsDevice.canvas.style.cursor=cursor;
-                element.opacity=opacityOn;
+            if (validationFn == null || validationFn()){
+                if(!useSelectedState || !element.isSelected) {
+                    element.color=colorOn;
+                    pc.app.graphicsDevice.canvas.style.cursor=cursor;
+                    element.opacity=opacityOn;
+                }
             }
         });
         element.on('mouseleave',function(){
-            if (!useSelectedState || !element.isSelected) {
-                element.color=colorOff;
-                pc.app.graphicsDevice.canvas.style.cursor='auto';
-                element.opacity=opacityOff;
+            if (validationFn == null || validationFn()){
+                if (!useSelectedState || !element.isSelected) {
+                    element.color=colorOff;
+                    pc.app.graphicsDevice.canvas.style.cursor='auto';
+                    element.opacity=opacityOff;
+                }
             }
         });
         element.color=colorOff;

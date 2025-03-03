@@ -3,7 +3,10 @@ export default class UndoRedo  {
     #undoBtn;
     #redoBtn;
     #previousStatesRegistry=[];
+    get prevStatesLn() {return this.#previousStatesRegistry.length;};
     #futureStatesRegistry=[];
+    get futureStatesLn() {return this.#futureStatesRegistry.length;};
+    #currentState;
     
     constructor(opts={}){
         const {realmEditor}=opts;
@@ -19,6 +22,7 @@ export default class UndoRedo  {
             }, 
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.undo,
+            hoverValidationFn:()=>{return $this.prevStatesLn > 0},
         });
         this.#redoBtn = UI.SetUpItemButton({
             parentEl:this.realmEditor.gui.mapPanel,
@@ -30,36 +34,97 @@ export default class UndoRedo  {
             }, 
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.redo,
+            hoverValidationFn:()=>{return $this.futureStatesLen > 0},
         });
+
+
+        // Hacky and simple way to capture states
+        // Every mouse up and mouse down, UNLESS we're on the UNDO/REDO buttons.
+        pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
+            if (!Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+                $this.CaptureAndRegisterState()
+            }
+        }, this);
+        pc.app.mouse.on(pc.EVENT_MOUSEUP, function(){
+            if (!Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+                $this.CaptureAndRegisterState()
+            }
+        }, this);
+
+
     }
-    
+   
+    captureCurrentState(){
+        this.#currentState =  JsonUtil.cleanJson(JSON.stringify(this.realmEditor.currentLevel)).templateInstances;
+    }
     CaptureAndRegisterState(){
-        const state = JSON.parse(JSON.stringify(realmEditor.currentLevel)).templateInstances;
-        let prevState = this.#previousStatesRegistry[this.#previousStatesRegistry.length-1];
-        if (JSON.stringify(prevState) === JSON.stringify(state)){
-            // state didn't change, don't update it.
+        let lastCur = this.#currentState == undefined ? [] : JSON.parse(JSON.stringify(this.#currentState));
+        let newCur = JSON.stringify(JsonUtil.cleanJson(JSON.stringify(this.realmEditor.currentLevel)).templateInstances);
+        let prevState = JSON.stringify(this.#previousStatesRegistry[this.#previousStatesRegistry.length-1]);
+        this.captureCurrentState();
+        if (newCur === JSON.stringify(lastCur)){
+            // The state didn't change. Do nothing.
+        } else if (prevState === newCur){
+            // The current state is already stored as the last saved state. Do nothing.
         } else {
-            this.#previousStatesRegistry.push(state);
+            // The current state changed, and is not equal to the last saved state. 
+            // Push the old current state into prev states
+            // Save the new current state
+            this.#previousStatesRegistry.push(lastCur);
+            this.logStates();
+
         }
+        this.updateBtnGfx();
+
     }
     Undo(){
         if (this.#previousStatesRegistry.length > 0){
             let prevState = this.#previousStatesRegistry.pop(); 
-            this.#futureStatesRegistry.push(prevState);
+            this.#futureStatesRegistry.push(this.#currentState);
             this.LoadState(prevState);
+            this.captureCurrentState();
         }
+        this.updateBtnGfx();
+        this.logStates();
     }
     Redo(){
         if (this.#futureStatesRegistry.length > 0){
             let nextState = this.#futureStatesRegistry.pop();
-            this.#previousStatesRegistry.push(nextState);
+            this.#previousStatesRegistry.push(this.#currentState);
             this.LoadState(nextState);
+            this.captureCurrentState();
         }
+        this.updateBtnGfx();
+        this.logStates();
+    }
+
+    updateBtnGfx(){
+        // 
+        if (this.#previousStatesRegistry.length == 0) {
+           this.#undoBtn.element.color = pc.Color.GRAY; 
+        }else{
+           this.#undoBtn.element.color = pc.Color.WHITE; 
+        }
+        if (this.#futureStatesRegistry.length == 0){
+           this.#redoBtn.element.color = pc.Color.GRAY; 
+
+        } else {
+           this.#redoBtn.element.color = pc.Color.WHITE; 
+
+        }
+    }
+
+    logStates(){
+        let a = "";
+        this.#previousStatesRegistry.forEach(x=>{a+="["+x.length+"],";});
+        a += " >["+this.#currentState?.length+"]<, ";
+        this.#futureStatesRegistry.forEach(x=>{a+="["+x.length+"],";})
+        // console.log(a);
+
     }
 
     LoadState(state){
         // Note: "state" == "realmEditor.levels[x].templateInstances"
-        console.log("load state:"+JSON.stringify(state));
         // Clear all existing objects 
         realmEditor.currentLevel.ClearPlacedTemplateInstances();
 
@@ -70,11 +135,11 @@ export default class UndoRedo  {
                 properties:x.properties,
                 position:x.position.add(realmEditor.currentLevel.terrain.centroid),
                 rotation:x.rotation,
-                captureState:false,
             });
             // this.CaptureAndRegisterState();
 
         });
+
 
     }
 

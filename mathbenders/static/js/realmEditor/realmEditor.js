@@ -229,10 +229,8 @@ class RealmEditor {
                     properties:x.properties,
                     position:x.position.add(thisLevel.terrain.centroid),
                     rotation:x.rotation,
-                    captureState:false,
                 });
             });
-            this.undoRedo.CaptureAndRegisterState();
        });
         const loadedRealmGuid = realmJson.guid; 
         this.#RealmData = new RealmData({levels:levels,guid:loadedRealmGuid,name:realmJson.name});
@@ -331,7 +329,6 @@ class RealmEditor {
         // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
         // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
         const {
-            captureState=true, // undo redo
             level=this.currentLevel, 
             ItemTemplate, 
             position=pc.Vec3.ZERO, 
@@ -347,9 +344,6 @@ class RealmEditor {
         instance.entity.on('destroy',function(){
             level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
         });
-        if (captureState){
-            this.undoRedo.CaptureAndRegisterState();
-        }
         return instance;
     }
     

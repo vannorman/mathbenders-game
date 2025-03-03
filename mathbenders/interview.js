@@ -1,4 +1,10 @@
 const interview = {
+    // Sun Mar 2 2025
+    /*
+    At the "Get Shit Done" Austin meetup (via Instragram?) and I have realized the biggest thing missing from my ship is a mentor. I can deliver the product, that is not a question. The question is how can I correctly Go To Market including marketing, sales, fundraising, etc. I need help! So, today I'm reaching out to the founders of DragonBox Jean-Baptiste Huynh among others to ideally help find a mentor. Maybe apply to incubators as well."
+
+    */
+
     // Sun Feb 16 2025
     /*
         It's incredible how much difference having Eytan on the team has made. I found many technical blockers to become more visible and Eytan seems to always have a cleaner and more organized approach to the architecture. Refactoring LevelBuilder (now RealmEditor), moving away from what I called "Prefabs" before and into Templates, and many other small changes have made the code base much more manageable. However, quite a bit of work still lies ahead. NumberInfo has become a focal point as numbers are everywhere and demand many interactions, from physical collisions and triggers to loading as ammo into a gadget, being picked up, combining with each other, and more. Further, it is now a consideration to consolidate all number logic into a manager rather than having a script on each entity, and to potentially use a shader to represent the number rather than an additional text entity that "faces player", due to the enormous computational load of rendering and calculating 1,000s of numbers at a time. However, this may not be critical path; an MVP may only need to have 100s of numbers at a time, which is fairly manageable now with per-number architecture.
