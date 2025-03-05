@@ -10,14 +10,6 @@ export default class Template {
 
     entity; // stores scale, position, and rotation;
 
-    static isSubclass(child, parent) {
-      while (child && child !== Object) {
-        if (child === parent) return true;
-        child = Object.getPrototypeOf(child);
-      }
-      return false;
-    } 
-
     static get isGadget(){ return false;  }
 
     constructor(args={}) {
@@ -30,7 +22,7 @@ export default class Template {
             rigidbodyType='none',
             rigidbodyVelocity=pc.Vec3.ZERO,
         }=args;
-        this.entity = new pc.Entity();
+        this.entity = new pc.Entity(this.constructor.name);
 
         const $this=this;
         pc.app.root.addChild(this.entity);
@@ -43,7 +35,6 @@ export default class Template {
         this.entity.addComponent('script');
         this.entity._templateInstance = this;
         this.name = this.constructor.name;
-        this.entity.name = this.constructor.name;
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup();
@@ -68,7 +59,21 @@ export default class Template {
                 // static colliders do not collide each other; set rigidbody group and mask accordingly
                 r.group = Constants.CollisionLayers.FixedObjects;
                 r.mask = pc.BODYMASK_ALL & ~r.group;
-                collisionComponent.on('collisionstart',function(result){console.log(this.entity.name+" hit "+result.other.name);});     
+                const $this = this;
+                console.log("this col setup;"+$this.entity.name);
+                collisionComponent.on('collisionstart',
+                    function(result){
+                        let intervalFn = $this.entity.getGuid()+"_"+result.other.getGuid();
+                        window[intervalFn] = setInterval(function(){
+                            console.log($this.entity.name+" hit "+result.other.name+" g1:"+r.group+", m1:"+r.mask+",g2:"+result.other.rigidbody.group+",m2:"+result.other.rigidbody.mask);
+                        },2000);     
+                    });
+                collisionComponent.on('collisionend', 
+                    function(result){
+                        let intervalFn = $this.entity.getGuid()+"_"+result.getGuid();
+                        clearInterval(window[intervalFn]);
+                    });
+
             }
         });
     }

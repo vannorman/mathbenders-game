@@ -369,19 +369,6 @@ export default class GUI {
                     { ItemTemplate:BigConcretePad} ,
             ],}));
         
-        // Set up terrain panel
-        this.editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
-        this.terrain = new TerrainGui({guiBase:this});
-        this.editTerrainPanel.panel.addChild(this.terrain.screen);
-        this.#builderPanels.push(this.editTerrainPanel);
-
-        // Now that each builder panel was created, add it to the hierarcy.
-        this.#builderPanels.forEach(panel=>{
-            this.#navList.addChild(panel.navButton); 
-            this.#builderObjectIconsPanel.addChild(panel.panel);
-        });
-        this.#builderPanels[0].select();
-
         // Save icon
          this.#saveBtn = UI.SetUpItemButton({
             parentEl:this.mapPanel,
@@ -405,6 +392,21 @@ export default class GUI {
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.load,
         });
+
+        // Set up terrain panel
+        this.editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
+        this.terrain = new TerrainGui({guiBase:this});
+        this.editTerrainPanel.panel.addChild(this.terrain.screen);
+        this.#builderPanels.push(this.editTerrainPanel);
+
+        // Now that each builder panel was created, add it to the hierarcy.
+        this.#builderPanels.forEach(panel=>{
+            this.#navList.addChild(panel.navButton); 
+            this.#builderObjectIconsPanel.addChild(panel.panel);
+        });
+        this.#builderPanels[0].select();
+
+
 
         // Load screen
         this.#loadRealmScreen = new pc.Entity("load level scrn");

@@ -483,6 +483,7 @@ class GadgetPickup extends Template {}
 window['GadgetPickup'] = GadgetPickup; //awkward
 class MultiblasterPickup extends GadgetPickup {
     static _icon = assets.textures.ui.icons.multiblaster;
+    static isStaticCollider = true;
 
     static onCollect(){
         return Multiblaster;

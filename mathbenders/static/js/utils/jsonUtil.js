@@ -30,12 +30,14 @@ JsonUtil = {
         return {x : parseFloat(p.x), y: parseFloat(p.y), z: parseFloat(p.z)};
     },
     cleanJson(jsonString){
+        console.log("Cleaning:");
+        console.log(jsonString);
         if (!jsonString) return JSON.parse("{}")
         jsonString = jsonString.replaceAll("'",'"')
         jsonString = jsonString.replaceAll("True",'true')
         jsonString = jsonString.replaceAll("False",'false')
         let parsedJson = JSON.parse(jsonString);
-        parsedJson = JsonUtil.transformFractions(parsedJson);
+        //parsedJson = JsonUtil.transformFractions(parsedJson);
         parsedJson = JsonUtil.transformVec3s(parsedJson);
         return parsedJson;
 
@@ -43,15 +45,18 @@ JsonUtil = {
 
 
     transformVec3s(obj,depth=0) {
+        if (obj == null) return null;
         if (depth>20) return null; //oopes
         if (Array.isArray(obj)) {
             // Recurse into arrays
             return obj.map(JsonUtil.transformVec3s);
         } else if (typeof obj === "object" && obj !== null) {
             // Check if this object has a key "Fraction" with an object value
+            console.log(obj);
             if (Object.keys(obj).length == 1 && "Vec3" in obj && typeof obj.Vec3 === "object") {
                 return new pc.Vec3(obj.Vec3.x,obj.Vec3.y,obj.Vec3.z);
-            } else {
+            } else if ("Fraction" in obj && typeof obj.Fraction === "object") {
+                return new Fraction(obj.Fraction.numerator, obj.Fraction.denominator);
             }
 
             // Recurse into all object properties

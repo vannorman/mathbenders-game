@@ -7,7 +7,7 @@ export default class UndoRedo  {
     #futureStatesRegistry=[];
     get futureStatesLn() {return this.#futureStatesRegistry.length;};
     #currentState;
-    
+    enabled;    
     constructor(opts={}){
         const {realmEditor}=opts;
         this.realmEditor=realmEditor;
@@ -18,7 +18,9 @@ export default class UndoRedo  {
             anchor:[0.08, 0.02, 0.08, 0.02],
             pivot:[0.5,0],
             mouseDown:function(){
-                $this.Undo();
+                if ($this.enabled){
+                    $this.Undo();
+                }
             }, 
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.undo,
@@ -30,7 +32,9 @@ export default class UndoRedo  {
             anchor:[0.2, 0.02, 0.2, 0.02],
             pivot:[0.5,0],
             mouseDown:function(){
-                $this.Redo();
+                if ($this.enabled){
+                    $this.Redo();
+                }
             }, 
             cursor:'pointer',
             textureAsset:assets.textures.ui.builder.redo,
@@ -41,19 +45,30 @@ export default class UndoRedo  {
         // Hacky and simple way to capture states
         // Every mouse up and mouse down, UNLESS we're on the UNDO/REDO buttons.
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
-            if (!Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+            if ($this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
                 $this.CaptureAndRegisterState()
             }
         }, this);
         pc.app.mouse.on(pc.EVENT_MOUSEUP, function(){
-            if (!Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+            if ($this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
                 $this.CaptureAndRegisterState()
             }
         }, this);
+        
+        GameManager.subscribe(this,this.onGameStateChange);
 
 
     }
-   
+    onGameStateChange(state) {
+        switch(state){
+        case GameState.RealmBuilder:
+            this.enabled=true;
+            break;
+        case GameState.Playing:
+            this.enabled=false;
+            break;
+        }
+    } 
     captureCurrentState(){
         this.#currentState =  JsonUtil.cleanJson(JSON.stringify(this.realmEditor.currentLevel)).templateInstances;
     }

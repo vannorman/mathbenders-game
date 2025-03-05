@@ -6,7 +6,7 @@ export default class RealmData {
             creator="nocreat",
             date_created=Date.now(),
             date_last_edited=Date.now(),
-            levels=[new Level()],
+            levels=[],//new Level()],
             guid=Utils.newGuid(),
         } = opts;
         this.name = name;

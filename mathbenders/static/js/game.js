@@ -37,27 +37,12 @@ class GameManagerClass {
 
 window.GameManager = new GameManagerClass();
 
-var myTemplates = {}; // stores prefabs
 var Game = {
-    Mode : {
-        Normal : 'Normal',
-        Playing : 'Playing',
-        InGameGui : 'InGameGui',
-    },
    sun : null,
     get sunDir() {
         return Game.sun.up;
     },
     
-    Instantiate : {}, 
-    templateIcons : {}, 
-    
-    GameState : {
-        PreStart : "PreStart",
-        Running : "Running"
-    },
-    currentState : "PreStart", // DISLIKE!! 
-
    async LoadGame(){
 
         await CreateTemplates();
@@ -73,19 +58,14 @@ var Game = {
         
         light.setLocalEulerAngles(45, 30, 0);
         Game.sun = light;
-//        Game.sunDir = -light.up;
         pc.app.root.addChild(light);
 
 
-
-//        Levels.CreateSpaceship();
         pc.app.systems.rigidbody.gravity.set(0, -25, 0); // -20 seems to work better than default -9.8 
 
         // Create core objects
         window.Mouse = new MouseClass();
-        Game.currentState = Game.GameState.Running;
         
-        // window.Player = new PlayerClass({startingPosition:new pc.Vec3(0,20,0)}); // Module, so now handled in /player/player.js
 
 
         // let fpsMeter = new DebugFps();
@@ -94,12 +74,12 @@ var Game = {
         // let axis = new DebugAxis();
 
         // Bootstrapped starting area (temporary) -- Platform for player to stand.
-        let cubeP = new pc.Vec3(0,18,0);
-        let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
-        ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
-        Game.c = c; // Player relies on the position of the starting platform; boostrap; awkward
-        GameManager.setState(GameState.Playing);
+        //let cubeP = new pc.Vec3(0,18,0);
+       // let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
+        //ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
+        // Game.c = c; // Player relies on the position of the starting platform; boostrap; awkward
 
+        console.log('game st');
     },
 
     printLoadTime(color,message){

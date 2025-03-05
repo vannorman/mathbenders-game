@@ -6,17 +6,16 @@ import Terrain from './terrain.js';
 
 
 export default class Level {
+    terrain;
      constructor(opts={}) {
         const { skipTerrainGen=false } = opts; 
         this.templateInstances = [];
         if (!skipTerrainGen){
             const newTerrain = new Terrain();
             newTerrain.generate();
-            this._terrain = newTerrain;
+            this.terrain = newTerrain;
         }
     }
-    get terrain(){ return this._terrain;}
-    set terrain(value) { this._terrain = value; }
    
     registerPlacedTemplateInstance(templateInstance){
         this.templateInstances.push(templateInstance);
@@ -45,9 +44,10 @@ export default class Level {
         });
         const obj = {
             templateInstances : templateInstances,
-            terrain : this._terrain,
+            terrain : this.terrain,
         };
-        return obj;//JSON.stringify(obj);
+        return obj;
+        //JSON.stringify(obj);
     }
     
     Clear(opts={}){

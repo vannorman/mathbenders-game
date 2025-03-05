@@ -191,7 +191,7 @@ ThirdPersonController.prototype.postUpdate = function (dt) {
 
 };
 ThirdPersonController.prototype.onMouseDown = function (e) {
-    if (this.enabled && GameManager.state == GameState.Playing) {
+    if (Player.entity.enabled && this.entity.enabled) {
         Mouse.LockCursor();
     }
 }

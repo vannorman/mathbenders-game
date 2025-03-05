@@ -64,10 +64,46 @@ class RealmEditor {
 
 
 
-        this.#RealmData = new RealmData();
+        this.#RealmData = new RealmData({levels:[new Level()]});
         this.currentLevel = this.#RealmData.Levels[0];
-        // but this creates infintie?
-        // pc.app.on('update',this.update);
+    }
+
+    buildRandomLevels(){
+        return;
+        for (let i=0;i<5;i++){
+            let level = this.createNewLevel();
+            this.currentLevel = level;
+            const numItems = Math.round(Math.random()*20);
+           this.buildRandomItemsOnLevel({level:level,numItems:numItems}); 
+       }
+
+    }
+
+    buildRandomItemsOnLevel(args={}){
+        const {level=this.currentLevel,numItems=5} = args;
+        for(let j=0;j<numItems;j++){
+            let aabb = level.terrain.entity.render.meshInstances[0].aabb;
+            let scale = aabb.halfExtents.length();
+            let randLocalPos =  Utils3.flattenVec3(Utils.getRandomUnitVector()).mulScalar(scale*0.5);
+            let from = level.terrain.centroid.clone().add(new pc.Vec3(0,100,0)).add(randLocalPos);
+            let to = from.clone().add(new pc.Vec3(0,-200,0));
+            let result = pc.app.systems.rigidbody.raycastFirst(from, to);
+
+            let randomTemplateKey = Object.keys(templateNameMap)[Math.floor(Math.random()*Object.keys(templateNameMap).length)];
+            if (result) {
+                const pos = result.point;
+                let obj = this.InstantiateTemplate({
+                    level:level,
+                    ItemTemplate:templateNameMap[randomTemplateKey],
+                    position:pos,
+                    rotation:new pc.Vec3(0,Math.random()*180,0),
+                });
+            } else {
+                Utils3.debugSphere({position:from,timeout:100000});
+            }
+        //         
+
+       }
 
     }
 
@@ -195,18 +231,6 @@ class RealmEditor {
     }
 
 
-//    LoadData(realmData){
-//        realmData.Levels.forEach(level => {
-////            levelJson._placedItems.forEach(x=>{
-//            levelJson.templateInstances.forEach(x=>{
-//
-//                let obj = this.InstantiateTemplate({level:level,ItemTemplate:templateNameMap[x.templateName]});
-//                console.log(x.position);
-//                obj.moveTo(x.position.add(thisLevel.terrain.centroid),JsonUtil.ArrayToVec3(x.rotation));
-//            })
-// 
-//        });
-//    }
     
     LoadJson(realmJson){
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
@@ -277,7 +301,7 @@ class RealmEditor {
         level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
         
         const zoomFactor = 100;
-        realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
+        this.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
         return level;    
     }
 

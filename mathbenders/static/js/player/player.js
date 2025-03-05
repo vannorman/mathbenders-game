@@ -272,8 +272,9 @@ function GetDefaultTerrainStartPos(){
     }
 }
 
-window.Player = new PlayerClass({startingPosition:GetDefaultTerrainStartPos()});
+window.Player = new PlayerClass();//{startingPosition:GetDefaultTerrainStartPos()});
 
-        PlayerMessenger.build(); 
-        PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
-
+PlayerMessenger.build(); 
+PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
+realmEditor.buildRandomLevels();
+Player.entity.moveTo(GetDefaultTerrainStartPos());
