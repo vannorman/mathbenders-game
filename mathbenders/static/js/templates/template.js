@@ -1,6 +1,5 @@
 export default class Template {
 
-    static name="TemplateSuper";
     static _icon;
     static icon(properties={}) { return this._icon};
     static propertiesMap=[];
@@ -61,20 +60,31 @@ export default class Template {
                 r.mask = pc.BODYMASK_ALL & ~r.group;
                 const $this = this;
                 console.log("this col setup;"+$this.entity.name);
-                collisionComponent.on('collisionstart',
-                    function(result){
-                        let intervalFn = $this.entity.getGuid()+"_"+result.other.getGuid();
-                        window[intervalFn] = setInterval(function(){
-                            console.log($this.entity.name+" hit "+result.other.name+" g1:"+r.group+", m1:"+r.mask+",g2:"+result.other.rigidbody.group+",m2:"+result.other.rigidbody.mask);
-                        },2000);     
-                    });
-                collisionComponent.on('collisionend', 
-                    function(result){
-                        let intervalFn = $this.entity.getGuid()+"_"+result.getGuid();
-                        clearInterval(window[intervalFn]);
-                    });
-
-            }
+                const debugCollisions = false;
+                if (debugCollisions) {
+                    collisionComponent.on('collisionstart',
+                        function(result){
+                            let intervalFn = $this.entity.getGuid()+"_"+result.other.getGuid();
+                            window[intervalFn] = setInterval(function(){
+                                if (!result.other) {
+                                    clearInterval(window[intervalFn]);
+                                }
+                                if (!result.other.rigidbody) {
+                                    clearInterval(window[intervalFn]);
+                                    console.log("%c HUH? Where is this guy ","color:red;font-weight:bold;");
+                                    window.oo = result.other;
+                                    console.log(result.other);
+                                }
+                                console.log($this.entity.name+" hit "+result.other.name+" g1:"+r.group+", m1:"+r.mask+",g2:"+result.other.rigidbody?.group+",m2:"+result.other.rigidbody?.mask);
+                            },2000);     
+                        });
+                    collisionComponent.on('collisionend', 
+                        function(result){
+                            let intervalFn = $this.entity.getGuid()+"_"+result.getGuid();
+                            clearInterval(window[intervalFn]);
+                        });
+                    }
+                }
         });
     }
 

@@ -313,6 +313,8 @@ class NumberCube extends Template {
     // Currently, when numberSphere collides with Numbercube, the sphere may remain; this is wrong; hiearchy should be cube remains.
     static _icon = assets.textures.ui.numberCubePos;
     static _icon_neg = assets.textures.ui.numberCubeNeg;
+    static isStaticCollider = true;
+
     static icon(properties){
         const pos = Object.values(properties).find(x=>x instanceof Fraction).numerator > 0;
         if (pos) return this._icon;

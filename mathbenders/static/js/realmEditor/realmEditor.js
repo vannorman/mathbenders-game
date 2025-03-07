@@ -92,6 +92,7 @@ class RealmEditor {
             let randomTemplateKey = Object.keys(templateNameMap)[Math.floor(Math.random()*Object.keys(templateNameMap).length)];
             if (result) {
                 const pos = result.point;
+                console.log("rtk:"+randomTemplateKey);
                 let obj = this.InstantiateTemplate({
                     level:level,
                     ItemTemplate:templateNameMap[randomTemplateKey],
@@ -164,7 +165,10 @@ class RealmEditor {
         AudioManager.play({source:assets.sounds.ui.open});
         this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
         // To re-load the existing level ..
+        console.log("%c ENABLE","color:#77f;font-weight:bold;");
         const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
+        console.log(JSON.parse(realmData));
+
         this.#RealmData.Clear(); // delete everything
         pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{
             // if(!x.entity.getComponentInParent('thirdPersonController')){
@@ -246,14 +250,29 @@ class RealmEditor {
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
  
 //            levelJson._placedItems.forEach(x=>{
+            let index=0;
+            console.log("%c BEGIN ~~ ~","color:yellow;font-weight:bold;");
+            console.log(levelJson.templateInstances);
             levelJson.templateInstances.forEach(x=>{
-                let obj = this.InstantiateTemplate({
-                    level:thisLevel,
-                    ItemTemplate:templateNameMap[x.templateName],
-                    properties:x.properties,
-                    position:x.position.add(thisLevel.terrain.centroid),
-                    rotation:x.rotation,
-                });
+                try {
+                    let obj = this.InstantiateTemplate({
+                        level:thisLevel,
+                        ItemTemplate:templateNameMap[x.templateName],
+                        properties:x.properties,
+                        position:x.position.add(thisLevel.terrain.centroid),
+                        rotation:x.rotation,
+                    });
+                    if (obj == null){
+                        console.log("prob2 w X:"+index);
+                        console.log(x);
+
+                    }
+                } catch {
+                    console.log("prob w X:"+index);
+                    console.log(x);
+                } 
+                index++;
+
             });
        });
         const loadedRealmGuid = realmJson.guid; 
@@ -359,16 +378,21 @@ class RealmEditor {
             rotation=pc.Vec3.ZERO, 
             properties={},
             } = args;
+        try {
+            const instance = new ItemTemplate({position:position,rotation:rotation,properties:properties});
+            const entity = instance.entity;
+            entity.tags.add(Constants.Tags.BuilderItem);
 
-        const instance = new ItemTemplate({position:position,rotation:rotation,properties:properties});
-        const entity = instance.entity;
-        entity.tags.add(Constants.Tags.BuilderItem);
-
-        level.registerPlacedTemplateInstance(instance);
-        instance.entity.on('destroy',function(){
-            level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
-        });
-        return instance;
+            level.registerPlacedTemplateInstance(instance);
+            instance.entity.on('destroy',function(){
+                level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
+            });
+            return instance;
+        } catch  {
+            console.log("%c FFFFF.","color:green;font-weight:bold;");
+            console.log(ItemTemplate);
+            return null;
+        }
     }
     
     editItem(entity){

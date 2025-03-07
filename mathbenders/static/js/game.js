@@ -79,7 +79,6 @@ var Game = {
         //ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
         // Game.c = c; // Player relies on the position of the starting platform; boostrap; awkward
 
-        console.log('game st');
     },
 
     printLoadTime(color,message){
