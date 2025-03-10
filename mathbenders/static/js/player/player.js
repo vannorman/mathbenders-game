@@ -275,6 +275,6 @@ function GetDefaultTerrainStartPos(){
 window.Player = new PlayerClass();//{startingPosition:GetDefaultTerrainStartPos()});
 
 PlayerMessenger.build(); 
-PlayerMessenger.Say("Welcome to the Secret of Infinity game (prototype)");
+PlayerMessenger.Say("Welcome to Secret of Infinity (prototype). Press Y and U keys to toggle Editor.");
 realmEditor.buildRandomLevels();
 Player.entity.moveTo(GetDefaultTerrainStartPos());
