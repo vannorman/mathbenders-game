@@ -275,6 +275,15 @@ function GetDefaultTerrainStartPos(){
 window.Player = new PlayerClass();//{startingPosition:GetDefaultTerrainStartPos()});
 
 PlayerMessenger.build(); 
-PlayerMessenger.Say("Welcome to Secret of Infinity (prototype). Press Y and U keys to toggle Editor.");
+PlayerMessenger.Say("Press W to move forward. \nPress Y to toggle Editor.");
+window.welcomeMessageFn = setInterval(function(){
+    if (!realmEditor.wasEnabled){
+        PlayerMessenger.Say("Press Y to toggle Editor.");
+    } else {
+        console.log("done");
+        clearInterval(window.welcomeMessageFn);
+    }
+
+},10000);
 realmEditor.buildRandomLevels();
 Player.entity.moveTo(GetDefaultTerrainStartPos());

@@ -391,11 +391,12 @@ $(document).on("keydown", function (e) {
 //    if (ee == '7'){ Game.organic1.linesPerPointMax += 1; Game.organic1.Rebuild(); }
 //    if (ee == 'U'){ Game.organic1.linesPerPointMax -= 1; Game.organic1.Rebuild(); }
     if (ee == 'Y'){
-        GameManager.setState(GameState.RealmBuilder);
-        //console.log('s?');
-    }
-    if (ee == 'U'){
-        GameManager.setState(GameState.Playing);
+        if (GameManager.state == GameState.RealmBuilder){
+            GameManager.setState(GameState.Playing);
+        } else {
+            GameManager.setState(GameState.RealmBuilder);
+
+        }
     }
    if (ee == 'J'){
         cb.rotate(new pc.Vec3(0,45,0)); 

@@ -49,9 +49,15 @@ class PlayerMessenger {
 
         // Typing effect
         while (PlayerMessenger.typingIndex < text.length && PlayerMessenger.state === "typing") {
-            PlayerMessenger.textEntity.element.text += text[PlayerMessenger.typingIndex];
+            let c = text[PlayerMessenger.typingIndex];
+            PlayerMessenger.textEntity.element.text += c;
             PlayerMessenger.typingIndex++;
-            await PlayerMessenger.sleep(10 + Math.random() * 20); // 0.1 - 0.2s delay
+            if (c === '\n'){
+                console.log('new');
+                } else {
+                }
+                let pause = c === '\n' ? 1000 : 0; // 0.1 - 0.2s delay
+            await PlayerMessenger.sleep(10 + Math.random() * 20+ pause) + pause;
         }
 
         // If interrupted, exit early

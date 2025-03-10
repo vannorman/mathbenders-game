@@ -37,6 +37,7 @@ class RealmEditor {
     }
 
     constructor() {
+        this.wasEnabled = false;
         this.#isEnabled = false;
         this.#realm = null;
         this.camera = new EditorCamera({realmEditor:this});
@@ -159,6 +160,7 @@ class RealmEditor {
     }
     
     enable() {
+        this.wasEnabled = true; // first time enabled flag for messaging during prototype
         this.#isEnabled = true;
         this.toggle('normal');
         this.gui.enable();
