@@ -354,6 +354,7 @@ export default class GUI {
 //                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
                     { ItemTemplate:NumberHoop } ,
                     { ItemTemplate:MultiblasterPickup } ,
+                    { ItemTemplate:SwordPickup },
                     // templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
             ],}));
         this.#builderPanels.push(

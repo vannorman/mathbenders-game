@@ -1,9 +1,7 @@
-import Template from './template.js';
+import Template from '../template.js';
 import HeldItem from './heldItem.js';
-import Sword from './sword.js';
-import Multiblaster from './multiblaster.js';
 
-export class Gadget extends Template {
+export default class Gadget extends Template {
     static _icon; //= assets.textures.ui.trash;
     static pickupSound = assets.sounds.getGadget;
     static texture = assets.textures.gadget;
@@ -69,5 +67,6 @@ export class Gadget extends Template {
     }
 
 }
-
+// Only export the Gadget class
+export { Gadget, HeldItem }
 

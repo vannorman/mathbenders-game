@@ -136,6 +136,7 @@ export default class Inventory {
         }
          
         if (this.selectedSlot?.Template){
+            // createheldItem is a static method because from Inventory we do not have "instances" of each item, only data
             this.heldItem = this.selectedSlot.Template.createHeldItem(this.selectedSlot.itemProperties);
             Player.pivot.addChild(this.heldItem.entity);
             this.heldItem.onHeld();

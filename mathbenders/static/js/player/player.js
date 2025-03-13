@@ -259,7 +259,7 @@ class PlayerClass {
 }
 
 
-function GetDefaultTerrainStartPos(){
+window.GetDefaultTerrainStartPos = function(){
     const terPos = realmEditor.RealmData.Levels[0].terrain.centroid.clone();
     var from = terPos.clone().add(new pc.Vec3(0,300,0));
     var to = terPos.clone().add(new pc.Vec3(0,-300,0));

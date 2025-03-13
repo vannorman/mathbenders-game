@@ -1,6 +1,7 @@
-import HeldItem from './heldItem.js';
 import Template from './template.js';
-import {Gadget,Multiblaster} from './gadgets.js';
+import { Gadget } from './gadgets/base.js';
+import { Sword } from './gadgets/sword.js';
+import { Multiblaster } from './gadgets/multiblaster.js';
 import {PropertyMap,Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
 const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
@@ -464,10 +465,6 @@ class NumberSphere extends Template {
     set fraction(value) { this.script.setFraction(value); }
 
     static createHeldItem(properties){
-        // awkward conflict between the version of this template that is graphics only or not... ughhh
-        // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
-        // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
-        // const {fraction=new Fraction(3,1)}=args;
         const fraction = properties[this.name];//NumberSphere; // awkward data model.
         const sphere = new pc.Entity("helditem");
         sphere.addComponent("render",{ type : "sphere" });
@@ -510,6 +507,34 @@ class MultiblasterPickup extends GadgetPickup {
 }
 
 
+class SwordPickup extends GadgetPickup {
+    static _icon = assets.textures.ui.icons.sword;
+    static isStaticCollider = true;
+
+    static onCollect(){
+        return Sword;
+    }
+
+    setup(){
+
+        // graphics
+
+        this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
+        const sword = assets.models.gadgets.sword.resource.instantiateRenderEntity();
+        ApplyTextureAssetToEntity({entity:sword,textureAsset:assets.textures.gadget});
+        this.entity.addChild(sword);
+        sword.setLocalEulerAngles(90,0,90);
+        sword.setLocalPosition(pc.Vec3.UP);
+
+        // pickup item 
+        this.entity.addComponent('collision');
+        this.entity.addComponent('rigidbody',{type:'kinematic'});
+
+    }
+}
+
+
+
 
 
 window.templateNameMap = {
@@ -526,6 +551,7 @@ window.templateNameMap = {
     "CastleWall" : CastleWall,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
+    "SwordPickup" : SwordPickup,
 }
 
 // Export all templates to global scope for use in rest of app

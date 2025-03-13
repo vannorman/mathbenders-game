@@ -21,6 +21,7 @@ export default class InventorySlot {
         if (this.textEl) this.textEl.entity.destroy();
         this.Template = Template;
         this.itemProperties = properties;
+        console.log(Template)
         this.itemImageEntity.element.textureAsset = Template.icon(properties);
          
         

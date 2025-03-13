@@ -6,6 +6,7 @@ CollisionDetector.prototype.initialize = function () {
 }
 
 CollisionDetector.prototype.onCollisionStart = function (collision) {
+    // Todo: Instead of reportTo, which requires an object reference, simply pass the function we are calling 
     this.reportTo.onCollisionReport(collision);
 };
 
