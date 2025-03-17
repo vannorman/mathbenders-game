@@ -319,6 +319,7 @@ var Shaders = {
             material.setParameter('uTime',pc.app._time);
         });
         material.name = "grassdirt";
+        material.useGammaTonemap=false;
         material.update();
         return material;
     },

@@ -3,6 +3,7 @@ import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
 import {PropertyMap,Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+import HeldItem from './gadgets/heldItem.js';
 const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
 

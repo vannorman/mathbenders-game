@@ -92,7 +92,7 @@ class PlayerCamera{
 
         // make our scene prettier by adding a directional light
         // Maybe this should not be handled globally as skyboxes will change with scene portals.
-        pc.app.scene.envAtlas = assets.textures.skyboxes.helipad.resource;
+        pc.app.scene.envAtlas = assets.textures.skyboxes.sunny.resource;
         pc.app.scene.toneMapping = pc.TONEMAP_ACES;
         pc.app.scene.skyboxIntensity = 0.7;
         

@@ -112,6 +112,10 @@ const assets = {
     textures : {
         skyboxes : {
 
+            sunny: new pc.Asset("atlas","texture",
+                    { url: "/static/assets/textures/skyboxes/sunny-env-atlas.png" },
+                    { type: pc.TEXTURETYPE_RGBP, mipmaps: false }
+                ),
             helipad: new pc.Asset("helipad-env-atlas","texture",
                     { url: "/static/assets/textures/skyboxes/helipad-env-atlas.png" },
                     { type: pc.TEXTURETYPE_RGBP, mipmaps: false }

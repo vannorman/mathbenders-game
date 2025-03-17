@@ -52,6 +52,7 @@ var Game = {
             type: "directional",
             color: new pc.Color(1, 1, 1),
             castShadows: true,
+            intensity:1.6,
             shadowBias:0.5,
             shadowResolution:2048,
         });
