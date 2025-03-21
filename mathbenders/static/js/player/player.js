@@ -280,7 +280,6 @@ window.welcomeMessageFn = setInterval(function(){
     if (!realmEditor.wasEnabled){
         PlayerMessenger.Say("Press Y to toggle Editor.");
     } else {
-        console.log("done");
         clearInterval(window.welcomeMessageFn);
     }
 

@@ -17,6 +17,8 @@ export default class HandPanRealmBuilderMode extends RealmBuilderMode {
         let dt = .004;
         let xSpeed = new pc.Vec3().distance(this.realmEditor.camera.entity.getPosition().sub(this.realmEditor.camera.pivot.getPosition())) / 1000;
         let ySpeed = new pc.Vec3().distance(this.realmEditor.camera.entity.getPosition().sub(this.realmEditor.camera.pivot.getPosition())) / 1000;
+
+        // console.log("mousepan:"+e.dx.toFixed(3)+","+e.dy.toFixed(3)+",spd;"+xSpeed.toFixed(3)+","+ySpeed.toFixed(3))
         const mov = new pc.Vec3().add2(
                     right.mulScalar(-e.dx * xSpeed),
                     up.mulScalar(e.dy * ySpeed)

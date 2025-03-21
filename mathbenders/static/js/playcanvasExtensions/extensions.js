@@ -70,6 +70,10 @@ pc.Vec3.prototype.getYawAngle = function(a,b){
 
   return yawAngle * pc.math.RAD_TO_DEG;
 }
+pc.Quat.delta = function(q1,q2){
+    const dot = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+    return 1 - Math.abs(dot);
+}
 var _transformedForward = new pc.Vec3();
 pc.Quat.prototype.getYaw = function(){
     var transformedForward = _transformedForward;

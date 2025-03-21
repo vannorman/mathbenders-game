@@ -9,15 +9,25 @@ export default class Sword extends Gadget {
 
     // KEep track of swings as they happen
     // Dislike awkward statics here
-    static swinging = false;
+    static get swinging() { return Sword.state == Sword.State.SwingingUp || Sword.state == Sword.State.SwingingDown; };
     static eventHappenedThisSwing = false;
     static angle = 90;
     static swingRot;
     static swingStep = 0;
     static swingPercentComplete = 0;
     static #UpdateInitialized = false; // leads to issues if not checked
-    static startRot = new pc.Quat().setFromEulerAngles(0,90,0);
-    static swingTargetRot = new pc.Quat().setFromEulerAngles(0,180,0); // Changed to a different angle for the swing
+    static swingTargetRot; //new pc.Quat().setFromEulerAngles(0,180,0); 
+    static swingTargetRotUp = new pc.Quat().setFromEulerAngles(0,90,0); 
+    static swingTargetRotDown = new pc.Quat().setFromEulerAngles(-90,0,-90); 
+
+    static State = Object.freeze({
+        Ready: 0,
+        SwingingUp: 1,
+        SwingingDown: 2
+    });
+
+    static state = Sword.State.Ready;
+
     static {
         if (!Sword.#UpdateInitialized){
             pc.app.on('update',function(dt){Sword.silentUpdate(dt);});
@@ -27,20 +37,13 @@ export default class Sword extends Gadget {
 
     constructor () {
         super();
-        this.swinging = false;
+    }
+
+    loadNumber(){
+        console.log("Sword shouldn't even hear about this I guess");
     }
 
     setup(){
-       /* 
-        sword.addComponent('script');
-        sword.script.create('gadgetSword',{attributes:{ 
-            onSelectFn:()=>{AudioManager.play({source:assets.sounds.swordDraw});},
-            onFireFn:()=>{AudioManager.play({source:assets.sounds.swordSwing});},
-            onPickupFn:()=>{AudioManager.play({source:assets.sounds.swordDraw});},
-            
-            }});
-        sword.script.gadgetSword.init(); //hacky af way to make sure init happens even if obj is disabled.
-*/
     }
 
     onMouseDown(){
@@ -48,33 +51,85 @@ export default class Sword extends Gadget {
     }
     
     fire(){
-        // Only start swinging if we're not already swinging
-        if (!Sword.swinging) {
-            Sword.resetSwingAnimation();
-            Sword.swinging = true;
+        if (Sword.state == Sword.State.Ready) {
+            console.log("Was ready, begin swing down.");
+            Sword.setState(Sword.State.SwingingDown);
         }
     }
 
-    static resetSwingAnimation() {
-        Sword.swingStep = 0;
+    static setState(state){
+        Sword.state = state;
         Sword.swingPercentComplete = 0;
-        Sword.eventHappenedThisSwing = false;
-        // Make sure the target rotation is set for the first swing
-        Sword.swingTargetRot = new pc.Quat().setFromEulerAngles(0,180,0);
+        switch(state){
+        case Sword.State.SwingingDown:
+            Sword.swingTargetRot = Sword.swingTargetRotDown;
+            break;
+        case Sword.State.SwingingUp:
+            Sword.swingTargetRot = Sword.swingTargetRotUp;
+            break;
+        case Sword.State.Ready:
+            Sword.eventHappenedThisSwing = false;
+            // reset for next chop
+            if (Sword.swingCollider) {
+                Sword.swingCollider.enabled = true;
+            }
+            Sword.swingTargetRot = Sword.swingTargetRotUp;
+                
+            break;
+        }
+    }
+
+
+    static silentUpdate(dt){
+        if (Sword.swinging) {
+            const heldItemGfx = Player.inventory.heldItem.entity;
+            if (!heldItemGfx) {
+                console.error("No held item entity found");
+                return;
+            }
+            
+            // Move graphics
+            let swingSpeed = 5;
+            Sword.swingPercentComplete += dt * swingSpeed;
+            Sword.swingPercentComplete = Math.min(Sword.swingPercentComplete, 1); // Clamp to prevent values over 1
+            // console.log("State:"+Sword.state+", perc:"+Sword.swingPercentComplete.toFixed(2)); 
+            // Get current rotation and slerp towards target rot.
+            const rot = heldItemGfx.getLocalRotation();
+            let currentRot = rot;
+            rot.slerp(currentRot, Sword.swingTargetRot, Sword.swingPercentComplete);
+            heldItemGfx.setLocalRotation(rot);
+            
+            
+            // Check if we've completed this step of the swing based on percentage only
+            if (Sword.swingPercentComplete >= 0.99) {
+                switch(Sword.state){
+                case Sword.State.SwingingDown:
+                    Sword.setState(Sword.State.SwingingUp);
+                    break;
+                case Sword.State.SwingingUp:
+                    Sword.setState(Sword.State.Ready);
+                    break;
+                }
+            }
+        }
     }
 
     static onCollisionReport(result){
+        console.log("Col:"+result.other.name);
         const entity = result.other;
         if (Sword.swinging){
             const ni = entity.script && entity.script.numberInfo ? entity.script.numberInfo  : null;
-            if (ni && entity.script.pickUpItem?.canPickup && !Sword.eventHappenedThisSwing) { // dislike "Canpickup" being a proxy for "Canchop"
+            if (ni && !Sword.eventHappenedThisSwing) { // dislike "Canpickup" being a proxy for "Canchop"
                 Sword.swingCollider.enabled = false;
                 Sword.eventHappenedThisSwing = true; // don't allow additional number chops
                 Sword.chop(ni);
             } else {
+                console.log("not chop. event:"+Sword.eventHappenedThisSwing);
                 // we hit NOT a choppable thing. Abort the swing 
-                Sword.advanceSwingStep();
+                Sword.setState(Sword.State.SwingingUp);
             }
+        } else {
+            console.log("notswing. st:"+Sword.state);
         }
     }
 
@@ -154,89 +209,7 @@ export default class Sword extends Gadget {
         Game.Instantiate[data.templateName](data.rightResultProperties);
     }
 
-    static advanceSwingStep = function(){
-        Sword.swingPercentComplete = 0;
-        Sword.swingStep++;
-        
-        // If we're returning to the starting position
-        if (Sword.swingStep % 2 === 0) {
-            // Return to starting position
-            Sword.swingTargetRot = new pc.Quat().setFromEulerAngles(0,90,0);
-        } else {
-            // Swing down
-            Sword.swingTargetRot = new pc.Quat().setFromEulerAngles(0,180,0);
-        }
-        
-        console.log("Advancing swing step to " + Sword.swingStep + ", target rotation: " + 
-                   (Sword.swingStep % 2 === 0 ? "90" : "180") + " degrees");
-    }
 
-    static silentUpdate(dt){
-        if (Sword.swinging) {
-            try {
-                const heldItemGfx = Player.inventory.heldItem.entity;
-                if (!heldItemGfx) {
-                    console.error("No held item entity found");
-                    Sword.swinging = false;
-                    return;
-                }
-                
-                // Move graphics
-                let swingSpeed = 2;
-                Sword.swingPercentComplete += dt * swingSpeed;
-                Sword.swingPercentComplete = Math.min(Sword.swingPercentComplete, 1); // Clamp to prevent values over 1
-                
-                // Get current rotation
-                const currentRot = heldItemGfx.getLocalRotation();
-                
-                // Create a new quaternion for the interpolated rotation
-                let rot = new pc.Quat();
-                // Use lerp instead of slerp if slerp isn't available
-                if (rot.slerp) {
-                    rot.slerp(currentRot, Sword.swingTargetRot, Sword.swingPercentComplete);
-                } else {
-                    rot.lerp(currentRot, Sword.swingTargetRot, Sword.swingPercentComplete);
-                }
-                
-                // Check for NaN values in the rotation
-                if (isNaN(rot.x) || isNaN(rot.y) || isNaN(rot.z) || isNaN(rot.w)) {
-                    console.error("NaN detected in rotation quaternion:", rot);
-                    // Reset to a valid rotation
-                    rot = new pc.Quat().setFromEulerAngles(0, 90, 0);
-                }
-                
-                // Apply the rotation
-                heldItemGfx.setLocalRotation(rot);
-                
-                // Occasionally log the progress for debugging
-                if (Math.random() < 0.01) {
-                    console.log("Swing progress: " + (Sword.swingPercentComplete * 100).toFixed(1) + 
-                               "%, Step: " + Sword.swingStep);
-                }
-                
-                // Check if we've completed this step of the swing based on percentage only
-                if (Sword.swingPercentComplete >= 0.99) {
-                    console.log("Completed swing step " + Sword.swingStep);
-                    if (Sword.swingStep == 0) {
-                        Sword.advanceSwingStep(); // pull sword back
-                    } else {
-                        // reset for next chop
-                        if (Sword.swingCollider) {
-                            Sword.swingCollider.enabled = true;
-                        }
-                        Sword.swinging = false;
-                        Sword.eventHappenedThisSwing = false;
-                        Sword.swingStep = 0;
-                        Sword.swingPercentComplete = 0;
-                        console.log("Swing animation complete, reset to initial state");
-                    }
-                }
-            } catch (error) {
-                console.error("Error in sword swing animation:", error);
-                Sword.swinging = false;
-            }
-        }
-    }
 }
 
 // Make Sword available globally if needed

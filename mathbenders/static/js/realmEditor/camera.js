@@ -134,7 +134,7 @@ export default class EditorCamera {
             // then do so
         }
         if (shouldLerp) {
-            this.targetPivotPosition = targetPivotPosition;
+            this.targetPivotPosition = targetPivotPosition.clone(); // if not clone, changing the vec3 ref will update targetpivotpos as well. it's a pointer, not a value
             this.targetZoomFactor = targetZoomFactor;
             this.toggle('lerping');
         } else {

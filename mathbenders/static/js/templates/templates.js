@@ -27,6 +27,7 @@ class NumberHoop extends Template {
         this.renderEntity = assets.numberHoop.resource.instantiateRenderEntity();
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
         this.entity.addChild(this.renderEntity);
+        this.renderEntity.setLocalEulerAngles(0,0,0);
         
         const childOffset = new pc.Vec3(0,0,2);
         this.renderEntity.setLocalPosition(childOffset);

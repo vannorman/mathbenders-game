@@ -207,13 +207,11 @@ class RealmEditor {
 
     onMouseUp(e) {
         if (!this.#isEnabled) return;
-
         this.#mode.onMouseUp();
     }
 
     onMouseDown(e) {
         if (!this.#isEnabled) return;
-
         this.#mode.onMouseDown();
     }
 
@@ -403,6 +401,7 @@ class RealmEditor {
             this.#mode.setEntity(entity);
 //            this.#mode.setItemTemplate(ItemTemplate)
         } else {
+            console.log("Toggle normal");
             this.toggle('normal');
         }
     }

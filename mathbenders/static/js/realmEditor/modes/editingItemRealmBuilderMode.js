@@ -25,10 +25,13 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
 
     setEntity(entity){
+        if (this.entity && this.entity.getGuid()==entity.getGuid()) {
+            console.log("Dupe. return..");
+        }
         this.entity = entity;
         this.ItemTemplate = entity._templateInstance.constructor;
+        console.log("Set mode:"+entity.name);
         realmEditor.camera.translate({targetPivotPosition:entity.getPosition()});
-        
         // Note that positions "0" and "3" around the cirlce are already taken.
         let i=1;
         const $this=this;
@@ -65,7 +68,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     }
 
     onMouseDown(e) {
-        super.onMouseDown(e);
+       // super.onMouseDown(e);
     }
 
 

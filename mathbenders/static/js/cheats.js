@@ -369,7 +369,7 @@ $(document).on("keydown", function (e) {
     if (ee == 'V'){
         const p = Player.droppedPosition.clone().add(pc.Vec3.UP);
         const r = new pc.Vec3(-180,0,0);
-        Game.Instantiate.sword({position:p,rotation:r});
+        let s = new SwordPickup({position:p})
     }
     if (ee == 'K'){
         console.log('killall');
