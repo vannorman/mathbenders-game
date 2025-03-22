@@ -99,6 +99,10 @@ export default class Inventory {
                 x.deSelect();
             }
         });
+        if (this.selectedSlot?.Template?.isGadget){
+            // this.selectedSlot.Template.
+            // console.log("deselect;"+this.selectedSlot.Template.name);
+        }
         slot.onSelect();
         this.selectedSlot = slot;
         if (this.selectedSlot.Template?.isGadget){

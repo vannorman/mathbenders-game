@@ -58,6 +58,7 @@ export default class Multiblaster extends Gadget {
             const sc = this.#bulletScale;
 
             const s = new NumberSphere({position:firePos}).entity;
+            s.tags.add(Constants.Tags.MultiblasterBullet);
 //            Game.Instantiate.NumberSphere({position:firePos});
             // s.script.destroy('pickUpItem');
             s.setLocalScale(new pc.Vec3(sc,sc,sc));
@@ -101,8 +102,6 @@ export default class Multiblaster extends Gadget {
         // awkward. where does heldItemGfx live again?
         // Somewhat circular; PlayerInventory calls the static createHeldItemGfx method, stores it in PlayerInventory.helditem, then we query it here?
         // WHY??
-        console.log("Held item?");
-        console.log(Player.inventory.heldItem);
         return Player.inventory.heldItem.entity;
     }
 

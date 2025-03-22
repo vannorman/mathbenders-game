@@ -35,6 +35,12 @@ export default class Sword extends Gadget {
         } 
     }
 
+    onSelect(){
+      console.trace("Call Stack Trace");
+
+        Sword.swingCollider.enabled = false;
+    }
+
     constructor () {
         super();
     }
@@ -52,7 +58,6 @@ export default class Sword extends Gadget {
     
     fire(){
         if (Sword.state == Sword.State.Ready) {
-            console.log("Was ready, begin swing down.");
             Sword.setState(Sword.State.SwingingDown);
         }
     }
@@ -62,29 +67,30 @@ export default class Sword extends Gadget {
         Sword.swingPercentComplete = 0;
         switch(state){
         case Sword.State.SwingingDown:
+            Sword.swingCollider.enabled = true;
             Sword.swingTargetRot = Sword.swingTargetRotDown;
             break;
         case Sword.State.SwingingUp:
+            Sword.swingCollider.enabled = false;
             Sword.swingTargetRot = Sword.swingTargetRotUp;
             break;
         case Sword.State.Ready:
+            Sword.swingCollider.enabled = false;
             Sword.eventHappenedThisSwing = false;
-            // reset for next chop
-            if (Sword.swingCollider) {
-                Sword.swingCollider.enabled = true;
-            }
             Sword.swingTargetRot = Sword.swingTargetRotUp;
                 
             break;
         }
     }
 
+    
 
     static silentUpdate(dt){
         if (Sword.swinging) {
-            const heldItemGfx = Player.inventory.heldItem.entity;
+            const heldItemGfx = Player.inventory.heldItem?.entity;
             if (!heldItemGfx) {
                 console.error("No held item entity found");
+                Sword.setState(Sword.State.Ready);
                 return;
             }
             
@@ -115,7 +121,6 @@ export default class Sword extends Gadget {
     }
 
     static onCollisionReport(result){
-        console.log("Col:"+result.other.name);
         const entity = result.other;
         if (Sword.swinging){
             const ni = entity.script && entity.script.numberInfo ? entity.script.numberInfo  : null;
@@ -124,12 +129,9 @@ export default class Sword extends Gadget {
                 Sword.eventHappenedThisSwing = true; // don't allow additional number chops
                 Sword.chop(ni);
             } else {
-                console.log("not chop. event:"+Sword.eventHappenedThisSwing);
                 // we hit NOT a choppable thing. Abort the swing 
                 Sword.setState(Sword.State.SwingingUp);
             }
-        } else {
-            console.log("notswing. st:"+Sword.state);
         }
     }
 
@@ -154,8 +156,8 @@ export default class Sword extends Gadget {
         heldItemGfx.name = "swordWithCollider";
         // Sword.heldItemGfx = heldItemGfx; 
         Sword.swingCollider = swingCollider; 
+        Sword.swingCollider.enabled=false;
         
-        console.log('Created sword held item with initial rotation: ' + initialRotation);
         return new HeldItem({
             entity:heldItemGfx,
             position:new pc.Vec3(0.7,0.2,-0.2),
@@ -173,40 +175,29 @@ export default class Sword extends Gadget {
         const postSliceSpeed = ni.numberType == NumberInfo.Shape.Sphere ? 0.2 : 1.1;
         const leftVel = leftDir.mulScalar(postSliceSpeed);
         const rightVel = rightDir.mulScalar(postSliceSpeed);
+        const templateName = ni.entity._templateInstance.constructor.name;
+        
         const resultFrac = Fraction.Divide(ni.fraction,new Fraction(2,1));
-        const op = ni.entity.script.objectProperties;
-        const templateName = op.objectProperties?.templateName; 
-        if (!templateName){
-            console.log("no template name on"+ni.entity.name);
-        }
-
-        const leftResultProperties = {
+        const optsLeft = {
             position : leftPos,
-            rigidbodyType : pc.RIGIDBODY_TYPE_DYNAMIC,
-            rigidbodyVelocity : leftVel,
-            numberInfo : { fraction : resultFrac }
+            properties : {
+                NumberSphere : resultFrac
+            }
         } 
+        const leftResult = new NumberSphere(optsLeft);
+        leftResult.entity.rigidbody.applyImpulse(leftDir);
 
-        const rightResultProperties = {
+        const optsRight = {
             position : rightPos,
-            rigidbodyType : pc.RIGIDBODY_TYPE_DYNAMIC,
-            rigidbodyVelocity : rightVel,
-            numberInfo : { fraction : resultFrac }
+            properties : {
+                NumberSphere : resultFrac
+            }
         } 
-     
-        const data = {
-            templateName : templateName,
-            rightResultProperties : rightResultProperties,
-            leftResultProperties : leftResultProperties,
-            // network should know about number to destroy somehow, eventually. Instead we just pass Sword.numebr
-            objToDestroy : ni.entity,
-        }
-        ni.entity.enabled=false; // hide lag from destroy? Shouldnt destroy be instnat?
-    
-        // RESOLVE CHOP
-        data.objToDestroy.destroy();
-        Game.Instantiate[data.templateName](data.leftResultProperties);
-        Game.Instantiate[data.templateName](data.rightResultProperties);
+        const rightResult = new NumberSphere(optsRight);
+        rightResult.entity.rigidbody.applyImpulse(rightDir);
+        
+ 
+        ni.entity.destroy();
     }
 
 

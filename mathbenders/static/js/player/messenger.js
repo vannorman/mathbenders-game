@@ -53,7 +53,6 @@ class PlayerMessenger {
             PlayerMessenger.textEntity.element.text += c;
             PlayerMessenger.typingIndex++;
             if (c === '\n'){
-                console.log('new');
                 } else {
                 }
                 let pause = c === '\n' ? 1000 : 0; // 0.1 - 0.2s delay

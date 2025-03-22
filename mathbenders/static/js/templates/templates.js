@@ -221,7 +221,7 @@ class CastleTurret extends Template {
         const topRender = topAsset.resource.instantiateRenderEntity();
         let topCollision = Utils.addMeshCollider(topRender,topAsset,pc.RIGIDBODY_TYPE_STATIC); // todo performance change to box collider
 
-        topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
+        topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         ApplyTextureAssetToEntity({entity:topRender,textureAsset:assets.textures.stone90}); 
         
         this.entity.addChild(topRender);
@@ -364,6 +364,8 @@ class NumberCube extends Template {
     set fraction(value) { this.script.setFraction(value); }
 
     static createHeldItem(properties){
+        // The "incorrect" (?) way to create a non collision graphics only item; not a Template; 
+        // createes issues if we try to ref its entity._templateInstance ref
         // awkward conflict between the version of this template that is graphics only or not... ughhh
         // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
         // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
@@ -436,8 +438,6 @@ class NumberSphere extends Template {
     ]
     
     constructor(args={}) {
-//        console.log("args:")
-//        console.log(args)
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args);
     }
@@ -446,9 +446,9 @@ class NumberSphere extends Template {
         let sphere =this.entity;
         sphere.tags.add(Constants.Tags.PlayerCanPickUp);
         sphere.addComponent("render",{ type : "sphere" });
-        // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
         const s = sphere.getLocalScale.x;
         sphere.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
+        sphere.rigidbody.linearDamping = 0.5;
         sphere.addComponent('script');
         // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
         // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
@@ -467,15 +467,18 @@ class NumberSphere extends Template {
     set fraction(value) { this.script.setFraction(value); }
 
     static createHeldItem(properties){
+        // The "correct" (?) way to create the graphics version is one that is yet another Template, this one without collision.
         const fraction = properties[this.name];//NumberSphere; // awkward data model.
-        const sphere = new pc.Entity("helditem");
-        sphere.addComponent("render",{ type : "sphere" });
-        sphere.addComponent('script');
-        sphere.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
-        sphere.script.numberInfo.Setup();
-        sphere.script.numberInfo.setFraction(fraction);
+        const options =  {
+            properties : {
+               NumberSphereGfxOnly : fraction
+            }
+        } 
+        let template = new NumberSphereGfxOnly(options);
+        console.log('template');
+        console.log(template);
         return new HeldItem({
-            entity:sphere,
+            entity:template.entity,
         });
     }
 }

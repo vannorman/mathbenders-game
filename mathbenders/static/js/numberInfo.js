@@ -1,15 +1,5 @@
-/*
-### NUMBER INFO
-- lives on any instance of a number in game
-- handles fraction text display, collision detection, collision resolution
-
-- Sometimes after collision and resulting zero, the destroyed number is removed from pc.app.root but there is still a reference to it. Therefore the memeory is not released and the object persists. Not sure why. Possibly because when I tried to debug another thing (collision result which fired a setInterval without a rigidbody after destruction) that the debug ref was actually making it persist.
-
-*/
-
 var NumberInfo = pc.createScript('numberInfo');
 NumberInfo.attributes.add('moveSpeed', { type: 'number', default: 4, title: 'Move Speed' });
-NumberInfo.attributes.add('ints', { type: 'entity', array:true });
 NumberInfo.attributes.add('destroyFxFn', { type:'object'});
 NumberInfo.attributes.add('ignoreCollision', { type:'boolean', default: false});
 NumberInfo.attributes.add('allowCombination', { type: 'boolean', default: true, });
@@ -20,14 +10,6 @@ NumberInfo.Shape = {
     Cube : "Cube",
     None : "None",
 }
-
-NumberInfo.prototype.initialize = function() {
-    const $this=this;
-
-}
-
-
-// NumberInfo.prototype.get numberType() { return "Sphere" };
 
 NumberInfo.prototype.Setup = function() {
     Object.defineProperty(this,'numberType', {get: function(){
@@ -58,23 +40,26 @@ NumberInfo.prototype.Setup = function() {
     } else if (this.numberType == NumberInfo.Shape.Sphere) {
         this.pivot = new pc.Entity("numPivot");
         this.entity.addChild(this.pivot);
-        this.int1 =  Utils.AddText( { 
-            color:this.getColor(),
-            parent:this.pivot,
-            scale:0.10,
-            localPos:new pc.Vec3(0,0,0.59),
-        });
+        
+        let sphereText = this.createTextEntity('Text1',pc.Vec3.ZERO);
+        this.int1 = sphereText;
+//        this.int1 =  Utils.AddText( { 
+//            color:this.getColor(),
+//            parent:this.pivot,
+//            scale:0.10,
+//            localPos:new pc.Vec3(0,0,0.59),
+//        });
         this.pivot.addComponent('script');
         this.pivot.script.create('alwaysFaceCamera',{attributes:{reverse:true,useRadius:true,radius:16}});
         // this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
         this.ints = [this.int1];
-        Game.int1 = this.int1;
+        console.log("this ints");
+        console.log(this.ints);
+        this.pivot.addChild(sphereText);
+        sphereText.setLocalPosition(0,0,1);
 
         // Can we move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
 
-    } else if (this.numberType == NumberInfo.Shape.Hoop) {
-        // Let the hoop add its own text
-        //console.log("Hoop detected");
     } else {
         console.log('shapeless');
     }
@@ -87,32 +72,90 @@ NumberInfo.prototype.getColor = function(){
     return this.fraction.numerator < 0 ? pc.Color.WHITE : pc.Color.BLACK;
 }
 
-NumberInfo.prototype.createTextEntity = function(name,pos){
-   let entity = new pc.Entity(name);
-   this.entity.addChild(entity);
-   entity.setLocalPosition(pos);
-   let scale = 0.05;
-   entity.setLocalScale(new pc.Vec3(1,1,1).mulScalar(scale));
+NumberInfo.prototype.createTextEntity = function(name, pos) {
+    let entity = new pc.Entity(name);
+    this.entity.addChild(entity);
+    entity.setLocalPosition(pos);
+    let scale = 0.05;
+    entity.setLocalScale(new pc.Vec3(1,1,1).mulScalar(scale));
+    
+    // Create the main integer text
     entity.addComponent('element', {
         type: 'text',
-        // The text
-        layers:[pc.LAYERID_WORLD],
+        layers: [pc.LAYERID_WORLD],
         text: this.fraction.asString(),
-        // Color of the text
-        color: pc.Color.BLACK,
-        // Align text to the center of the entity
+        color: this.getColor(),
         anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
         pivot: new pc.Vec2(0.5, 0.5),
-        // Set a font size
-        fontSize: 16,
+        fontSize: this.getFontSize(this.fraction.asString()),
         fontAsset: assets.fonts.montserrat,
     });
+
+    // Create fraction elements if needed
+    if (true || this.fraction.asString().includes('/')) {
+        console.log('num');
+        // Create numerator
+        let numerator = new pc.Entity('numerator');
+        entity.addChild(numerator);
+        numerator.setLocalPosition(0, 0.1, 0);
+        numerator.addComponent('element', {
+            type: 'text',
+            layers: [pc.LAYERID_WORLD],
+            text: this.fraction.numerator.toString(),
+            color: this.getColor(),
+            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
+            pivot: new pc.Vec2(0.5, 0.5),
+            fontSize: this.getFontSize(this.fraction.numerator.toString()),
+            fontAsset: assets.fonts.montserrat,
+        });
+
+        // Create line
+        let line = new pc.Entity('line');
+        entity.addChild(line);
+        line.setLocalPosition(0, 0, 0);
+        line.addComponent('element', {
+            type: 'text',
+            layers: [pc.LAYERID_WORLD],
+            text: '_',
+            color: this.getColor(),
+            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
+            pivot: new pc.Vec2(0.5, 0.5),
+            fontSize: this.getFontSize('_'),
+            fontAsset: assets.fonts.montserrat,
+        });
+
+        // Create denominator
+        let denominator = new pc.Entity('denominator');
+        entity.addChild(denominator);
+        denominator.setLocalPosition(0, -0.1, 0);
+        denominator.addComponent('element', {
+            type: 'text',
+            layers: [pc.LAYERID_WORLD],
+            text: this.fraction.denominator.toString(),
+            color: this.getColor(),
+            anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
+            pivot: new pc.Vec2(0.5, 0.5),
+            fontSize: this.getFontSize(this.fraction.denominator.toString()),
+            fontAsset: assets.fonts.montserrat,
+        });
+
+
+        // Store references to fraction elements
+        this.fractionElements = {
+            numerator: numerator,
+            line: line,
+            denominator: denominator
+        };
+
+        // Initially show fraction elements and hide integer
+        this.updateFractionDisplay(entity, true);
+    }
+
     // Rotate the text entity
     if (pos.x > 0) {
         entity.setLocalEulerAngles(0, 90, 0);
     } else if (pos.x < 0) {
         entity.setLocalEulerAngles(0, -90, 0);
-
     } else if (pos.y > 0) {
         entity.setLocalEulerAngles(-90, 0, 0);
     } else if (pos.y < 0) {
@@ -122,22 +165,51 @@ NumberInfo.prototype.createTextEntity = function(name,pos){
     } else if (pos.z < 0) {
         entity.setLocalEulerAngles(0, 180, 0);
     }
+
     return entity;
-
 };
 
-NumberInfo.prototype.setObjectProperties = function(properties, context){
-    context.fraction = properties.fraction;
-    context.updateNumberText(properties, context);
+NumberInfo.prototype.getFontSize = function(text) {
+    const len = text.length;
+    return Math.max(10, 18 - len * 2);
 };
 
-NumberInfo.prototype.updateNumberText  = function(properties, context){
-    for(var i=0; i< context.ints.length; i++){
-        var int1 = context.ints[i];
-        int1.element.text = properties.fraction.numerator;
+NumberInfo.prototype.updateFractionDisplay = function(entity, isFraction) {
+    if (this.fractionElements) {
+        // Show/hide fraction elements
+        this.fractionElements.numerator.enabled = isFraction;
+        this.fractionElements.line.enabled = isFraction;
+        this.fractionElements.denominator.enabled = isFraction;
+        
+        // Show/hide integer text
+        entity.element.enabled = !isFraction;
     }
 };
 
+NumberInfo.prototype.updateNumberText = function() {
+    const fractionString = this.fraction.asString().toString();
+    const isFraction = fractionString.includes('/');
+    
+    for (let i = 0; i < this.ints.length; i++) {
+        const textEntity = this.ints[i];
+        
+        if (isFraction) {
+            console.log('frac');
+            // Update fraction elements
+            if (this.fractionElements) {
+                this.fractionElements.numerator.element.text = this.fraction.numerator.toString();
+                this.fractionElements.denominator.element.text = this.fraction.denominator.toString();
+                this.updateFractionDisplay(textEntity, true);
+            }
+        } else {
+            // Update integer text
+            textEntity.element.text = fractionString;
+            if (this.fractionElements) {
+                this.updateFractionDisplay(textEntity, false);
+            }
+        }
+    }
+};
 
 
 NumberInfo.prototype.onCollisionStart = function (result) {
@@ -201,7 +273,6 @@ NumberInfo.ResolveCollisionOffline = function(data){
     }
 }
 NumberInfo.ProduceCollisionResult = function(collisionResult){
-    
     const TemplateToClone = collisionResult.TemplateToClone;
     const fractionKey = TemplateToClone.name;
     const maxNumber = collisionResult.maxNumber;
@@ -284,16 +355,23 @@ NumberInfo.prototype.setFraction = function(fraction){
 
         this.entity.destroy();
     } else {
-        const texts = this.entity.getComponentsInChildren('element');
-        this.ints.forEach(x => {
-            texts.push(x.element);
-        })
-        for(let i=0;i<texts.length;i++){
-            // bug - because of setFractionAfterSeconds, it fails to find text after text was rebuilt once.
-            if (!texts[i]) return;
-            texts[i].color = this.getColor();
-            texts[i].text=this.fraction.asString();
+
+
+        // Was it a sphere?
+        if (this.entity._templateInstance?.name == 'NumberSphere'){
+
         }
+        this.ints.forEach(x => {
+            let el = x.element;
+            // bug - because of setFractionAfterSeconds, it fails to find text after text was rebuilt once.
+            el.color = this.getColor();
+            el.text=this.fraction.asString();
+            const len = el.text.length;
+            const fontSize = Math.max(1.5,8 - len*1.25);
+            el.fontSize = fontSize;
+
+        })
+        this.updateNumberText();
       
        this.entity.render.meshInstances[0].material = this.fraction.numerator < 0 ? Materials.celBlack : Materials.celWhite;
        this.entity.render.meshInstances[0].material.update();
@@ -304,7 +382,16 @@ NumberInfo.CollisionPairs = {};
 NumberInfo.GetCollisionResolutionOffline = function(collisionData){
     const { obj1, obj2 } = collisionData;
 
+    // # Determine the POSITION of the resulting (added) fraction between two numberinfos.
+    // USUALLY, we want the "midpoint" between the two dynamic numbers that collided.
+    // SOMETIMES, for example multiblaster bullet hits number we don't want this; we want the larger of the two numbers to remain and the bullet to have little effect.
+
     let midpoint = obj1.getPosition().clone().add(obj2.getPosition()).mulScalar(0.5);
+
+    // Awkward check for multiblaster bullets.
+    if (obj1.tags.list().includes(Constants.Tags.MultiblasterBullet)) { midpoint = obj2.getPosition(); }
+    else if (obj2.tags.list().includes(Constants.Tags.MultiblasterBullet)) { midpoint = obj1.getPosition(); }
+
     // Ensure kinematic wins in dynamic+kinematic combo
     let wasKin1 = false;
     let wasKin2 = false;
