@@ -97,7 +97,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
         // Create numerator
         let numerator = new pc.Entity('numerator');
         entity.addChild(numerator);
-        numerator.setLocalPosition(0, 0.1, 0);
+        numerator.setLocalPosition(0, 3.5, 0);
         numerator.addComponent('element', {
             type: 'text',
             layers: [pc.LAYERID_WORLD],
@@ -105,14 +105,14 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             color: this.getColor(),
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
-            fontSize: this.getFontSize(this.fraction.numerator.toString()),
+            fontSize: this.getFontSize(this.fraction.numerator.toString(),true),
             fontAsset: assets.fonts.montserrat,
         });
 
         // Create line
         let line = new pc.Entity('line');
         entity.addChild(line);
-        line.setLocalPosition(0, 0, 0);
+        line.setLocalPosition(0, 5, 0);
         line.addComponent('element', {
             type: 'text',
             layers: [pc.LAYERID_WORLD],
@@ -120,14 +120,14 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             color: this.getColor(),
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
-            fontSize: this.getFontSize('_'),
+            fontSize: 15, //this.getFontSize('_'),
             fontAsset: assets.fonts.montserrat,
         });
 
         // Create denominator
         let denominator = new pc.Entity('denominator');
         entity.addChild(denominator);
-        denominator.setLocalPosition(0, -0.1, 0);
+        denominator.setLocalPosition(0, -4.5, 0);
         denominator.addComponent('element', {
             type: 'text',
             layers: [pc.LAYERID_WORLD],
@@ -135,7 +135,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             color: this.getColor(),
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
-            fontSize: this.getFontSize(this.fraction.denominator.toString()),
+            fontSize: this.getFontSize(this.fraction.denominator.toString(),true),
             fontAsset: assets.fonts.montserrat,
         });
 
@@ -169,9 +169,18 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
     return entity;
 };
 
-NumberInfo.prototype.getFontSize = function(text) {
+Game2={};
+Game2.ft = 8;
+Game2.fd = 1.5
+Game2.it = 8;
+Game2.id = 5;
+NumberInfo.prototype.getFontSize = function(text, isFraction=false) {
+    let s = 0;
     const len = text.length;
-    return Math.max(10, 18 - len * 2);
+    if (isFraction) s = Math.max(3, Game2.ft - len * Game2.fd);
+    else s = Math.max(12, Game2.it - len * Game2.id);
+    console.log("fs:"+s);
+    return s;
 };
 
 NumberInfo.prototype.updateFractionDisplay = function(entity, isFraction) {
@@ -198,12 +207,16 @@ NumberInfo.prototype.updateNumberText = function() {
             // Update fraction elements
             if (this.fractionElements) {
                 this.fractionElements.numerator.element.text = this.fraction.numerator.toString();
+                this.fractionElements.numerator.element.fontSize = this.getFontSize(this.fraction.numerator.toString(),true);
                 this.fractionElements.denominator.element.text = this.fraction.denominator.toString();
+                this.fractionElements.denominator.element.fontSize = this.getFontSize(this.fraction.numerator.toString(),true);
                 this.updateFractionDisplay(textEntity, true);
             }
         } else {
             // Update integer text
             textEntity.element.text = fractionString;
+//            console.log("Fontsize:"+textEntity.element.
+            textEntity.element.fontSize=this.getFontSize(this.fraction.numerator.toString());
             if (this.fractionElements) {
                 this.updateFractionDisplay(textEntity, false);
             }
@@ -290,7 +303,7 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
         const result = new TemplateToClone(options);
         // @Eytan here we have (competing / awkward) a data issue where NumberSphere and NumberCube have different "keys" for Fraction 
         // (as defined by editablePropertiesMap)
-        // NumberSphere(options); //Game.Instantiate[templateName](options); // TODO: Replace with Promise return
+        // NumberSphere(options); //Game2.Instantiate[templateName](options); // TODO: Replace with Promise return
 
         result.entity.script.create('sinePop');
 
