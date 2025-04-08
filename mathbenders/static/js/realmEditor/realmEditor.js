@@ -378,7 +378,6 @@ class RealmEditor {
             rotation=pc.Vec3.ZERO, 
             properties={},
             } = args;
-        try {
             const instance = new ItemTemplate({position:position,rotation:rotation,properties:properties});
             const entity = instance.entity;
             entity.tags.add(Constants.Tags.BuilderItem);
@@ -388,11 +387,6 @@ class RealmEditor {
                 level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
             });
             return instance;
-        } catch  {
-            console.log("%c FFFFF.","color:green;font-weight:bold;");
-            console.log(ItemTemplate);
-            return null;
-        }
     }
     
     editItem(entity){

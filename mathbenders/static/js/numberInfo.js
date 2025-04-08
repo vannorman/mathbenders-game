@@ -53,10 +53,8 @@ NumberInfo.prototype.Setup = function() {
         this.pivot.script.create('alwaysFaceCamera',{attributes:{reverse:true,useRadius:true,radius:16}});
         // this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
         this.ints = [this.int1];
-        console.log("this ints");
-        console.log(this.ints);
         this.pivot.addChild(sphereText);
-        sphereText.setLocalPosition(0,0,1);
+        sphereText.setLocalPosition(0,0,0.51);
 
         // Can we move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
 
@@ -93,7 +91,6 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
 
     // Create fraction elements if needed
     if (true || this.fraction.asString().includes('/')) {
-        console.log('num');
         // Create numerator
         let numerator = new pc.Entity('numerator');
         entity.addChild(numerator);
@@ -179,7 +176,6 @@ NumberInfo.prototype.getFontSize = function(text, isFraction=false) {
     const len = text.length;
     if (isFraction) s = Math.max(3, Game2.ft - len * Game2.fd);
     else s = Math.max(12, Game2.it - len * Game2.id);
-    console.log("fs:"+s);
     return s;
 };
 

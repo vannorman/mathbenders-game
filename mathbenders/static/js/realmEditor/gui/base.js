@@ -368,6 +368,7 @@ export default class GUI {
                     { ItemTemplate:CastleTurret } ,
                     { ItemTemplate:CastleWall } ,
                     { ItemTemplate:BigConcretePad} ,
+                    { ItemTemplate:Tree1} ,
             ],}));
         
         // Save icon

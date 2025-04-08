@@ -3,6 +3,7 @@ import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
 import {PropertyMap,Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+import {Tree1} from './trees.js';
 import HeldItem from './gadgets/heldItem.js';
 const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
@@ -234,6 +235,8 @@ class CastleTurret extends Template {
     }
 
 }
+
+
 
 class CastleWall extends Template {
     static isStaticCollider = true;
@@ -557,6 +560,7 @@ window.templateNameMap = {
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
     "SwordPickup" : SwordPickup,
+    "Tree1" : Tree1,
 }
 
 // Export all templates to global scope for use in rest of app

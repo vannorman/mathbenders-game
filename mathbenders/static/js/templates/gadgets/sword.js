@@ -1,5 +1,4 @@
 import Gadget from './base.js';
-
 import HeldItem from './heldItem.js';
 
 export default class Sword extends Gadget {

@@ -98,6 +98,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
 
     instantiateItem(){
         const instantiatedItem = realmEditor.InstantiateTemplate({ItemTemplate:this.dragger.ItemTemplate});
+        console.log(this.dragger.ItemTemplate);
         instantiatedItem.disableColliders();
         this.dragger.toggle('post');
         this.dragger.mode.setDraggingItem(instantiatedItem);

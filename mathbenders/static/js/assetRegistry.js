@@ -32,6 +32,10 @@ const assets = {
             spikey: new pc.Asset("spikey", "container", { url: "/static/assets/models/creatures/spikey.glb", }),
 
         },
+        trees : {
+            trees :  new pc.Asset("", "container", { url: "/static/assets/models/trees/trees.glb",    }),
+
+        },
         structures: {
             flat_pyramid :  new pc.Asset("flat_pyramid", "container", { url: "/static/assets/models/structures/flat_pyramid.glb",    }),
             spaceship:new pc.Asset("spaceship", "container", { url: "/static/assets/models/structures/spaceship.glb",    }),
@@ -134,6 +138,7 @@ const assets = {
             numberSpherePos: new pc.Asset("numberSpherePos", "texture", { url: "/static/assets/textures/ui/numberSpherePos.png", }),
             numberSphereNeg: new pc.Asset("numberSphereNeg", "texture", { url: "/static/assets/textures/ui/numberSphereNeg.png", }),
             icons : {
+                trees : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/trees.png", }),
                 fraction : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/fraction.jpg", }),
                 bow : new pc.Asset("iconBow", "texture", { url: "/static/assets/textures/ui/iconBow.png", }),
                 sword : new pc.Asset("iconSword", "texture", { url: "/static/assets/textures/ui/iconSword.png", }),
