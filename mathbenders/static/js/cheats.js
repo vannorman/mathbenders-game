@@ -341,7 +341,26 @@ $(document).on("keydown", function (e) {
     if (ee == 'B'){
 //        let p = Player.droppedPosition;
 //        cb = Game.bow(p);
-        let rp = function(){ return pc.Vec3.onUnitSphere().flat()}; for (i=0;i<1000;i++){let a = new Tree1({position:Player.entity.getPosition().add(rp().mulScalar(Math.random()*200))})}
+        let rp = function(){ return pc.Vec3.onUnitSphere().flat()}; 
+        let numTrees = 10;
+        window.batchGroup = pc.app.batcher.addGroup("Trees", false, 200);
+        window.trees = [];
+        for (i=0;i<numTrees;i++){
+            let a = new Tree1({position:Player.entity.getPosition().add(rp().mulScalar(Math.random()*20))});
+            window.trees.push(a);
+        }
+
+        setTimeout(function(){
+            console.log('bg');
+            for (i=0;i<numTrees;i++){
+                window.trees[i].entity.children[0].render.batchGroupId=0
+            }
+        },10);
+
+
+    }
+    if (ee == 'N'){
+
     }
     if (ee == 'L'){
         let p=Player.droppedPosition.clone().add(pc.Vec3.UP);

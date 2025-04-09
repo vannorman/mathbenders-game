@@ -54,12 +54,40 @@ class ApplicationLoader {
             canvasResizer.ResizeCanvas();
         });
 
-    }
-}
+
+        // NOTE : For a more complicated setup, try this. 
+        // Using AppBase (instead of Application which has a lot of this built int.);
+            /*
+                        var options = new pc.AppOptions();
+                        options.batchManager = pc.BatchManager;
+                        options.graphicsDevice = device;
+                        options.componentSystems = [
+                            pc.ElementComponentSystem, 
+                            pc.ScriptComponentSystem, 
+                            pc.RigidBodyComponentSystem, 
+                            pc.RenderComponentSystem, 
+                            pc.CameraComponentSystem, 
+                            pc.LightComponentSystem, 
+                            pc.CollisionComponentSystem,
+                            pc.AnimComponentSystem,
+                            ];
+
+                        options.resourceHandlers = [pc.RenderHandler, pc.AnimationHandler, pc.AnimClipHandler, pc.AnimStateGraphHandler, pc.ModelHandler, pc.MaterialHandler, pc.TextureHandler, pc.TextHandler, pc.JsonHandler, pc.AudioHandler, pc.ScriptHandler, pc.SceneHandler, pc.CubemapHandler, pc.HtmlHandler, pc.CssHandler, pc.ShaderHandler, pc.HierarchyHandler, pc.FolderHandler, pc.FontHandler, pc.BinaryHandler, pc.TextureAtlasHandler, pc.SpriteHandler, pc.TemplateHandler, pc.ContainerHandler];
+
+                        options.soundManager = pc.SoundManager;
+                        options.keyboard = new pc.Keyboard(document.body)
+                        options.mouse = new pc.Mouse(document.body);
+                        options.elementInput = new pc.ElementInput(document.body);
+                        app.init(options);
+        
+                        */
 
 
-$(document).ready(function(){
-    let appLoader = new ApplicationLoader();
-});
+
+                }
+            }
 
 
+            $(document).ready(function(){
+                let appLoader = new ApplicationLoader();
+            });

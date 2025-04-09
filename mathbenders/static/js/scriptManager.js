@@ -70,7 +70,6 @@ var ScriptManager = {
         // "PlayCanvas" script type
         // should (probably) exist only attached to entities / instances in the game
         // requires "pc.app.assets.loadFromUrl" with a promise return to ensure proper load order
-        "/static/js/taggable.js",
         "/static/js/matchPos.js",
         "/static/js/utils/fpsMeter.js",
         "/static/js/fraction.js",
