@@ -339,8 +339,9 @@ $(document).on("keydown", function (e) {
 //        Game.Instantiate.multiblaster({position:p,rotation:r});
     }
     if (ee == 'B'){
-        let p = Player.droppedPosition;
-        cb = Game.bow(p);
+//        let p = Player.droppedPosition;
+//        cb = Game.bow(p);
+        let rp = function(){ return pc.Vec3.onUnitSphere().flat()}; for (i=0;i<1000;i++){let a = new Tree1({position:Player.entity.getPosition().add(rp().mulScalar(Math.random()*200))})}
     }
     if (ee == 'L'){
         let p=Player.droppedPosition.clone().add(pc.Vec3.UP);
@@ -453,3 +454,5 @@ const ro = new pc.Vec3(0,0,0);
 var rotateMode = false;
 const mo = new pc.Vec3(0,0,0);
 var moveMode = false;
+
+

@@ -29,7 +29,7 @@ export default class CanvasResizer {
 
         } else {
             // Letterbox
-            console.log('lb');
+            // console.log('lb');
             // Calculate and set new resolution at aspect ratio constraint.
             let resX = parseInt(winWidth);
             let resY = parseInt(winWidth * aspectRatio.h/aspectRatio.w);

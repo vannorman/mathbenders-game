@@ -59,7 +59,6 @@ export default class Template {
                 r.group = Constants.CollisionLayers.FixedObjects;
                 r.mask = pc.BODYMASK_ALL & ~r.group;
                 const $this = this;
-                console.log("this col setup;"+$this.entity.name);
                 const debugCollisions = false;
                 if (debugCollisions) {
                     collisionComponent.on('collisionstart',

@@ -167,9 +167,9 @@ class RealmEditor {
         AudioManager.play({source:assets.sounds.ui.open});
         this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
         // To re-load the existing level ..
-        console.log("%c ENABLE","color:#77f;font-weight:bold;");
+        // console.log("%c ENABLE","color:#77f;font-weight:bold;");
         const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
-        console.log(JSON.parse(realmData));
+        // console.log(JSON.parse(realmData));
 
         this.#RealmData.Clear(); // delete everything
         pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{
@@ -251,8 +251,7 @@ class RealmEditor {
  
 //            levelJson._placedItems.forEach(x=>{
             let index=0;
-            console.log("%c BEGIN ~~ ~","color:yellow;font-weight:bold;");
-            console.log(levelJson.templateInstances);
+            console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
                 try {
                     let obj = this.InstantiateTemplate({

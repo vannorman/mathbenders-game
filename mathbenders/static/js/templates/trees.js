@@ -1,13 +1,20 @@
 import Template from './template.js';
 
 window.treeAsset = assets.models.trees.trees.resource.instantiateRenderEntity();
+
 export class Tree1 extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.trees;
+    index;
 
-    setup(){ 
-        console.log("setup tree?");
-        const tree = window.treeAsset.children[2].clone();
+    constructor(args={}){
+        const { index = 0 } = args;
+        super(args);
+        this.index=index;
+    }
+    setup(){
+        const index = this.index == 0 ? 2 : 3;
+        const tree = window.treeAsset.children[index].clone();
         tree.setLocalScale(1,1,1);
         this.entity.addChild(tree);
         tree.setLocalPosition(new pc.Vec3(0,0,0));

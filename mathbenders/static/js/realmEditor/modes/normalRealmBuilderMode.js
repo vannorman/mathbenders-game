@@ -30,7 +30,6 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
     }
 
     onMouseScroll(e){
-        console.log("normal scroll");
         let r = realmEditor.camera.entity.right.mulScalar(0.22);
         this.cameraIsLerping = false;
         if (realmEditor.camera.cameraComponent.projection == 1){
