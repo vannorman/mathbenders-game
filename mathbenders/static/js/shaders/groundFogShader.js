@@ -28,14 +28,12 @@ pc.extend(pc, function () {
 
         this.shader = shader;
         this.playerEntity = playerEntity;
-
+        this.device = graphicsDevice;
     };
 
-    // Our effect must derive from pc.PostEffect
-    GroundFog = pc.inherits(GroundFog, pc.PostEffect);
 
     // Frame to connect the posteffect to the variables in the shader
-    GroundFog.prototype = pc.extend(GroundFog.prototype, {
+    GroundFog.prototype = pc.extend(pc.PostEffect.prototype, {
         // Every post effect must implement the render method which 
         // sets any parameters that the shader might require and 
         // also renders the effect on the screen
@@ -155,6 +153,8 @@ function getInverseViewProjectionMatrix(viewMatrix, projectionMatrix) {
 }
 
 
+
+// Hmm.. why is this here lol . Guess I need a better management of shader etc.
 class WarpFxByPointManager {
     constructor() {
         this.app = pc.app;

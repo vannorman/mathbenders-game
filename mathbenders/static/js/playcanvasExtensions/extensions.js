@@ -35,6 +35,14 @@ pc.Vec3.prototype.distanceToSquared = function(b) {
 	return dx * dx + dy * dy + dz * dz;
 }
 
+Object.defineProperty(pc.Vec3.prototype, "data", {
+    get: function data(){
+        return [this.x,this.y,this.z];
+    }
+});
+
+
+
 // https://www.npmjs.com/package/playcanvas-vector-math?activeTab=code?
 // Extend playcanvas vec3
 pc.Vec3.onUnitSphere = function(){

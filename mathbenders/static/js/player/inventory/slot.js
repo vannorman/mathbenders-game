@@ -36,7 +36,7 @@ export default class InventorySlot {
     }
 
     createGui(){
-        const slotBackground = new pc.Entity("inv"+i);
+        const slotBackground = new pc.Entity("invslot");
         slotBackground.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
             pivot: [0.5, 0.5],
@@ -47,7 +47,7 @@ export default class InventorySlot {
         slotBackground.addComponent("layoutchild", { excludeFromLayout: false, });
 
         // add a child image
-        const itemImage = new pc.Entity("invImg"+i);
+        const itemImage = new pc.Entity("invImg");
         itemImage.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
             pivot: [0.5, 0.5],

@@ -12,7 +12,7 @@ var ScriptManager = {
         Module : "Module"
     },
     dependencyScripts : [
-        "/static/lib/playcanvas-stable.js",
+        "/static/lib/playcanvas.js",// -stable.js",
         // "https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.min.js",
     ],
     gameManagementScripts : [

@@ -14,14 +14,11 @@ export default class Terrain {
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
             sampleResolution : Math.random()/100, // higher values : more coarse terrain
             size : 128 + Math.round(Math.random()*128),
-            placeTrees : true,
-            treeCount : 0,
 
             // Overlay a second terrain
             resolution2 : 0,
             heightScale2 : 0,
             exp : 0,
-            trees:0,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
         Object.keys(args).forEach(k => {
@@ -32,53 +29,9 @@ export default class Terrain {
         this.placeTreeFn = null;
     }
 
-    placeTrees() {
-        // could get verts from meshUtil.GetVertsFromEntityMesh(this.entity)
-        // OR, simply get the xz bounds of the terrain then pick a random point above it and raycast down (more variety)
-        // Need to setTimeout so that all trees dont get instanced at once (too slow)
-        // Need to buffer initial setTimeout kickoff time (5s?) so that "terarin slider tweaking" doesn't kick off 100 times before user is done messing with it
-        // Need to store the setTimeout so that it can be interrupted on terrain.destroy()
-        const positions = meshUtil.GetVertsFromEntityMesh({entity:this.entity});
-        const terEnt = this.entity;
-        const selectedPositions = Utils.SelectRandomFromArray({arr:positions,count:this.data.treeCount})
-        const thisInstance = this;
-        this.placeTreeTimeoutFn = setTimeout(function(){
-            var placeTreeFn = setInterval(function(){
-                if (selectedPositions.length <= 0){
-                    clearInterval(placeTreeFn);
-                    return;
-                }
-                const p = selectedPositions.pop();
-                const tree = TerrainGenerator.Tree({position:p});
-                terEnt.addChild(tree);
-            },25)
-            thisInstance.placeTreeFn = placeTreeFn;
-        },100);
-
-        // Raycast down method
-        /*
-         var { positions = [], TerrainEntity = null, treeCount = 20000 } = options;
-            const verts = reshape(positions); // create a 2d array
-            extents = findExtents(verts);
-            extents = extents.map(x => x.add(TerrainEntity.getPosition())); // world coords
-    
-        let p = getRandomVec3WithinExtents(extents);
-            if (pc.Vec3.distance(p,pc.Vec3.ZERO) < 15) continue;
-            p.add(new pc.Vec3(0,100,0));
-            var results = pc.app.systems.rigidbody.raycastAll(p, p.clone().add(new pc.Vec3(0,-300,0)));
-            for (let j=0;j<results.length;j++){
-                let result = results[j];
-                if (result.entity == TerrainEntity){
-                    setTimeout(function(){TerrainGenerator.Tree({position:result.point,TerrainEntity:TerrainEntity})},i);
-                }
-            }
-        */
-
-    }
     postGenerationFunction() { 
         const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y+this._data.textureOffset});
         this.entity.render.meshInstances[0].material = mat;
-        this.placeTrees();
     }
     
     toJSON(){ 
@@ -109,6 +62,7 @@ export default class Terrain {
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
         this.entity = TerrainGenerator.Generate(this.data);
         this.postGenerationFunction();
+        setTimeout(function(){realmEditor.placeTrees({numTrees:1})},100);
     }
    
     RegenerateWithDelay(opts={}){

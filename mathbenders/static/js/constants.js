@@ -47,40 +47,40 @@ const Materials = {
     get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
     get white() { return this.createMaterial(pc.Color.WHITE )},
     get black() { return this.createMaterial(new pc.Color(00,00,00))},
-    createCelMaterial (options={}){
-        const { isNegative = false } = options;
+    get brown() { return this.createMaterial(new pc.Color(0.5,0.2,0.2))},
+    createCelMaterial(options = {}) {
+    const { isNegative = false } = options;
 
-        var vert = assets.shaders.cel_shader_object_vert.resource;
-        var frag = assets.shaders.cel_shader_object_frag.resource;
-        
-        var shaderDefinition = {
-            attributes: {
-                position: pc.SEMANTIC_POSITION,
-                normal: pc.SEMANTIC_NORMAL
-            },
-            vshader: vert,
-            fshader: frag
-        };
+    const vert = assets.shaders.cel_shader_object_vert.resource;
+    const frag = assets.shaders.cel_shader_object_frag.resource;
 
-        var vs = assets.shaders.cel_shader_object_vert.resource;
-       var fs = assets.shaders.cel_shader_object_frag.resource;
-       const shader = pc.createShaderFromCode(pc.app.graphicsDevice, vs,fs, 'celShader', {
+    const material = new pc.ShaderMaterial({
+        vertexCode: vert,
+        fragmentCode: frag,
+        attributes: {
             aPosition: pc.SEMANTIC_POSITION,
             aNormal: pc.SEMANTIC_NORMAL,
             aUv: pc.SEMANTIC_TEXCOORD0
-        });
+        },
+        name: 'celMaterial'
+    });
 
-        var material = new pc.Material();
-        material.shader = shader;
-        material.setParameter('uSunDir', Game.sunDir.data);
-       // Game.sun.up.mulScalar(-1).data);
-        material.setParameter('uIsNegative', isNegative);
-        pc.app.on('update', function(){ 
-            material.setParameter('uCameraPos', Camera.main.entity.getPosition().data);
-        });
-        return material;    
-    },
-    get celWhite() { return this.createCelMaterial()},
+    // Set parameters
+    material.setParameter('uSunDir', Game.sunDir.data);//Game.sunDir.clone().normalize().data);
+    material.setParameter('uIsNegative', isNegative);
+    // Optional texture binding
+    // material.setParameter('uTexture', yourTexture.resource);
+
+    // Optional cameraPos usage in shader — not needed in this shader
+    pc.app.on('update', () => {
+        material.setParameter('uCameraPos', Camera.main.entity.getPosition().data);
+    });
+
+    material.update(); // 💥 Important in ShaderMaterial
+
+    return material;
+},
+   get celWhite() { return this.createCelMaterial()},
     get celBlack() { return this.createCelMaterial({isNegative:true})},
 } 
 

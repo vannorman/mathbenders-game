@@ -18,10 +18,10 @@ export default class RealmData {
     }
 
     Clear(opts = {}){
-        const {deleteLevelObjects=true} = opts;
+        const {deleteLevelObjects=true,} = opts;
         if (deleteLevelObjects){
             this.Levels.forEach(level=>{
-                level.Clear({deleteLevelObjects:deleteLevelObjects});
+                level.Clear({deleteLevelObjects:deleteLevelObjects,});
             });
         }
     }

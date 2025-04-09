@@ -19,7 +19,6 @@ TerrainGenerator = {
             resolution2=0,
             heightScale2=0,
             exp=0,
-            trees=0,
             heights =  (() => {
                 const heights2d = perlin.get2dPerlinArr({
                     dim:options.dimension,
@@ -55,10 +54,11 @@ TerrainGenerator = {
         newTerrain['entity'] = terrainEntity;
         terrainEntity.tags._list.push(Constants.Tags.Terrain);
 
-        if (trees > 0){
-            setTimeout(function(){ TerrainGenerator.PlaceTrees(terrainEntity,trees,size);},1000);
-        }
+//        if (trees > 0){
+//            setTimeout(function(){ TerrainGenerator.PlaceTrees(terrainEntity,trees,size);},1000);
+//        }
 
+        
         return terrainEntity;
     },
     SecondLayerWithExponentialHeights(options){
@@ -78,44 +78,6 @@ TerrainGenerator = {
             //console.log('d:'+d);
         }
         return heights;
-    },
-    PlaceTrees(ent,numTrees,size){
-        if (window.trees){
-            window.trees.forEach(x=>x.destroy());
-        }
-
-        window.batchGroup = pc.app.batcher.addGroup("Trees", false, 200);
-        window.trees = [];
-        for (i=0;i<numTrees;i++){
-            let x = (Math.random()-0.5) * size/2;
-            let y = 50;
-            let z = (Math.random()-0.5) * size/2;
-            let from = ent.getPosition().add(new pc.Vec3(x,y,z));
-            let to = from.clone().add(pc.Vec3.UP.clone().mulScalar(-100));
-            let result = pc.app.systems.rigidbody.raycastFirst(from, to);
-        Utils3.debugSphere({position:from,scale:30});
-        Utils3.debugSphere({position:to,scale:20,color:pc.Color.BLUE});
-
-            let pos =  result.point; //Physics.RaycastFirst(from,to,Constants.Tags.Terrain);
-            let a = new Tree1({position:pos});
-            window.trees.push(a);
-
-        }
-
-        setTimeout(function(){
-            console.log('bg');
-            for (i=0;i<numTrees;i++){
-                window.trees[i].entity.children[0].render.batchGroupId=window.batchGroup.id;
-                let p = window.trees[i].entity.getPosition();
-                ent.addChild(window.trees[i].entity);
-                window.trees[i].entity.moveTo(p);
-
-            }
-
-        },10);
-
-
-
     },
     AddSineCanyonToPerlinTerrain2d(options){
         const { 
@@ -356,7 +318,7 @@ TerrainGenerator = {
         });
 
         var node = new pc.GraphNode();
-        var collisionMeshInstance = new pc.MeshInstance(node, mesh, physicsMaterial);
+        var collisionMeshInstance = new pc.MeshInstance(mesh, physicsMaterial, node);
         var collisionModel = new pc.Model();
         collisionModel.graph = node;
         collisionModel.meshInstances.push(collisionMeshInstance);
@@ -381,26 +343,6 @@ TerrainGenerator = {
         curvyFloor = entity;
         return [entity, positions];
     },
-    Tree(opts){
-        const { position } = opts;
-        const p = position;
-        const clone = Game.Instantiate.tree({network:false,localOnly:true});
-        tree2 = clone;
-        // enable the clone because the template is disabled
-        clone.enabled = true;
-        clone.setLocalScale(new pc.Vec3(.001,.001,.001))
-        clone.setLocalEulerAngles(new pc.Vec3(90,90,90))
-        //console.log("clone model:")
-        // console.log(clone)
-        const r = new pc.Vec3(0,Math.random()*360,0);
-        clone.moveTo(p,r);
-        //clone.addComponent('script');
-        //clone.script.create('tagged',{attributes:{tags:[Tagged.Tree]}});
-        clone.tags._list.push(Constants.Tags.Tree);
-        clone.name = "Terrain tree";
-        return clone;
-    },
-
 
     GetCanyonOne(options={}){
         const { 

@@ -33,7 +33,7 @@ const assets = {
 
         },
         trees : {
-            trees :  new pc.Asset("", "container", { url: "/static/assets/models/trees/trees.glb",    }),
+            tree1 :  new pc.Asset("", "container", { url: "/static/assets/models/trees/Tree1.glb",    }),
 
         },
         structures: {
@@ -205,6 +205,8 @@ const assets = {
             grid_blue : new pc.Asset("grid_fine", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }),
             grid_fine : new pc.Asset("grid_fine", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }),
             water : new pc.Asset("grid_blue", "texture", { url: '/static/assets/textures/terrain/water.jpg' }),
+            tree_green : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/tree_green.jpg' }),
+            tree_brown : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/tree_brown.jpg' }),
         },
     }
 

@@ -37,6 +37,12 @@ export default class TerrainGui {
         // @Eytan is it better to pass realmEditor or realmData reference around rather than acces the global?
 
         function CreateTerrainEditingSlider(args){
+            const {onChangeFn=(val)=>{
+                const curTer = realmEditor.currentLevel.terrain;
+                curTer.data[args.key] = val;
+                curTer.RegenerateWithDelay({realmEditor:realmEditor});
+
+            }}=args;
             const slider = UI.createSlider({
                 labelText:args.key,
                 width:150,
@@ -47,11 +53,7 @@ export default class TerrainGui {
                 maxVal:args.maxVal,
                 minStep:args.minStep,
                 precision:args.precision || 2,
-                onChangeFn:(val)=>{
-                    const curTer = realmEditor.currentLevel.terrain;
-                    curTer.data[args.key] = val;
-                    curTer.RegenerateWithDelay({realmEditor:realmEditor});
-               },
+                onChangeFn:onChangeFn,
             });
             return slider;
         }
@@ -210,7 +212,9 @@ export default class TerrainGui {
         this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
-        this.#TerrainTools.trees = CreateTerrainEditingSlider({key:'trees',maxVal:200,minStep:1});
+        const treeChangeFn =(val)=>{
+            realmEditor.placeTrees({numTrees:val})}
+        this.#TerrainTools.trees = CreateTerrainEditingSlider({onChangeFn:treeChangeFn,key:'trees',maxVal:200,minStep:1});
         seconds.addChild(this.#TerrainTools.resolution2.group);
         seconds.addChild(this.#TerrainTools.heightScale2.group);
         seconds.addChild(this.#TerrainTools.exp.group);

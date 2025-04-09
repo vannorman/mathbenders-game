@@ -126,7 +126,7 @@ export default class GUI {
                 // console.log('par:'+par.name);
                 // console.log('tags:'+par.tags._list.toString());
 
-                for(i=0;i<parentDepthSearch;i++){
+                for(let i=0;i<parentDepthSearch;i++){
                     if (par.tags._list.includes(Constants.Tags.BuilderItem)){
                         editableItemUnderCursor = par;
                         // return getEditableItemByEntity(editableItemUnderCursor);

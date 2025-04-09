@@ -320,7 +320,7 @@ $(document).on("keydown", function (e) {
             }
         } 
         const ns = new NumberSphere(options);
-     }
+      }
      if (ee == 'X'){
         const num = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? 1000 : 2;
         const frac = new Fraction(num,1);

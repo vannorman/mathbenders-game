@@ -80,6 +80,39 @@ class RealmEditor {
 
     }
 
+    placeTrees(args={}){
+        
+
+        const {level=this.currentLevel,numTrees=5} = args;
+        // Remove other trees on this level.
+        level.templateInstances.filter(x=>x.constructor.name==Tree1.name).forEach(x=>{
+            x.entity.destroy();
+        })
+
+
+        for(let j=0;j<numTrees;j++){
+            let aabb = level.terrain.entity.render.meshInstances[0].aabb;
+            let scale = aabb.halfExtents.length();
+            let randLocalPos =  Utils3.flattenVec3(Utils.getRandomUnitVector()).mulScalar(scale*0.5);
+            let from = level.terrain.centroid.clone().add(new pc.Vec3(0,100,0)).add(randLocalPos);
+            let to = from.clone().add(new pc.Vec3(0,-200,0));
+            let result = pc.app.systems.rigidbody.raycastFirst(from, to);
+
+            if (result) {
+                const pos = result.point;
+                let obj = this.InstantiateTemplate({
+                    level:level,
+                    ItemTemplate:Tree1,
+                    position:pos,
+                    rotation:new pc.Vec3(0,Math.random()*180,0),
+                });
+            } else {
+                Utils3.debugSphere({position:from,timeout:100000});
+            }
+       }
+
+    }
+
     buildRandomItemsOnLevel(args={}){
         const {level=this.currentLevel,numItems=5} = args;
         for(let j=0;j<numItems;j++){

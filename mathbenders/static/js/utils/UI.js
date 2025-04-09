@@ -81,7 +81,9 @@ class UISlider {
                 const startAnchorX = $this._mouseDownAnchorX; // what was x position of slider when we first clicked
                 const deltaAnchorX = delta / $this._sliderWidth;
                 let resultX = startAnchorX + deltaAnchorX;
-                $this.SetVal({resultX:resultX});
+
+                let shouldUpdate = Math.abs($this._val-resultX*$this._maxVal) >= $this._minStep;
+                $this.SetVal({fireOnChangeFn:shouldUpdate,resultX:resultX});
            }
         });
 

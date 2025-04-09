@@ -1,6 +1,6 @@
 import Template from './template.js';
 
-window.treeAsset = assets.models.trees.trees.resource.instantiateRenderEntity();
+window.treeAsset = assets.models.trees.tree1.resource.instantiateRenderEntity();
 
 export class Tree1 extends Template {
     static isStaticCollider = true;
@@ -14,8 +14,9 @@ export class Tree1 extends Template {
     }
     setup(){
         const index = this.index == 0 ? 2 : 3;
-        const tree = window.treeAsset.children[index].clone();
-        tree.setLocalScale(1,1,1);
+        const tree = window.treeAsset.clone();
+        let r = function(){ return 0.008 + Math.random() * 0.006; }
+        tree.setLocalScale(r(),r(),r());
         this.entity.addChild(tree);
         tree.setLocalPosition(new pc.Vec3(0,0,0));
         const col = new pc.Entity("tree collider");
@@ -23,8 +24,12 @@ export class Tree1 extends Template {
         col.addComponent('collision',{type:'cylinder',height:20,radius:2.5});
         this.entity.addChild(col);
         col.setLocalPosition(-1.5,0,1);
-        tree.render.meshInstances[0].material=Materials.brown;
-        tree.render.meshInstances[1].material=Materials.green;
+        // tree.render.meshInstances[0].material=Materials.brown;
+        // tree.render.meshInstances[1].material=Materials.green;
+        Game.t = this;
+        // ApplyTextureAssetToMeshInstance({meshInstance:window.treeAsset.children[2].render.meshInstances[0],textureAsset:assets.textures.terrain.tree_brown});
+        // ApplyTextureAssetToMeshInstance({meshInstance:tree.render.meshInstances[1],textureAsset:assets.textures.terrain.tree_green});
+
         this.entity.tags.add(Constants.Tags.Tree); 
     }
 }
