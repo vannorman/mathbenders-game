@@ -33,16 +33,7 @@ export default class TerrainGui {
             color:pc.Color.GREEN,
         }); 
 
-        this.screen.addComponent("layoutgroup", {
-            orientation: pc.ORIENTATION_VERTICAL,
-            spacing: new pc.Vec2(-20, 0),
-            alignment: new pc.Vec2(0.5,0.5),
-            widthFitting: pc.FITTING_NONE,
-            heightFitting: pc.FITTING_NONE,
-        });
-
-
-        //const realmData = realmEditor.RealmData; 
+                //const realmData = realmEditor.RealmData; 
         // @Eytan is it better to pass realmEditor or realmData reference around rather than acces the global?
 
         function CreateTerrainEditingSlider(args){
@@ -94,37 +85,93 @@ export default class TerrainGui {
                 pivot: [0.5, 0.5], 
                 width: 40, 
                 height: 40,
-                color:pc.Color.BLACK,
+                color:pc.Color.GRAY,
+                opacity:0.4,
                 useInput:true,
             });
+           const text = new pc.Entity("text");
+            text.addComponent('element', {
+                type: 'text',
+                text: name,
+                color: pc.Color.BLACK,
+                anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
+                pivot: new pc.Vec2(0.5, 0.5),
+                fontSize: 20,
+                fontAsset: assets.fonts.montserrat,
+            });
+            tb.addChild(text);
+
+            // UI.HoverColor({element:tb.element});
             tb.element.on("mousedown", () => {
-                tb.element.text = menu.enabled ? ">" : "v"
+                text.element.text = menu.enabled ? ">" : "v"
                 menu.enabled = !menu.enabled; // Toggle menu visibility
             });
-            // UI.HoverColor({element:tb.element});
-            return tb; 
+
+             return tb; 
         }
 
-        const globals = new pc.Entity("global group");
-        globals.addComponent('element',{
-              type:'image',
+        const $this =this;
+        function uiGroup(name){
+            const group = new pc.Entity("global group");
+            group.addComponent('element',{
+                  type:'image',
+                anchor:[0.5,0.5,0.5,0.5],
+                pivot:[0.5,0.5],
+                height:Constants.Resolution.height,
+                width:$this.width,
+                opacity:0.5,
+                color:pc.Color.GREEN,
+            });
+            group.addComponent('layoutgroup',{
+               orientation: pc.ORIENTATION_VERTICAL,
+                spacing: new pc.Vec2(-20, 0),
+                alignment: new pc.Vec2(0.5,0.5),
+                widthFitting: pc.FITTING_NONE,
+                heightFitting: pc.FITTING_NONE,
+            });
+
+
+            return group;
+        }
+
+        const tabGroup = new pc.Entity("tabgroup");
+        tabGroup.addComponent('element',{
+                  type:'image',
+                anchor:[0.5,1,0.5,1],
+                pivot:[0.5,0.5],
+                height:80,
+                width:160,
+                opacity:0.8,
+                color:pc.Color.CYAN,
+           }); 
+            tabGroup.addComponent('layoutgroup',{
+               orientation: pc.ORIENTATION_HORIZONTAL,
+                spacing: new pc.Vec2(0,10),
+                alignment: new pc.Vec2(0.5,0.5),
+                widthFitting: pc.FITTING_NONE,
+                heightFitting: pc.FITTING_NONE,
+            });
+
+        this.screen.addChild(tabGroup);
+         const globals = uiGroup("Globals");
+        // const toggleGlobals = toggleButton({menu:globals});
+
+        const toggleGlobals = UI.SetUpItemButton({
+            parentEl:tabGroup,
+            width:80,height:60,
+            colorOn:pc.Color.GREEN,
+            colorOff:pc.Color.BLUE,
             anchor:[0.5,0.5,0.5,0.5],
-            pivot:[0.5,0.5],
-            height:Constants.Resolution.height,
-            width:this.width,
-            opacity:0.5,
-            color:pc.Color.RED,
+            pivot:[0.5,0],
+            mouseDown:function(){realmEditor.gui.terrain.seconds.enabled=false;realmEditor.gui.terrain.globals.enabled=true;console.log('globals on/off');},
+            cursor:'pointer',
         });
-        globals.addComponent('layoutgroup',{
-           orientation: pc.ORIENTATION_VERTICAL,
-            spacing: new pc.Vec2(-20, 0),
-            alignment: new pc.Vec2(0.5,0.5),
-            widthFitting: pc.FITTING_NONE,
-            heightFitting: pc.FITTING_NONE,
-        });
-        const toggleGlobals = toggleButton({menu:globals});
-        this.screen.addChild(toggleGlobals);
-        this.screen.addChild(globals);
+
+
+
+
+        tabGroup.addChild(toggleGlobals);
+       this.screen.addChild(globals);
 
         this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:512,minStep:10});
         this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});
@@ -140,11 +187,26 @@ export default class TerrainGui {
         globals.addChild(this.#TerrainTools.heightScale.group);
         globals.addChild(this.#TerrainTools.heightTruncateInterval.group);
         globals.addChild(this.#TerrainTools.textureOffset.group);
-
 //        this.#TerrainTools.spacer = spacer();
-        const seconds = new pc.Entity("seconds group",{type:'group'});
-        const toggleSeconds = toggleButton({menu:seconds});
-        this.screen.addChild(toggleSeconds);
+        const seconds = uiGroup("Seconds");
+        const toggleSeconds = UI.SetUpItemButton({
+            parentEl:tabGroup,
+            width:80,height:60,
+            colorOn:pc.Color.GREEN,
+            colorOff:new pc.Color(0,0.8,0),
+            anchor:[0.5,0.5,0.5,0.5],
+            pivot:[0.5,0],
+            mouseDown:function(){
+                realmEditor.gui.terrain.seconds.enabled=true;realmEditor.gui.terrain.globals.enabled=false;
+                console.log('seconds on/off');},
+            cursor:'pointer',
+        });
+
+
+
+
+
+        tabGroup.addChild(toggleSeconds);
         this.screen.addChild(seconds);
 
         this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
@@ -153,7 +215,7 @@ export default class TerrainGui {
         seconds.addChild(this.#TerrainTools.resolution2.group);
         seconds.addChild(this.#TerrainTools.heightScale2.group);
         seconds.addChild(this.#TerrainTools.exp.group);
-       
+        seconds.enabled=false;
        this.globals = globals;
        this.seconds = seconds;
        this.toggleGlobals=toggleGlobals; 
@@ -174,7 +236,6 @@ export default class TerrainGui {
             cursor:'pointer',
         });
 
-        const $this =this;
         this.guiBase.editTerrainPanel.navButton.element.on('click',function(){
             // TODO: Move outside of UI?
             const terrainPos = realmEditor.currentLevel.terrain.entity.getPosition();

@@ -273,14 +273,15 @@ const UI = {
             anchor=[.5,.5,.5,.5],
             cursor='auto',
             pivot=[0.5,0.5],
-            color,
+            colorOn,
+            colorOff,
             text="",
             hoverValidationFn=null,
         }=options;
         const ent = new pc.Entity("btn");
         ent.addComponent('element',{ 
             layers: [pc.LAYERID_UI],
-            type: pc.ELEMENTTYPE_IMAGE, 
+            type: "image", 
             anchor:anchor,
             pivot:pivot, 
             width:width, 
@@ -288,7 +289,10 @@ const UI = {
             useInput:true,
         })
         if (textureAsset) ent.element.textureAsset=textureAsset;
-        if (color) ent.element.textureAsset=textureAsset;
+        if (colorOff) {
+            ent.element.color=colorOff;
+
+            }
         if (text) {
              const textA = new pc.Entity('Text'); // text
              textA.addComponent('element', {
@@ -303,7 +307,8 @@ const UI = {
             ent.addChild(textA); 
         }
         if (parentEl) parentEl.addChild(ent);
-        UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn});
+        if (!colorOff) UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn});
+        else UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn,colorOff:colorOff,colorOn:colorOn});
         if (mouseDown) ent.element.on('mousedown',function(){ mouseDown(ent); });
         return ent;
     },
