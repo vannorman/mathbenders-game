@@ -241,7 +241,13 @@ pc.Entity.prototype.getComponentInParent = function(componentName,depth=20) {
         else return this.parent.getComponentInParent(componentName,--depth);
     }
 }
-
+function FindObjectsWithTag(tag){
+    let ret = [];
+    pc.app.root.getComponentsInChildren('entity').forEach(x=>{
+        if (x.tags.list().includes(tag)) ret.push(x);
+    });
+    return ret;
+}
 pc.Entity.prototype.getComponentsInChildren = function(componentName) {
     // checks for scripts (user defined) and components (like 'render', 'meshInstances')
     var components = [];
