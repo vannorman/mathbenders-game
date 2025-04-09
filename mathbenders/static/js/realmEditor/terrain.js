@@ -21,6 +21,7 @@ export default class Terrain {
             resolution2 : 0,
             heightScale2 : 0,
             exp : 0,
+            trees:0,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
         Object.keys(args).forEach(k => {

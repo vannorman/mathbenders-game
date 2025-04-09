@@ -13,13 +13,13 @@ TerrainGenerator = {
             material = null, // can't pass material directly, the data isn't a passable type for javascript.
             size = 250,
             centroid,
-            placeTrees = false,
             treeCount=100,
 //            extraFn = null,
             terrainInstance = null,
             resolution2=0,
             heightScale2=0,
             exp=0,
+            trees=0,
             heights =  (() => {
                 const heights2d = perlin.get2dPerlinArr({
                     dim:options.dimension,
@@ -54,6 +54,11 @@ TerrainGenerator = {
         terrainEntity.tags.add(Constants.Tags.Terrain);
         newTerrain['entity'] = terrainEntity;
         terrainEntity.tags._list.push(Constants.Tags.Terrain);
+
+        if (trees > 0){
+            setTimeout(function(){ TerrainGenerator.PlaceTrees(terrainEntity,trees,size);},1000);
+        }
+
         return terrainEntity;
     },
     SecondLayerWithExponentialHeights(options){
@@ -73,6 +78,44 @@ TerrainGenerator = {
             //console.log('d:'+d);
         }
         return heights;
+    },
+    PlaceTrees(ent,numTrees,size){
+        if (window.trees){
+            window.trees.forEach(x=>x.destroy());
+        }
+
+        window.batchGroup = pc.app.batcher.addGroup("Trees", false, 200);
+        window.trees = [];
+        for (i=0;i<numTrees;i++){
+            let x = (Math.random()-0.5) * size/2;
+            let y = 50;
+            let z = (Math.random()-0.5) * size/2;
+            let from = ent.getPosition().add(new pc.Vec3(x,y,z));
+            let to = from.clone().add(pc.Vec3.UP.clone().mulScalar(-100));
+            let result = pc.app.systems.rigidbody.raycastFirst(from, to);
+        Utils3.debugSphere({position:from,scale:30});
+        Utils3.debugSphere({position:to,scale:20,color:pc.Color.BLUE});
+
+            let pos =  result.point; //Physics.RaycastFirst(from,to,Constants.Tags.Terrain);
+            let a = new Tree1({position:pos});
+            window.trees.push(a);
+
+        }
+
+        setTimeout(function(){
+            console.log('bg');
+            for (i=0;i<numTrees;i++){
+                window.trees[i].entity.children[0].render.batchGroupId=window.batchGroup.id;
+                let p = window.trees[i].entity.getPosition();
+                ent.addChild(window.trees[i].entity);
+                window.trees[i].entity.moveTo(p);
+
+            }
+
+        },10);
+
+
+
     },
     AddSineCanyonToPerlinTerrain2d(options){
         const { 

@@ -188,6 +188,9 @@ export default class TerrainGui {
         globals.addChild(this.#TerrainTools.heightTruncateInterval.group);
         globals.addChild(this.#TerrainTools.textureOffset.group);
 //        this.#TerrainTools.spacer = spacer();
+
+
+
         const seconds = uiGroup("Seconds");
         const toggleSeconds = UI.SetUpItemButton({
             parentEl:tabGroup,
@@ -201,20 +204,17 @@ export default class TerrainGui {
                 console.log('seconds on/off');},
             cursor:'pointer',
         });
-
-
-
-
-
         tabGroup.addChild(toggleSeconds);
         this.screen.addChild(seconds);
 
         this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
+        this.#TerrainTools.trees = CreateTerrainEditingSlider({key:'trees',maxVal:200,minStep:1});
         seconds.addChild(this.#TerrainTools.resolution2.group);
         seconds.addChild(this.#TerrainTools.heightScale2.group);
         seconds.addChild(this.#TerrainTools.exp.group);
+        seconds.addChild(this.#TerrainTools.trees.group);
         seconds.enabled=false;
        this.globals = globals;
        this.seconds = seconds;

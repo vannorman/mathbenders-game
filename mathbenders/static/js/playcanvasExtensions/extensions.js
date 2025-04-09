@@ -18,6 +18,7 @@ pc.CameraComponent.prototype.screenPointToRay = function(x,y){
     return raycastResult;
 }
 
+
 Object.defineProperty(pc.ElementComponent.prototype, "screenCornersCenter", {
     get: function screenCornersCenter() {
         return this.screenCorners[0].clone().add(this.screenCorners[2]).mulScalar(0.5)

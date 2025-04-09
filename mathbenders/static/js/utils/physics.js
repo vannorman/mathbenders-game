@@ -1,4 +1,26 @@
 const Physics = {
+    RaycastFirst(from,to,tag){
+
+        var results = pc.app.systems.rigidbody.raycastAll(from, to);
+        var closestResult = null;
+        var closestHit = 99999999;
+        results.forEach(result=>{
+            if (result && result.entity.tags._list.includes(tag)) {
+                const hitDistance = pc.Vec3.distance(result.point,from);
+                if (hitDistance < closestHit){
+                    closestHit = hitDistance;
+                    closestResult = result;
+                }
+            } else {
+                console.log(result.entity.tags._list);
+            }
+        });
+        console.log("Results");
+        console.log(results);
+        //console.log("close?:"+closestResult+", ..");
+        return closestResult;
+    },
+
     // Awkward - not sure how to detect colliders without a 100ms delay and callback.
     // E.g. there is no Physics.OverlapSphere as in Unity.
     OverlapSphere(opts={}){
