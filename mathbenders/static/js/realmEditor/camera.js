@@ -76,7 +76,7 @@ export default class EditorCamera {
             width: 512,
             height: 512,
            // format: pc.PIXELFORMAT_R8_G8_B8_A8,
-            format: pc.PIXELFORMAT_SRGBA8,
+            format: pc.PIXELFORMAT_RGBA8,
             mipMaps: true,
             addressU: pc.ADDRESS_CLAMP_TO_EDGE,
             addressV: pc.ADDRESS_CLAMP_TO_EDGE

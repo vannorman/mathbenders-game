@@ -8,10 +8,11 @@ import Terrain from './terrain.js';
 export default class Level {
     terrain;
      constructor(opts={}) {
-        const { skipTerrainGen=false } = opts; 
+        const { skipTerrainGen=false, realmEditor } = opts; 
+        this.realmEditor=realmEditor;
         this.templateInstances = [];
         if (!skipTerrainGen){
-            const newTerrain = new Terrain();
+            const newTerrain = new Terrain({realmEditor:this.realmEditor});
             newTerrain.generate();
             this.terrain = newTerrain;
         }

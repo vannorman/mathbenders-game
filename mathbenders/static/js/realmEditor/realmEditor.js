@@ -65,7 +65,7 @@ class RealmEditor {
 
 
 
-        this.#RealmData = new RealmData({levels:[new Level()]});
+        this.#RealmData = new RealmData({levels:[new Level({realmEditor:this})]});
         this.currentLevel = this.#RealmData.Levels[0];
     }
 
@@ -80,15 +80,22 @@ class RealmEditor {
 
     }
 
+    
+    clearTrees(){
+        this.currentLevel?.templateInstances?.filter(x=>x.constructor.name==Tree1.name).forEach(x=>{
+            x.entity.destroy();
+        })
+
+
+    }
+
     placeTrees(args={}){
         
 
         const {level=this.currentLevel,numTrees=5} = args;
         // Remove other trees on this level.
-        level.templateInstances.filter(x=>x.constructor.name==Tree1.name).forEach(x=>{
-            x.entity.destroy();
-        })
 
+        this.clearTrees();
 
         for(let j=0;j<numTrees;j++){
             let aabb = level.terrain.entity.render.meshInstances[0].aabb;
@@ -278,12 +285,12 @@ class RealmEditor {
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
-            let thisLevel = new Level({skipTerrainGen:true});
+            let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
             levels.push(thisLevel);
             
             let terrainData = levelJson.terrain;
             terrainData.centroid = Terrain.getCentroid();
-            thisLevel.terrain = new Terrain(terrainData);
+            thisLevel.terrain = new Terrain({data:terrainData,realmEditor:this});
             const $this = this;
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
  
@@ -349,11 +356,11 @@ class RealmEditor {
     }
 
     createNewLevel(){
-        const level = new Level({skipTerrainGen:true});
+        const level = new Level({skipTerrainGen:true,realmEditor:this});
         this.#RealmData.Levels.push(level);
         const newTerrainPos = Terrain.getCentroid();
         
-        level.terrain = new Terrain({centroid:newTerrainPos,seed:Math.random()});
+        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this});
         level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
         
         const zoomFactor = 100;

@@ -23,9 +23,15 @@ export default class Terrain {
             exp : 0,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
-        Object.keys(args).forEach(k => {
-            data[k] = args[k];
-        });
+       const { realmEditor } = args;
+       this.realmEditor=realmEditor;
+       console.log('re?');
+       if (args.data){
+            Object.keys(args.data).forEach(k => {
+                data[k] = args.data[k];
+            });
+        }
+
         // data.textureOffset -= 128; // normalize 0-256 range to -128 to 128; shouldn't be hardcoded here but i don't have <0 range for this slider yet
         this._data = data;
         this.placeTreeFn = null;
@@ -62,6 +68,7 @@ export default class Terrain {
     
     generate(source="none"){
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
+        this.realmEditor.clearTrees();
         this.entity = TerrainGenerator.Generate(this.data);
         this.postGenerationFunction();
         //setTimeout(function(){realmEditor.placeTrees({numTrees:1})},100);
