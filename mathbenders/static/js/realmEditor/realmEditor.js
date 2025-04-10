@@ -112,7 +112,7 @@ class RealmEditor {
                     });
                 }
             } else {
-                Utils3.debugSphere({position:from,timeout:100000});
+                Utils3.debugSphere({position:from,timeout:100});
             }
        }
 

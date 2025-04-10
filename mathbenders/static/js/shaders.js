@@ -327,6 +327,9 @@ var Shaders = {
             varying vec2 uvv;
             uniform float uTime;
             uniform float uYoffset;
+            vec3 toLinear(vec3 srgbColor) {
+                return pow(srgbColor, vec3(2.2));
+            }
             void getAlbedo() {
                 float y = vPositionW.y - uYoffset;
                 vec4 color;
@@ -353,7 +356,8 @@ var Shaders = {
                 } else { // Snow
                     color = vec4(1,1,1,1); //1.0 * wR, 1.0 * wG, 1.0, 1.0);
                 }
-                dAlbedo = color.rgb;
+                dAlbedo = toLinear(color.rgb);
+
  
 
 

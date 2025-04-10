@@ -39,7 +39,7 @@ export class Tree1 extends Template {
         tree.setLocalScale(r(),r(),r());
         this.entity.addChild(tree);
         this.tree=tree;
-        tree.setLocalPosition(new pc.Vec3(0,0,0));
+        tree.setLocalPosition(new pc.Vec3(0,-1,0));
         const col = new pc.Entity("tree collider");
         col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_STATIC});
         col.addComponent('collision',{type:'cylinder',height:20,radius:2.5});

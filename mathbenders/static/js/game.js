@@ -62,30 +62,19 @@ var Game = {
         return Game.sun.up;
     },
     
-   async LoadGame(){
+   LoadGame(){
 
-        await CreateTemplates();
-
-       
-
-
+        //await CreateTemplates();
         pc.app.systems.rigidbody.gravity.set(0, -25, 0); // -20 seems to work better than default -9.8 
 
         // Create core objects
         window.Mouse = new MouseClass();
-        
-
 
         // let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
+        this.uiCam = uiCam;
         let skyCam = new RealmBuilderCamera();
-        // let axis = new DebugAxis();
 
-        // Bootstrapped starting area (temporary) -- Platform for player to stand.
-        //let cubeP = new pc.Vec3(0,18,0);
-       // let c =Utils.Cube({position:cubeP,scale:new pc.Vec3(13,0.5,30)});
-        //ApplyTextureAssetToEntity({textureAsset:assets.textures.chess,entity:c,scaleTexture:true});
-        // Game.c = c; // Player relies on the position of the starting platform; boostrap; awkward
 
     },
 

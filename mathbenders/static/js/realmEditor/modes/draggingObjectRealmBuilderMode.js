@@ -57,7 +57,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
         super.onMouseMove(e);
         this.mode?.onMouseMove(e);
         const mp = Mouse.getMousePositionInElement(realmEditor.gui.mapPanel);
-        console.log('mp'+mp);
         if (mp){
             this.#localMousePos=mp;
         }
@@ -66,7 +65,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     update(dt){   
         const mp = this.#localMousePos;
         if (!mp) return;
-        console.log('up:'+mp);
         let right = realmEditor.camera.entity.right.flat();
         let up = realmEditor.camera.entity.up.flat();
         let mov = new pc.Vec3();
@@ -124,7 +122,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
 
     instantiateItem(){
         const instantiatedItem = realmEditor.InstantiateTemplate({ItemTemplate:this.dragger.ItemTemplate});
-        console.log(this.dragger.ItemTemplate);
+        //console.log(this.dragger.ItemTemplate);
         instantiatedItem.disableColliders();
         this.dragger.toggle('post');
         this.dragger.mode.setDraggingItem(instantiatedItem);

@@ -18,6 +18,8 @@ export default class GUI {
     #mapIcons;
     #customCursorIcon;
     get customCursorIcon(){return this.#customCursorIcon;}
+    #setHandPanModeBtn;
+    #setSelectPanModeBtn;
 
     // Navigation of all builder panel modes
     #builderPanels;
@@ -63,8 +65,9 @@ export default class GUI {
     get isMouseOverMap() {
         const is = Mouse.isMouseOverEntity(this.mapPanel) 
 
-//        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
-//        && !Mouse.isMouseOverEntity(this.#changeMapBtn)
+        && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
+        && !Mouse.isMouseOverEntity(this.#setHandPanModeBtn)
+        && !Mouse.isMouseOverEntity(this.#setSelectPanModeBtn)
 //        && !Mouse.isMouseOverEntity(this.#saveBtn)
 //        && !Mouse.isMouseOverEntity(this.#loadBtn)
 //
@@ -335,8 +338,25 @@ export default class GUI {
             cursor:'pointer',
         });
 
-    
-       
+        // Set up set of buttons to select "Pan, Select".    
+        this.#setHandPanModeBtn = UI.SetUpItemButton({
+            parentEl:this.mapPanel,
+            width:30,height:30,textureAsset:assets.textures.ui.icons.hand,
+            anchor:[.05,.95,.05,.95],
+            mouseDown:function(){ console.log("HAND PAN"); },
+            cursor:'pointer',
+        });
+
+        // Set up set of buttons to select "Pan, Select".    
+        this.#setSelectPanModeBtn = UI.SetUpItemButton({
+            parentEl:this.mapPanel,
+            width:30,height:30,textureAsset:assets.textures.ui.builder.select,
+            anchor:[.1,.95,.1,.95],
+            mouseDown:function(){ console.log("SLECT "); },
+            cursor:'pointer',
+        });
+
+        
         this.#builderPanels = []
         const realmInfoPanel = new BuilderPanel({ gui:this,  name:"Realm Info"});
         this.realmInfoScreen = this.CreateRealmInfoScreen();

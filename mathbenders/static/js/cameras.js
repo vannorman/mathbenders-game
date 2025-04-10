@@ -28,7 +28,9 @@ class UiCamera {
             layers:[pc.LAYERID_UI],
             projection:1,
             priority:0,
-            aspectRatio:Constants.Resolution.aspectRatio
+            aspectRatio:Constants.Resolution.aspectRatio,
+            gammaCorrection:0,
+
         })
         Camera.ui = uiCam.camera;
         pc.app.root.addChild(uiCam);
@@ -49,7 +51,8 @@ class PlayerCamera{
 
             farClip:1500,
             aspectRatio:Constants.Resolution.aspectRatio,
-            aspectRatioMode:1
+            aspectRatioMode:1,
+            gammaCorrection:1,
         });
         Camera.main = this.self;
         pc.app.root.addChild(this.entity);
