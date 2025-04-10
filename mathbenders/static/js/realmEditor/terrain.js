@@ -1,3 +1,5 @@
+
+
 export default class Terrain {
     
 
@@ -14,7 +16,7 @@ export default class Terrain {
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
             sampleResolution : Math.random()/100, // higher values : more coarse terrain
             size : 128 + Math.round(Math.random()*128),
-
+            waterLevel : 1,
             // Overlay a second terrain
             resolution2 : 0,
             heightScale2 : 0,
@@ -30,7 +32,7 @@ export default class Terrain {
     }
 
     postGenerationFunction() { 
-        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y+this._data.textureOffset});
+        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y+this._data.textureOffset,waterLevel:this._data.waterLevel});
         this.entity.render.meshInstances[0].material = mat;
     }
     
@@ -62,7 +64,7 @@ export default class Terrain {
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
         this.entity = TerrainGenerator.Generate(this.data);
         this.postGenerationFunction();
-        setTimeout(function(){realmEditor.placeTrees({numTrees:1})},100);
+        //setTimeout(function(){realmEditor.placeTrees({numTrees:1})},100);
     }
    
     RegenerateWithDelay(opts={}){

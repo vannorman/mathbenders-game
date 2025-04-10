@@ -91,6 +91,31 @@ class MouseClass {
         this.#onCursorUpFns[obj.name]=obj.fn;
     }
 
+    
+    getMousePositionInElement(element) {
+        const corners = element.element.screenCorners;
+
+        // Top-left and bottom-right corners
+        const topLeft = corners[0];
+        const bottomRight = corners[2];
+
+        const width = bottomRight.x - topLeft.x;
+        const height = bottomRight.y - topLeft.y;
+
+        // Early exit if mouse is outside the element
+        if (
+            this.#x < topLeft.x || this.#x > bottomRight.x ||
+            this.#y < topLeft.y || this.#y > bottomRight.y
+        ) {
+            return null; // or return [0,0] or throw if you prefer
+        }
+
+        // Normalize
+        const localX = (this.#x - topLeft.x) / width;
+        const localY = (this.#y - topLeft.y) / height;
+
+        return [localX, localY];
+    }
     isMouseOverEntity(entity){
         const sc = entity.element.screenCorners;
         if (this.#x > sc[0].x && this.#x < sc[2].x && this.#y > sc[0].y && this.#y < sc[2].y){

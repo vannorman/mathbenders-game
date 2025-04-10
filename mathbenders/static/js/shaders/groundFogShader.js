@@ -2,7 +2,6 @@
 
 // still trying glsl height fog post effect
 // https://www.terathon.com/lengyel/Lengyel-UnifiedFog.pdf
-
 const currentTerrainHeightManager = {
     currentTerrainHeight : 0,
     get adjustedPlayerHeight() {
@@ -12,7 +11,6 @@ const currentTerrainHeightManager = {
     }
     
 }
-
 var warpFxByPointManager; // surely a better way than to declare this global to define and reference later?
 //--------------- POST EFFECT DEFINITION------------------------//
 // includes fog.
@@ -103,7 +101,19 @@ GroundFogShader.prototype.init = function(options) {
     pc.Tracing.set(pc.TRACEID_RENDER_FRAME, true);
     pc.Tracing.set(pc.TRACEID_RENDER_PASS, true);
     pc.Tracing.set(pc.TRACEID_RENDER_PASS_DETAIL, true);
-    
+   
+    function onGameStateChange(state) {
+        switch(state){
+        case GameState.RealmBuilder:
+            this.enabled=false;
+            break;
+        case GameState.Playing:
+            this.enabled=true;
+            break;
+        }
+    }
+
+    GameManager.subscribe(this,onGameStateChange);
     
     var effect = new pc.GroundFog(
         this.app.graphicsDevice, 

@@ -51,10 +51,36 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     }
 
         
+    #localMousePos;
 
     onMouseMove(e) {
         super.onMouseMove(e);
         this.mode?.onMouseMove(e);
+        const mp = Mouse.getMousePositionInElement(realmEditor.gui.mapPanel);
+        console.log('mp'+mp);
+        if (mp){
+            this.#localMousePos=mp;
+        }
+    }
+
+    update(dt){   
+        const mp = this.#localMousePos;
+        if (!mp) return;
+        console.log('up:'+mp);
+        let right = realmEditor.camera.entity.right.flat();
+        let up = realmEditor.camera.entity.up.flat();
+        let mov = new pc.Vec3();
+        if (mp[0] < 0.05) mov.add(right.clone().mulScalar(-0.04));
+        if (mp[0]> 0.95) mov.add(right.clone().mulScalar(0.04));
+        if (mp[1] < 0.05) mov.add(up.clone().mulScalar(-0.04));
+        if (mp[1] > 0.95) mov.add(up.clone().mulScalar(0.04));
+
+
+        if (mov.length() >= 0.05) {
+            this.realmEditor.camera.pivot.translate(mov);
+        }
+
+
     }
 
     onMouseUp(e) {
