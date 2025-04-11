@@ -187,7 +187,7 @@ export default class GUI {
             pivot: [0, 0],
             width: 1,
             height: 1,
-            margin: [this.leftMargin, 0, 0, 0],
+            margin: [0, 0, 0, 0],
             opacity:1,
             useInput : true,
         });
@@ -213,30 +213,25 @@ export default class GUI {
 
 
         // Define panels where the builder icons go.
-        var builderPanel = new pc.Entity("builderpanel");
-        builderPanel.addComponent("element", {
+        var navAndBuilderPanel = new pc.Entity("builderpanel");
+        navAndBuilderPanel.addComponent("element", {
             type: "image",
-            anchor: [0, 0, 0, 1],    
-            pivot: [0, 0.5],         
-            width: this.leftMargin,               // 
-            height: 1,               
-            // color: pc.Color.RED,//new pc.Color(.6,.6,.6),
+            anchor: [0, 0, 0.3, 1],    
+            margin:[0,0,0,0],
             textureAsset: assets.textures.ui.builder.orangeFade,
             useInput: true           
         });
 
-        gui.addChild(builderPanel);
-        this.builderPanel=builderPanel;
+        gui.addChild(navAndBuilderPanel);
+        this.navAndBuilderPanel=navAndBuilderPanel;//builderPanel=builderPanel;
 
         // Create the second image (positioned 160px from the left, 80px wide, 100% height)
         this.#builderObjectIconsPanel = new pc.Entity("builerobjectsiconpanl");
         this.#builderObjectIconsPanel.addComponent("element", {
             type: "image",
-            anchor: [0, 0, 1, 1],    // Stretch vertically, anchor to left side
+            anchor: [0.34, 0, 1, 1],    // Stretch vertically, anchor to left side
             pivot: [0, 0.5],         
-            width: 80,               // Fixed width of 80 pixels
-            height: 1,               
-            margin: [82, 0, 0, 0],  // Offset from the left by 160px (80px + 80px gap)
+            margin: [0, 0, 0, 0],  // Offset from the left by 160px (80px + 80px gap)
             color: pc.Color.WHITE,
             opacity:1,
             useInput: true           
@@ -246,10 +241,9 @@ export default class GUI {
         var logoPanel = new pc.Entity("logopanel");
         logoPanel.addComponent("element", {
             type: "image",
-            anchor: [0, 0, 0, 1],    
-            pivot: [0, 0.5],         
-            width: this.#logoPanelWidth,               
-            height: 1,               
+            anchor: [0, 0, 0.12, 1],    
+            //width: this.#logoPanelWidth,               
+            // height: 1,               
             textureAsset: assets.textures.ui.builder.orangeFade,
             useInput: true           
         });
@@ -261,7 +255,6 @@ export default class GUI {
             pivot: [0, 0.5],         
             width: 2,
             height: 1,               
-            margin: [80, 0, 0, 0],  // doesn't seem to matter lol
             color: new pc.Color(0.1,0.1,0.1),
         });
 
@@ -272,16 +265,16 @@ export default class GUI {
             pivot: [0, 0.5],         
             width: 2,               // 
             height: 1,               
-            margin: [this.#logoPanelWidth + 2, 0, 0, 0],  // 
+            margin: [0,0,0,0],//this.#logoPanelWidth + 2, 0, 0, 0],  // 
             color: new pc.Color(0.1,0.1,0.1),
         });
 
 
         // Add logo panel, tray, and border images
-        builderPanel.addChild(logoPanel);
-        builderPanel.addChild(border1);
-        builderPanel.addChild(this.#builderObjectIconsPanel);
-        builderPanel.addChild(border2);
+        navAndBuilderPanel.addChild(logoPanel);
+        navAndBuilderPanel.addChild(border1);
+        navAndBuilderPanel.addChild(this.#builderObjectIconsPanel);
+        navAndBuilderPanel.addChild(border2);
         //        gui.addChild(builderItemsPanel);
 
 

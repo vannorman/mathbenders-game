@@ -64,7 +64,7 @@ export default class BuilderPanel {
         const builderObjectLayout = new pc.Entity(name);
         builderObjectLayout.addComponent("element", {
             type: "image",
-            anchor: [0.025,0.9,1,0.1],
+            anchor: [0,0,1,1],//0.025,0.9,1,0.1],
             pivot: [0.5, 0.5],       
             margin: [0, 0, 0, 0],
         });

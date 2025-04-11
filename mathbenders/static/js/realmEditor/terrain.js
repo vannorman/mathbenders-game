@@ -10,13 +10,14 @@ export default class Terrain {
         let data = {
             name : "New Terrain", 
             heightTruncateInterval : Math.random()*.1, // 0 : smooth, 1 : blocky
-            textureOffset : Math.round((Math.random()-0.5)*32),
+            textureOffset : 0,
             heightScale : Math.random()*0.5+0.5, // how tall hills
             seed : Math.random(),  
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
             sampleResolution : Math.random()/100, // higher values : more coarse terrain
             size : 128 + Math.round(Math.random()*128),
             waterLevel : 1,
+            resolution:.09 + Math.random()*.05,
             // Overlay a second terrain
             resolution2 : 0,
             heightScale2 : 0,

@@ -300,11 +300,12 @@ const UI = {
              textA.addComponent('element', {
                 type: 'text',
                 text: text,
-                anchor:[0,0,0,0],
+                anchor:[0.5,0.5,0.5,0.5],
                 pivot:[0.5,0.5],
+                margin:[0,0,0,0],
                 fontAsset: assets.fonts.montserrat, // Replace with your font asset id
                 fontSize : 12,
-                color:pc.Color.WHITE,
+                color:pc.Color.BLACK,
             });
             ent.addChild(textA); 
         }
@@ -335,7 +336,7 @@ const UI = {
                 type: pc.ELEMENTTYPE_IMAGE,
                 color: new pc.Color(1, 1, 1),
                 opacity: 1,
-                margin: new pc.Vec4(0, 0, 0, 0),
+                margin: [0,0,0,0],//new pc.Vec4(0, 0, 0, 0),
                 rect: new pc.Vec4(0, 0, 1, 1),
                 mask: false,
                 useInput: true
@@ -455,7 +456,7 @@ const UI = {
         viewport.addComponent('element', {
             anchor: new pc.Vec4(0, 0, 1, 1),
             color: new pc.Color(0.2, 0.2, 0.2),
-            margin: new pc.Vec4(0, 20, 20, 0),
+            margin: [0,0,0,0],//new pc.Vec4(0, 20, 20, 0),
             mask: true,
             opacity: 1,
             pivot: new pc.Vec2(0, 1),

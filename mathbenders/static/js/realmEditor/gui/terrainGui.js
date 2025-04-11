@@ -25,12 +25,11 @@ export default class TerrainGui {
         this.screen = new pc.Entity("Terrain screen");
         this.screen.addComponent('element',{
             type:'image',
-            anchor:[0.5,0.5,0.5,0.5],
+            anchor:[0,0,1,1],
             pivot:[0.5,0.5],
-            height:Constants.Resolution.height,
-            width:this.width,
-            opacity:0.5,
-            color:pc.Color.GREEN,
+            margin:[0,0,0,0],
+            opacity:0.2,
+            color:pc.Color.WHITE,
         }); 
 
                 //const realmData = realmEditor.RealmData; 
@@ -162,6 +161,7 @@ export default class TerrainGui {
             parentEl:tabGroup,
             width:80,height:60,
             colorOn:pc.Color.GREEN,
+            text:"Globals",
             colorOff:pc.Color.BLUE,
             anchor:[0.5,0.5,0.5,0.5],
             pivot:[0.5,0],
@@ -196,6 +196,7 @@ export default class TerrainGui {
         const seconds = uiGroup("Seconds");
         const toggleSeconds = UI.SetUpItemButton({
             parentEl:tabGroup,
+            text:"Panel2",
             width:80,height:60,
             colorOn:pc.Color.GREEN,
             colorOff:new pc.Color(0,0.8,0),
@@ -206,6 +207,7 @@ export default class TerrainGui {
                 console.log('seconds on/off');},
             cursor:'pointer',
         });
+        this.toggleSeconds=toggleSeconds;
         tabGroup.addChild(toggleSeconds);
         this.screen.addChild(seconds);
 
