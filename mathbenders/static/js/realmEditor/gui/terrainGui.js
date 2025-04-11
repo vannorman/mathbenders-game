@@ -116,12 +116,10 @@ export default class TerrainGui {
             const group = new pc.Entity("global group");
             group.addComponent('element',{
                   type:'image',
-                anchor:[0.5,0.5,0.5,0.5],
-                pivot:[0.5,0.5],
-                height:Constants.Resolution.height,
-                width:$this.width,
+                anchor:[0,0,1,1],
                 opacity:0.5,
-                color:pc.Color.GREEN,
+                margin:[0,0,0,0],
+                color:pc.Color.BLUE,
             });
             group.addComponent('layoutgroup',{
                orientation: pc.ORIENTATION_VERTICAL,
@@ -164,7 +162,7 @@ export default class TerrainGui {
             text:"Globals",
             colorOff:pc.Color.BLUE,
             anchor:[0.5,0.5,0.5,0.5],
-            pivot:[0.5,0],
+            pivot:[0.5,1],
             mouseDown:function(){realmEditor.gui.terrain.seconds.enabled=false;realmEditor.gui.terrain.globals.enabled=true;console.log('globals on/off');},
             cursor:'pointer',
         });
@@ -174,6 +172,7 @@ export default class TerrainGui {
 
         tabGroup.addChild(toggleGlobals);
        this.screen.addChild(globals);
+       this.globals=globals;
 
         this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:512,minStep:10});
         this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});

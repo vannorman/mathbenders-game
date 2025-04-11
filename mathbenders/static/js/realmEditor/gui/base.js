@@ -409,7 +409,7 @@ export default class GUI {
         });
 
         // Set up terrain panel
-        this.editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain"});
+        this.editTerrainPanel = new BuilderPanel({ gui:this,  name:"Terrain",skipLayout:true});
         this.terrain = new TerrainGui({guiBase:this});
         this.editTerrainPanel.panel.addChild(this.terrain.screen);
         this.#builderPanels.push(this.editTerrainPanel);
@@ -592,10 +592,9 @@ export default class GUI {
         const realmInfoScreen = new pc.Entity();
         realmInfoScreen.addComponent('element',{
             type:'image',
-            anchor:[0.5,0.5,0.5,0.5],
-            pivot:[0.5,1],
-            height:330,
-            width:150,
+            anchor:[0,0,1,1],
+            pivot:[0.5,.5],
+            margin:[0,0,0,0],
             opacity:0.5,
             color:pc.Color.BLUE,
         }); 

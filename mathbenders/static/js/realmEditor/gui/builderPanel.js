@@ -9,12 +9,13 @@ export default class BuilderPanel {
             navButton = null,
             logoPanelWidth = 80,
             realmEditor,
-            gui
+            gui,
+            skipLayout=false,
         } = args;
 
         this.name = name;
         this.gui = gui; // Needed for first "select()" call, called in base.js line 300, since this is all kicked off by the constructor of realmeditor, so a global realmeditor has not resolved yet.. awkward 
-        panel = this.CreateBuilderPanel(name);
+        panel = this.CreateBuilderPanel(name,skipLayout);
         items.forEach(item => {
             const itemIcon = this.CreateBuilderObjectIcon({ItemTemplate:item.ItemTemplate});
             panel.addChild(itemIcon);
@@ -60,7 +61,7 @@ export default class BuilderPanel {
 
     }
 
-    CreateBuilderPanel(name){
+    CreateBuilderPanel(name, skipLayout=false){
         const builderObjectLayout = new pc.Entity(name);
         builderObjectLayout.addComponent("element", {
             type: "image",
@@ -68,7 +69,7 @@ export default class BuilderPanel {
             pivot: [0.5, 0.5],       
             margin: [0, 0, 0, 0],
         });
-        builderObjectLayout.addComponent("layoutgroup", {
+        if (!skipLayout) builderObjectLayout.addComponent("layoutgroup", {
             orientation: pc.ORIENTATION_HORIZONTAL,
             spacing: new pc.Vec2(10, 10),
             // fit_both for width and height, making all child elements take the entire space
