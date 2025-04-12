@@ -112,32 +112,46 @@ class PlayerCamera{
 
     }
 }
-// Player camera
-    
-class RealmBuilderCamera {
-    constructor(args={}){
-/*        const skyCam = new pc.Entity("SkyCamera");
-        skyCam.addComponent("camera", {
-            layers: [pc.LAYERID_SKYBOX, pc.LAYERID_DEPTH,  pc.LAYERID_WORLD,  ],
-            projection:0,
-//            orthoHeight:20,
-            priority:3,
-            clearColorBuffer:false,
-            clearDepthBuffer:true,
-            viewport:[0.5,0.5,1,1],
-            farClip:15000,
-            aspectRatio:Constants.Resolution.aspectRatio,
-            aspectRatioMode:1
+
+class OutlineCamera {
+    constructor(){
+        // create texture and render target for rendering into, including depth buffer
+        function createRenderTarget() {
+            const texture = new pc.Texture(pc.app.graphicsDevice, {
+                name: 'OutlineObjects',
+                width: pc.app.graphicsDevice.width,
+                height: pc.app.graphicsDevice.height,
+                format: pc.PIXELFORMAT_RGBA8,
+                mipmaps: false,
+                minFilter: pc.FILTER_LINEAR,
+                magFilter: pc.FILTER_LINEAR
+            });
+            return new pc.RenderTarget({
+                colorBuffer: texture,
+                depth: true
+            });
+        }
+
+        let renderTarget = createRenderTarget();
+
+        // create a layer for rendering to texture, and add it to the layers
+        const outlineLayer = new pc.Layer({ name: 'OutlineLayer' });
+        pc.app.scene.layers.push(outlineLayer);
+
+        // Create outline camera, which renders entities in outline layer into the render target
+        const outlineCamera = new pc.Entity('Outline Camera');
+        outlineCamera.addComponent('camera', {
+            clearColor: new pc.Color(0.0, 0.0, 0.0, 0.0),
+            layers: [outlineLayer.id],
+            renderTarget: renderTarget,
+
+            // set the priority of outlineCamera to lower number than the priority of the main camera (which is at default 0)
+            // to make it rendered first each frame
+            priority: -1
         });
-        Camera.sky = skyCam.camera;
-        Camera.sky.entity.addComponent('script');
-        Camera.sky.enabled = false;
-        pc.app.root.addChild(Camera.sky.entity); */
+        pc.app.root.addChild(outlineCamera);
+        Camera.outline = outlineCamera.camera;
 
     }
-
-
 }
-
-
 

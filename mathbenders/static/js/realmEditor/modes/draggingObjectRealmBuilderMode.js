@@ -64,16 +64,16 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     update(dt){   
         const mp = this.#localMousePos;
-        if (!mp) return;
+
+        if (!mp ) return;
         let right = realmEditor.camera.entity.right.flat();
         let up = realmEditor.camera.entity.up.flat();
         let mov = new pc.Vec3();
-        if (mp[0] < 0.05) mov.add(right.clone().mulScalar(-0.04));
-        if (mp[0]> 0.95) mov.add(right.clone().mulScalar(0.04));
-        if (mp[1] < 0.05) mov.add(up.clone().mulScalar(-0.04));
-        if (mp[1] > 0.95) mov.add(up.clone().mulScalar(0.04));
-
-
+        let speed=2.4;
+        if (mp[0] < 0.05) mov.add(right.clone().mulScalar(-speed));
+        else if (mp[0] > 0.95) mov.add(right.clone().mulScalar(speed));
+        if (mp[1] < 0.05) mov.add(up.clone().mulScalar(-speed));
+        else if (mp[1] > 0.95) mov.add(up.clone().mulScalar(speed));
         if (mov.length() >= 0.05) {
             this.realmEditor.camera.pivot.translate(mov);
         }

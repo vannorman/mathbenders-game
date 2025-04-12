@@ -73,8 +73,7 @@ var Game = {
         // let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         this.uiCam = uiCam;
-        let skyCam = new RealmBuilderCamera();
-
+        let outlineCam = new OutlineCamera();
 
     },
 

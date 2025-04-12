@@ -5,7 +5,8 @@ import {
     LoadScreenRealmBuilderMode,
     MapScreenRealmBuilderMode,
     NormalRealmBuilderMode,
-    OrbitRealmBuilderMode
+    OrbitRealmBuilderMode,
+    SelectRealmBuilderMode,
 } from "./modes/index.js";
 
 import {
@@ -51,6 +52,7 @@ class RealmEditor {
             ['loadScreen', new LoadScreenRealmBuilderMode({realmEditor: this})],
             ['mapScreen', new MapScreenRealmBuilderMode({realmEditor: this})],
             ['normal', new NormalRealmBuilderMode({realmEditor: this})],
+            ['select', new SelectRealmBuilderMode({realmEditor: this})],
             ['orbit', new OrbitRealmBuilderMode({realmEditor: this})]
         ]);
 

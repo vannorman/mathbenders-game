@@ -5,6 +5,7 @@ import MapScreenRealmBuilderMode from "./mapScreenRealmBuilderMode.js";
 import NormalRealmBuilderMode from "./normalRealmBuilderMode.js";
 import OrbitRealmBuilderMode from "./orbitRealmBuilderMode.js";
 import HandPanRealmBuilderMode from "./handPanRealmBuilderMode.js";
+import SelectRealmBuilderMode from "./selectRealmBuilderMode.js";
 
 // Using a Map data structure to keep track of modes, and access them via their
 // associate map key string. Because these modes 'act' on the RealmBuilder via
@@ -22,5 +23,6 @@ export {
     LoadScreenRealmBuilderMode,
     MapScreenRealmBuilderMode,
     NormalRealmBuilderMode,
-    OrbitRealmBuilderMode
+    OrbitRealmBuilderMode,
+    SelectRealmBuilderMode
 };

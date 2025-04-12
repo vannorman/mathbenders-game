@@ -167,6 +167,8 @@ export default class GUI {
         });
         pc.app.root.addChild(this.#screen);
 
+
+
         // Set up the cursor.
         this.#customCursorIcon = new pc.Entity("customcursoce");
         this.#customCursorIcon.addComponent(
@@ -183,7 +185,7 @@ export default class GUI {
         this.mapPanel = new pc.Entity("mappanel");
         this.mapPanel.addComponent("element", {
             type: "image",
-            anchor: [0, 0, 1, 1],   
+            anchor: [0.3, 0, 1, 1],   
             pivot: [0, 0],
             width: 1,
             height: 1,
@@ -192,6 +194,22 @@ export default class GUI {
             useInput : true,
         });
         this.mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()}) // i don't love binding this here, awkward.
+
+        this.dragBox = new pc.Entity();
+        this.dragBox.addComponent('element',{
+            type:'image',
+            anchor: [0.2, 0.2, 0.7, 0.7],
+            pivot: [0.5, 0.5],
+            margin:[0,0,0,0],
+            color:pc.Color.WHITE,
+            opacity:0.3,
+
+        })
+        this.mapPanel.addChild(this.dragBox);
+        this.dragBox.enabled=false;
+
+
+
 
         // and worse,
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
@@ -261,14 +279,12 @@ export default class GUI {
         var border2 = new pc.Entity("border1");
         border2.addComponent("element", {
             type: "image",
-            anchor: [1, 0, 1, 1],    
-            pivot: [0, 0.5],         
-            width: 2,               // 
-            height: 1,               
+            anchor: [0.995, 0, 1, 1],    
+            pivot: [0.5, 0.5],         
             margin: [0,0,0,0],//this.#logoPanelWidth + 2, 0, 0, 0],  // 
-            color: new pc.Color(0.1,0.1,0.1),
+            color: pc.Color.BLACK,
         });
-
+        this.border2=border2;
 
         // Add logo panel, tray, and border images
         navAndBuilderPanel.addChild(logoPanel);
@@ -336,7 +352,7 @@ export default class GUI {
             parentEl:this.mapPanel,
             width:30,height:30,textureAsset:assets.textures.ui.icons.hand,
             anchor:[.05,.95,.05,.95],
-            mouseDown:function(){ console.log("HAND PAN"); },
+            mouseDown:function(){ realmEditor.toggle('normal'); console.log("HAND PAN"); },
             cursor:'pointer',
         });
 
@@ -345,7 +361,7 @@ export default class GUI {
             parentEl:this.mapPanel,
             width:30,height:30,textureAsset:assets.textures.ui.builder.select,
             anchor:[.1,.95,.1,.95],
-            mouseDown:function(){ console.log("SLECT "); },
+            mouseDown:function(){ realmEditor.toggle('select'); console.log("SELECT "); },
             cursor:'pointer',
         });
 

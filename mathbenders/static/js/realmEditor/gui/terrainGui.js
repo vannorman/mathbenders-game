@@ -137,7 +137,7 @@ export default class TerrainGui {
         tabGroup.addComponent('element',{
                   type:'image',
                 anchor:[0.5,1,0.5,1],
-                pivot:[0.5,0.5],
+                pivot:[0.5,1],
                 height:80,
                 width:160,
                 opacity:0.8,
@@ -157,12 +157,10 @@ export default class TerrainGui {
 
         const toggleGlobals = UI.SetUpItemButton({
             parentEl:tabGroup,
-            width:80,height:60,
+            width:80,height:30,
             colorOn:pc.Color.GREEN,
             text:"Globals",
             colorOff:pc.Color.BLUE,
-            anchor:[0.5,0.5,0.5,0.5],
-            pivot:[0.5,1],
             mouseDown:function(){realmEditor.gui.terrain.seconds.enabled=false;realmEditor.gui.terrain.globals.enabled=true;console.log('globals on/off');},
             cursor:'pointer',
         });

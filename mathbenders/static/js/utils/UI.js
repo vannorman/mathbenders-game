@@ -301,7 +301,7 @@ const UI = {
                 type: 'text',
                 text: text,
                 anchor:[0.5,0.5,0.5,0.5],
-                pivot:[0.5,1],
+                pivot:[0.5,0.5],
                 margin:[0,0,0,0],
                 fontAsset: assets.fonts.montserrat, // Replace with your font asset id
                 fontSize : 12,
