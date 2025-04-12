@@ -252,6 +252,8 @@ class RealmEditor {
         if (this.#mode) this.#mode.onExit();
         this.#mode = this.#modes.get(mode);
         this.#mode.onEnter();
+
+        this.gui.onModeChanged(mode);
     }
 
     onMouseUp(e) {
@@ -281,6 +283,11 @@ class RealmEditor {
         // console.log("update new");
         if (this.mode ) this.mode.update(dt);
         this.camera.update(dt);
+        if (pc.app.keyboard.wasPressed(pc.KEY_H) || pc.app.keyboard.wasPressed(pc.KEY_Q)){
+            this.toggle('normal');
+        } else if (pc.app.keyboard.wasPressed(pc.KEY_S) || pc.app.keyboard.wasPressed(pc.KEY_W)){
+            this.toggle('select');
+        }
     }
 
 
@@ -372,9 +379,6 @@ class RealmEditor {
         return level;    
     }
 
-    SetEditableItemMode() {
-        // Eytan - how pass this to the mode? Should only be possible within that mode?
-    }
 
     BeginDraggingNewObject(options={}){
 

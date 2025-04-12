@@ -279,6 +279,7 @@ const UI = {
             colorOff,
             text="",
             hoverValidationFn=null,
+            useSelectedState=false,
         }=options;
         const ent = new pc.Entity("btn");
         ent.addComponent('element',{ 
@@ -310,8 +311,8 @@ const UI = {
             ent.addChild(textA); 
         }
         if (parentEl) parentEl.addChild(ent);
-        if (!colorOff) UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn});
-        else UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn,colorOff:colorOff,colorOn:colorOn});
+        if (!colorOff) UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn,useSelectedState:useSelectedState});
+        else UI.HoverColor({element:ent.element,cursor:cursor,validationFn:hoverValidationFn,colorOff:colorOff,colorOn:colorOn,useSelectedState:useSelectedState});
         if (mouseDown) ent.element.on('mousedown',function(){ mouseDown(ent); });
         return ent;
     },
@@ -656,4 +657,70 @@ const UI = {
     }
 
 }
+
+class OptionButtonGroupUI {
+    constructor({ parent, options }) {
+        this.buttons = [];
+
+        options.forEach((opt, index) => {
+            const buttonEntity = new pc.Entity(`OptionButton_${opt.name}`);
+            const { anchor=[0,0,1,1], w=30, h=30 } = opt;
+            buttonEntity.addComponent("element", {
+                type: "image",
+                anchor: anchor,
+                pivot: [0.5, 0.5],
+                width: w,
+                height: h,
+                textureAsset: opt.textureAsset,
+                color: opt.defaultColor.clone(),
+                useInput:true,
+
+            });
+
+            buttonEntity.isSelected = false;
+
+            // Position buttons horizontally
+            // buttonEntity.setLocalPosition(index * 70, -70, 0);
+
+            // Events
+            buttonEntity.element.on("mouseenter", () => {
+                if (!buttonEntity.isSelected) {
+                    buttonEntity.element.color = opt.hoverColor.clone();
+                }
+            });
+
+            buttonEntity.element.on("mouseleave", () => {
+                if (!buttonEntity.isSelected) {
+                    buttonEntity.element.color = opt.defaultColor.clone();
+                }
+            });
+
+            buttonEntity.element.on("click", () => {
+                opt.onClick?.();
+                buttonEntity.element.fire("select");
+
+            });
+
+            buttonEntity.element.on("select", () => {
+                this.buttons.forEach(btn => {
+                    btn.isSelected = false;
+                    btn.element.color = options.find(o => o.name === btn.name).defaultColor.clone();
+                });
+
+                buttonEntity.isSelected = true;
+                buttonEntity.element.color = opt.selectedColor.clone();
+
+ 
+            });
+
+            buttonEntity.name = opt.name;
+
+            parent.addChild(buttonEntity);
+            this.buttons.push(buttonEntity);
+            return this;
+        });
+
+    }
+}
+
 

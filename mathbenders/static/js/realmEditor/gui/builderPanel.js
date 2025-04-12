@@ -154,8 +154,6 @@ export default class BuilderPanel {
             alignment:[0.5,0.5],
             anchor:[0.5,0.5,0.5,0.5],
         });
-//        setTimeout(function(){textA.element.pivot=[0.5,0.5]},3000);
-        Game.t=textA.element;
         UI.HoverColor({element:navA.element,opacityOn:1,opacityOff:0,cursor:'pointer',useSelectedState:true});
         navA.element.on('mouseenter',function(){if (!navA.element.isSelected) textA.element.color=pc.Color.BLACK;})
         navA.element.on('mouseleave',function(){if (!navA.element.isSelected) textA.element.color=pc.Color.WHITE;})

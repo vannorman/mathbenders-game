@@ -13,7 +13,6 @@ pc.CameraComponent.prototype.screenPointToRay = function(x,y){
     let to = new pc.Vec3();
     this.screenToWorld(x,pc.app.graphicsDevice.height - y,4,from);
     this.screenToWorld(x,pc.app.graphicsDevice.height - y,100000,to);
-    let dir = to.clone().sub(from).normalize();
     let raycastResult = pc.app.systems.rigidbody.raycastFirst(from,to);
     return raycastResult;
 }

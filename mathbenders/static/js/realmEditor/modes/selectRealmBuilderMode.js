@@ -35,8 +35,17 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         const getWorldPoint = (screenPos) => {
             const raycastResult = realmEditor.camera.cameraComponent.screenPointToRay(screenPos.x, screenPos.y);
              //Utils3.debugSphere({position:raycastResult.point})
-
-            return raycastResult.point;
+            if (raycastResult){
+                // Utils3.debugSphere({position:raycastResult.point,color:pc.Color.BLUE,timeout:30000})
+                return raycastResult.point;
+            } else {
+                const worldDir = realmEditor.camera.cameraComponent.screenPointToWorldDir(screenPos.x, screenPos.y);
+                let approxDist = realmEditor.currentLevel.terrain.entity.getPosition().clone().sub(realmEditor.camera.entity.getPosition()).length();
+                let distAdjust = 1 + Mouse.y / pc.app.graphicsDevice.height; // from 0.5 to 1.5
+                const pt = realmEditor.camera.entity.getPosition().clone().add(worldDir.normalize().mulScalar(approxDist*distAdjust));
+                // Utils3.debugSphere({position:pt,color:pc.Color.RED,timeout:10000})
+                return pt;
+            }
         };
 
         const worldStart = getWorldPoint(this.screenStart);
@@ -87,6 +96,7 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
     }
   
     updateBoxSize(){
+        if (!realmEditor.gui.isMouseOverMap){ return; }
         let anchor = [this.#startDragPos.x,this.#startDragPos.y,this.#mp[0],this.#mp[1]];
 
         // Flip x start and end if they are inverted

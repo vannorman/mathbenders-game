@@ -21,7 +21,7 @@ SinePopIn.prototype.update = function(dt){
     //console.log("t:"+t+", amp:"+amp.toFixed(2)+", thispop:"+this.popAmount+", scale;"+scale.toFixed(2));
     this.entity.setLocalScale(new pc.Vec3(scale,scale,scale)); //pc.Vec3.ONE.mulScalar(scale));
     if (t >= this.popTime * 1000){
-       this.entity.setLocalScale(pc.Vec3.ONE.mulScalar(this.startScaleX));
+       this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(this.startScaleX));
        this.entity.script.destroy('sinePop');
     }
 };

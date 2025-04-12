@@ -66,8 +66,8 @@ export default class GUI {
         const is = Mouse.isMouseOverEntity(this.mapPanel) 
 
         && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
-        && !Mouse.isMouseOverEntity(this.#setHandPanModeBtn)
-        && !Mouse.isMouseOverEntity(this.#setSelectPanModeBtn)
+//        && !Mouse.isMouseOverEntity(this.#setHandPanModeBtn)
+//        && !Mouse.isMouseOverEntity(this.#setSelectPanModeBtn)
 //        && !Mouse.isMouseOverEntity(this.#saveBtn)
 //        && !Mouse.isMouseOverEntity(this.#loadBtn)
 //
@@ -341,11 +341,46 @@ export default class GUI {
             cursor:'pointer',
         });
 
+
+
+        this.modeSelect = new OptionButtonGroupUI({
+            parent: this.mapPanel,
+            options: [
+                {
+                    name: "A",
+                    textureAsset:assets.textures.ui.icons.hand,
+                    defaultColor: new pc.Color(1, 1, 1),
+                    hoverColor: new pc.Color(1, 1, 0),
+                    anchor:[.05,.95,.05,.95],
+                    selectedColor: new pc.Color(0, 1, 0),
+                    onClick: () => {
+                        console.log("button A was clicked")
+                        realmEditor.toggle('normal');
+                    }
+                },
+                {
+                    name: "B",
+                    textureAsset:assets.textures.ui.builder.select,
+                    anchor:[.1,.95,.1,.95],
+                    defaultColor: new pc.Color(1, 1, 1),
+                    hoverColor: new pc.Color(1, 1, 0),
+                    selectedColor: new pc.Color(0, 1, 0),
+                    onClick: () => {
+                        realmEditor.toggle('select');
+                        console.log("button B was clicked")
+                    }
+                }
+            ]
+        });
+
+/*
         // Set up set of buttons to select "Pan, Select".    
         this.#setHandPanModeBtn = UI.SetUpItemButton({
             parentEl:this.mapPanel,
             width:30,height:30,textureAsset:assets.textures.ui.icons.hand,
+            useSelectedState:true,
             anchor:[.05,.95,.05,.95],
+            colorOn:pc.Color.YELLOW,
             mouseDown:function(){ realmEditor.toggle('normal'); console.log("HAND PAN"); },
             cursor:'pointer',
         });
@@ -353,13 +388,16 @@ export default class GUI {
         // Set up set of buttons to select "Pan, Select".    
         this.#setSelectPanModeBtn = UI.SetUpItemButton({
             parentEl:this.mapPanel,
-            width:30,height:30,textureAsset:assets.textures.ui.builder.select,
+            colorOn:pc.Color.YELLOW,
+            useSelectedState:true,
+            width:30,height:30,
+            textureAsset:assets.textures.ui.builder.select,
             anchor:[.1,.95,.1,.95],
             mouseDown:function(){ realmEditor.toggle('select'); console.log("SELECT "); },
             cursor:'pointer',
         });
 
-        
+  */      
         this.#builderPanels = []
         const realmInfoPanel = new BuilderPanel({ gui:this,  name:"Realm Info"});
         this.realmInfoScreen = this.CreateRealmInfoScreen();
@@ -659,6 +697,17 @@ export default class GUI {
         this.#customCursorIcon.element.anchor = new pc.Vec4(x, y, x, y);
 
 
+    }
+    
+    onModeChanged(mode){
+        switch(mode){
+            case 'normal': 
+                this.modeSelect.buttons[0].element.fire('select'); // Auto select first one
+                break;
+            case 'select': 
+                this.modeSelect.buttons[1].element.fire('select'); // Auto select first one
+                break;
+        } 
     }
 
 }
