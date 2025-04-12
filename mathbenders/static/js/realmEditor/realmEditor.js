@@ -217,8 +217,10 @@ class RealmEditor {
         this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
         // To re-load the existing level ..
         // console.log("%c ENABLE","color:#77f;font-weight:bold;");
+        if (this.#RealmData.Levels?.length > 0 && this.#RealmData.Levels[0].templateInstances.length > 0){
+            console.log(this.#RealmData.Levels[0].templateInstances[0].uuid);
+         }
         const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
-        // console.log(JSON.parse(realmData));
 
         this.#RealmData.Clear(); // delete everything
         pc.app.root.getComponentsInChildren('numberInfo').forEach(x=>{
@@ -294,6 +296,7 @@ class RealmEditor {
     
     LoadJson(realmJson){
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
+        try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
@@ -310,9 +313,11 @@ class RealmEditor {
             console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
                 try {
+                    console.log("x uuid:"+x.uuid);
                     let obj = this.InstantiateTemplate({
                         level:thisLevel,
                         ItemTemplate:templateNameMap[x.templateName],
+                        uuid:x.uuid,
                         properties:x.properties,
                         position:x.position.add(thisLevel.terrain.centroid),
                         rotation:x.rotation,
@@ -428,9 +433,10 @@ class RealmEditor {
             ItemTemplate, 
             position=pc.Vec3.ZERO, 
             rotation=pc.Vec3.ZERO, 
+            uuid=crypto.randomUUID(),
             properties={},
             } = args;
-            const instance = new ItemTemplate({position:position,rotation:rotation,properties:properties});
+            const instance = new ItemTemplate({uuid:uuid,position:position,rotation:rotation,properties:properties});
             const entity = instance.entity;
             entity.tags.add(Constants.Tags.BuilderItem);
 

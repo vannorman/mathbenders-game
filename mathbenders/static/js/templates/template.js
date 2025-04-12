@@ -6,6 +6,7 @@ export default class Template {
     static isThrowable = false;
     static isStaticCollider = false;
     colliders = new Map();
+    uuid;
 
     entity; // stores scale, position, and rotation;
 
@@ -14,14 +15,20 @@ export default class Template {
     constructor(args={}) {
         // NOTE: "properties" arg will contain the specific settings per template (e.g. Fraction) 
         // and must match editablePropertyMap as defined per template
-        const {
+        var {
             position=pc.Vec3.ZERO,
             rotation=pc.Vec3.ZERO,
+            uuid=null,
             properties={},
             rigidbodyType='none',
             rigidbodyVelocity=pc.Vec3.ZERO,
         }=args;
         this.entity = new pc.Entity(this.constructor.name);
+        if (uuid==null){
+            uuid=crypto.randomUUID();
+            console.log("new null, gen new uuid:"+uuid);
+        }
+        this.uuid=uuid;
 
         const $this=this;
         pc.app.root.addChild(this.entity);
@@ -111,8 +118,10 @@ export default class Template {
 
     getInstanceData(args={}){
         const {terrainCentroidOffset = pc.Vec3.ZERO} = args;
+        console.log("getinstdata:"+this.uuid);
         return {
             templateName : this.constructor.name,
+            uuid : this.uuid,
             position : this.entity.getPosition().sub(terrainCentroidOffset).trunc(),
             rotation : this.entity.getEulerAngles().trunc(),
             properties : this.properties,
