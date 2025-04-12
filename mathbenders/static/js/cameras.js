@@ -146,7 +146,9 @@ class OutlineCamera {
             layers: [outlineLayer.id],
             renderTarget: renderTarget,
             viewport:[0.5,0.5,1,1],
-
+            aspectRatio:Camera.skyCamAspectRatio,
+            aspectRatioMode:1,
+ 
             // set the priority of outlineCamera to lower number than the priority of the main camera (which is at default 0)
             // to make it rendered first each frame
             priority: -1
@@ -155,7 +157,7 @@ class OutlineCamera {
         outlineCamera.setLocalPosition(0,0,0);
         outlineCamera.setLocalEulerAngles(0,0,0);
 
-        const outline = new OutlineEffect(pc.app.graphicsDevice, 8, pc.Color.YELLOW);
+        const outline = new OutlineEffect(pc.app.graphicsDevice, 4, pc.Color.YELLOW);
         outline.color = new pc.Color(0, 0.5, 1, 1);
         outline.texture = renderTarget.colorBuffer;
         realmEditor.camera.cameraComponent.postEffects.addEffect(outline);
@@ -165,3 +167,11 @@ class OutlineCamera {
     }
 }
 
+Object.defineProperty(Camera, "skyCamAspectRatio", {
+    get: function skyCamAspectRatio() {
+        const leftMargin = 80;
+        const logoPanelWidth = 80; 
+        return (pc.app.graphicsDevice.width-leftMargin-logoPanelWidth)/pc.app.graphicsDevice.height;
+        // code
+    }
+});

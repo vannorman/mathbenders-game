@@ -5,7 +5,7 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
     #mouseHeld=false;
     #startDragPos=new pc.Vec2();
     screenStart;
-
+    selectedEntities=[];
     #screenEnd;
     get #mp(){
         return Mouse.getMousePositionInElement(realmEditor.gui.mapPanel);
@@ -14,6 +14,14 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
     onEnter(){
     }
 
+    clearHighlights(){
+        this.selectedEntities.forEach(entity=>{
+            entity.getComponentsInChildren('render').forEach(x=>{
+                x.layers = [0];
+            });
+
+        });
+    }
     onMouseMove(e) {
         super.onMouseMove(e);
         if (!this.#mouseHeld) return;
@@ -45,13 +53,11 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         const maxZ = Math.max(worldStart.z, worldEnd.z);
 
         // Step 4: Check each entity
-        const selectedEntities = [];
+        this.clearHighlights();
+        this.selectedEntities = [];
 
         for (const item of realmEditor.currentLevel.templateInstances) {
             const entity = item.entity;
-            entity.getComponentsInChildren('render').forEach(x=>{
-                x.layers = [0];
-            });
             const pos = entity.getPosition();
             function flatPos(pos){
                 return new pc.Vec2(pos.x,pos.z);
@@ -62,11 +68,10 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
                 entity.getComponentsInChildren('render').forEach(x=>{
                     x.layers = x.layers.concat(Camera.outline.layers);
                 });
-                selectedEntities.push(entity);
+                this.selectedEntities.push(entity);
             }
         }
 
-        if (selectedEntities.length > 0) console.log("Selected entities:", selectedEntities[0].getComponentsInChildren('render')[0].layers);
     }
 
     onMouseDown(e) {
@@ -103,6 +108,7 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
     }
 
     onMouseUp(e) {
+        this.clearHighlights();
         this.#mouseHeld=false; 
         realmEditor.gui.dragBox.enabled=false; 
         super.onMouseUp(e);

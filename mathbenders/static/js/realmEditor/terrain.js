@@ -26,7 +26,6 @@ export default class Terrain {
        };
        const { realmEditor } = args;
        this.realmEditor=realmEditor;
-       console.log('re?');
        if (args.data){
             Object.keys(args.data).forEach(k => {
                 data[k] = args.data[k];

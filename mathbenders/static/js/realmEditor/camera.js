@@ -55,17 +55,11 @@ export default class EditorCamera {
             clearDepthBuffer:true,
             viewport:[0.5,0.5,1,1],
             farClip:15000,
-            aspectRatio:Constants.Resolution.aspectRatio,
+            aspectRatio:Camera.skyCamAspectRatio,
             aspectRatioMode:1
         });
     }
 
-    get skyCamAspectRatio() { 
-        // Since the screen is more narrow in the "Map" area, we adjust the aspect ratio accordingly 
-        const leftMargin = 80;
-        const logoPanelWidth = 80; 
-        return (pc.app.graphicsDevice.width-leftMargin-logoPanelWidth)/pc.app.graphicsDevice.height;
-    }
 
 
     setUpRenderTexture(){
@@ -93,7 +87,7 @@ export default class EditorCamera {
 
         // Assign the render target to the camera
         this.cameraComponent.renderTarget = renderTarget;
-        this.cameraComponent.aspectRatio = this.skyCamAspectRatio;
+        this.cameraComponent.aspectRatio = Camera.skyCamAspectRatio;
 
         // Set the UI element's texture to the render target texture
         // After rendering, set the UI element's texture
