@@ -1,4 +1,48 @@
 Utils = {
+    isPointInTriangle(A,B,C,P){
+         // using Barycentric technique:
+
+        // A, B, and C are the triangle end points, P is the point under test
+
+        // Compute vectors        
+        v0 = C.clone().sub(A)
+        v1 = B.clone().sub(A)
+        v2 = P.clone().sub(A)
+
+        // Compute dot products
+        dot00 = v0.clone().dot(v0);
+        dot01 = v0.clone().dot(v1);
+        dot02 = v0.clone().dot(v2)
+        dot11 = v1.clone().dot(v1);
+        dot12 = v1.clone().dot(v2);
+
+        // Compute barycentric coordinates
+        invDenom = 1 / (dot00 * dot11 - dot01 * dot01)
+        u = (dot11 * dot02 - dot01 * dot12) * invDenom
+        v = (dot00 * dot12 - dot01 * dot02) * invDenom
+
+        // Check if point is in triangle
+        return (u > 0) && (v > 0) && (u + v < 1)
+    },
+
+    isPointInQuad(pt,quad){
+        // quad: array of 4 points like [{x, y}, {x, y}, {x, y}, {x, y}]
+        
+        function sign(p1, p2, p3) {
+            return (p1.x - p3.x) * (p2.y - p3.y) - 
+                   (p2.x - p3.x) * (p1.y - p3.y);
+        }
+
+
+        const b1 = sign(pt, quad[0], quad[1]) < 0.0;
+        const b2 = sign(pt, quad[1], quad[2]) < 0.0;
+        const b3 = sign(pt, quad[2], quad[3]) < 0.0;
+        const b4 = sign(pt, quad[3], quad[0]) < 0.0;
+
+        // All signs must be the same for the point to be inside
+        return (b1 === b2) && (b2 === b3) && (b3 === b4);
+    },
+
     addMeshCollider(clone,asset,rbType){
         let colEnt = clone.findComponent('render').entity; // assumes only one render per asset
         colEnt.addComponent('collision' ,{type:'mesh',renderAsset:asset.resource.renders[0]}); 

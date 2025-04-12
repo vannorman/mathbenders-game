@@ -36,7 +36,8 @@ var ScriptManager = {
         "/static/js/audio.js", 
         "/static/js/fx.js", 
         "/static/js/castleArchitecture.js",
-        "/static/js/shaders/outline-post-process.js",
+        "/static/js/shaders/outline-post-effect.js", // used in editor to highlight selected items
+        "/static/js/shaders/outline-post-process.js", // used in game to outline everything
 //        "/static/js/shaders/posteffectExample.js",
         "/static/js/shaders/toonOutlineShader.js",
 //        "/static/js/shaders/claudeFogOutlineShader.js",

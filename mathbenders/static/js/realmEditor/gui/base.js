@@ -80,13 +80,7 @@ export default class GUI {
     get worldPointUnderCursor() {
         var worldPointUnderCursor = null;
         // Bit of annoying math again
-        const w = pc.app.graphicsDevice.width;
-        const leftMargin = this.realmEditor.gui.leftMargin * pc.app.graphicsDevice.width / Constants.Resolution.width;
-        let invXmap = (-leftMargin + Mouse.x) * (pc.app.graphicsDevice.width-leftMargin)/pc.app.graphicsDevice.width;
-        let mx = (Mouse.x - leftMargin);
-        let ww = w - leftMargin;
-        let adjust = leftMargin*(ww - mx)/ww;
-        let raycastResult = this.realmEditor.camera.cameraComponent.screenPointToRay(Mouse.x-adjust,Mouse.y);
+        let raycastResult = this.realmEditor.camera.cameraComponent.screenPointToRay(Mouse.xMap,Mouse.y);
         // Whew ok bs math is over
         if (raycastResult) {
             // console.log("hit "+raycastResult.entity.name+", wp:"+raycastResult.point.y.toFixed(2));
@@ -95,7 +89,7 @@ export default class GUI {
         } else {
             let wc = new pc.Vec3()
             this.realmEditor.camera.cameraComponent.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
-            const dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.x-adjust,Mouse.y);
+            const dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.xMap,Mouse.y);
             worldPointUnderCursor = wc.add(dir.mulScalar(this.#lastCameraDistance));
         }
 

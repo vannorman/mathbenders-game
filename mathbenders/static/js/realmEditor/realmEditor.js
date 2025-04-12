@@ -42,6 +42,8 @@ class RealmEditor {
         this.#isEnabled = false;
         this.#realm = null;
         this.camera = new EditorCamera({realmEditor:this});
+        this.outlineCam = new OutlineCamera(this);
+
         this.gui = new GUI({ realmEditor:this });
         this.undoRedo = new UndoRedo({ realmEditor:this });
 

@@ -27,7 +27,7 @@ class UiCamera {
         uiCam.addComponent("camera",{
             layers:[pc.LAYERID_UI],
             projection:1,
-            priority:0,
+            priority:3,
             aspectRatio:Constants.Resolution.aspectRatio,
             gammaCorrection:0,
 
@@ -45,7 +45,7 @@ class PlayerCamera{
         this.entity = new pc.Entity("MainCamera");
         this.self = this.entity.addComponent("camera", {
             layers: [pc.LAYERID_SKYBOX, pc.LAYERID_DEPTH,  pc.LAYERID_WORLD,  pc.LAYERID_UI ],
-            priority:2,
+            priority:4,
             clearColorBuffer:true,
             clearDepthBuffer:true,
 
@@ -114,13 +114,14 @@ class PlayerCamera{
 }
 
 class OutlineCamera {
-    constructor(){
+    constructor(realmEditor){
         // create texture and render target for rendering into, including depth buffer
         function createRenderTarget() {
             const texture = new pc.Texture(pc.app.graphicsDevice, {
                 name: 'OutlineObjects',
-                width: pc.app.graphicsDevice.width,
-                height: pc.app.graphicsDevice.height,
+                width: 512,
+                // pc.app.graphicsDevice.height,
+                height: 512, //pc.app.graphicsDevice.height,
                 format: pc.PIXELFORMAT_RGBA8,
                 mipmaps: false,
                 minFilter: pc.FILTER_LINEAR,
@@ -144,14 +145,23 @@ class OutlineCamera {
             clearColor: new pc.Color(0.0, 0.0, 0.0, 0.0),
             layers: [outlineLayer.id],
             renderTarget: renderTarget,
+            viewport:[0.5,0.5,1,1],
 
             // set the priority of outlineCamera to lower number than the priority of the main camera (which is at default 0)
             // to make it rendered first each frame
             priority: -1
         });
-        pc.app.root.addChild(outlineCamera);
-        Camera.outline = outlineCamera.camera;
+        realmEditor.camera.entity.addChild(outlineCamera);
+        outlineCamera.setLocalPosition(0,0,0);
+        outlineCamera.setLocalEulerAngles(0,0,0);
 
+        const outline = new OutlineEffect(pc.app.graphicsDevice, 8, pc.Color.YELLOW);
+        outline.color = new pc.Color(0, 0.5, 1, 1);
+        outline.texture = renderTarget.colorBuffer;
+        realmEditor.camera.cameraComponent.postEffects.addEffect(outline);
+        // outlineCamera.moveTo(realmEditor.camera.entity.getPosition(),realmEditor.camera.entity.getEulerAngles());
+        Camera.outline = outlineCamera.camera;
+        return this;
     }
 }
 

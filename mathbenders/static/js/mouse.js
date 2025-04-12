@@ -65,6 +65,15 @@ class MouseClass {
         this.UpdateMousePos();
         this.#isPressed = true;
     }
+    get xMap(){
+        const w = pc.app.graphicsDevice.width;
+        const leftMargin = realmEditor.gui.leftMargin * pc.app.graphicsDevice.width / Constants.Resolution.width;
+        let invXmap = (-leftMargin + Mouse.x) * (pc.app.graphicsDevice.width-leftMargin)/pc.app.graphicsDevice.width;
+        let mx = (Mouse.x - leftMargin);
+        let ww = w - leftMargin;
+        let adjust = leftMargin*(ww - mx)/ww;
+        return this.x - adjust; 
+    }
     get x(){ return this.#x; }
     get y(){ return this.#y; }
     onMouseUp(event){

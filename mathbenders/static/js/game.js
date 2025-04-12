@@ -73,7 +73,6 @@ var Game = {
         // let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         this.uiCam = uiCam;
-        let outlineCam = new OutlineCamera();
 
     },
 

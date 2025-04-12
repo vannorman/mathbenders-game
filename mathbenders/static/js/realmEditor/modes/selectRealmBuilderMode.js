@@ -21,17 +21,22 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
 
     
          // Step 1: Get screen positions
-        const screenEnd = new pc.Vec2(Mouse.x,Mouse.y);
+        const screenEnd = new pc.Vec2(Mouse.xMap,Mouse.y);
 
         // Step 2: Convert screen positions to world space (on ground plane, assume y = 0)
         const getWorldPoint = (screenPos) => {
-            console.log(screenPos);
             const raycastResult = realmEditor.camera.cameraComponent.screenPointToRay(screenPos.x, screenPos.y);
+             //Utils3.debugSphere({position:raycastResult.point})
+
             return raycastResult.point;
         };
 
         const worldStart = getWorldPoint(this.screenStart);
         const worldEnd = getWorldPoint(screenEnd);
+
+        const worldCorner1 = getWorldPoint(new pc.Vec2(this.screenStart.x,screenEnd.y));
+        const worldCorner2 = getWorldPoint(new pc.Vec2(screenEnd.x,this.screenStart.y));
+
 
         // Step 3: Build bounding box on X/Z plane
         const minX = Math.min(worldStart.x, worldEnd.x);
@@ -48,22 +53,27 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
                 x.layers = [0];
             });
             const pos = entity.getPosition();
-            if (pos.x >= minX && pos.x <= maxX && pos.z >= minZ && pos.z <= maxZ) {
+            function flatPos(pos){
+                return new pc.Vec2(pos.x,pos.z);
+            }
+            let quad = [flatPos(worldStart),flatPos(worldCorner1),flatPos(worldEnd),flatPos(worldCorner2)];
+            let point = flatPos(pos);
+            if (Utils.isPointInQuad(point,quad)){
                 entity.getComponentsInChildren('render').forEach(x=>{
-                    x.layers.concat(Camera.outline.layers);
+                    x.layers = x.layers.concat(Camera.outline.layers);
                 });
                 selectedEntities.push(entity);
             }
         }
 
-        console.log("Selected entities:", selectedEntities);
+        if (selectedEntities.length > 0) console.log("Selected entities:", selectedEntities[0].getComponentsInChildren('render')[0].layers);
     }
 
     onMouseDown(e) {
         if (!realmEditor.gui.isMouseOverMap){
             return;
         }
-        this.screenStart = new pc.Vec2(Mouse.x,Mouse.y);
+        this.screenStart = new pc.Vec2(Mouse.xMap,Mouse.y);
         this.#mouseHeld=true; 
         realmEditor.gui.dragBox.enabled=true;
         this.#startDragPos = new pc.Vec2(this.#mp[0],this.#mp[1]);
