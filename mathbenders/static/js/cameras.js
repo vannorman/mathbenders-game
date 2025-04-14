@@ -156,15 +156,21 @@ class OutlineCamera {
         realmEditor.camera.entity.addChild(outlineCamera);
         outlineCamera.setLocalPosition(0,0,0);
         outlineCamera.setLocalEulerAngles(0,0,0);
-
-        const outline = new OutlineEffect(pc.app.graphicsDevice, 4, pc.Color.YELLOW);
+        this.cameraComponent = outlineCamera.camera;
+        const thickness = 4;
+        const outline = new OutlineEffect(pc.app.graphicsDevice, thickness, pc.Color.YELLOW);
+        this.shader = outline;
         outline.color = new pc.Color(0, 0.5, 1, 1);
         outline.texture = renderTarget.colorBuffer;
         realmEditor.camera.cameraComponent.postEffects.addEffect(outline);
         // outlineCamera.moveTo(realmEditor.camera.entity.getPosition(),realmEditor.camera.entity.getEulerAngles());
-        Camera.outline = outlineCamera.camera;
+        Camera.outline = this;//outlineCamera.camera;
         return this;
     }
+    
+    get thickness(){ return this.shader.thickness;}
+    set thickness(value){ this.shader.thickness= value;}
+
 }
 
 Object.defineProperty(Camera, "skyCamAspectRatio", {

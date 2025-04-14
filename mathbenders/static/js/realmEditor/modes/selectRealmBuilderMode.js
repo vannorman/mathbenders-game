@@ -3,14 +3,13 @@ import RealmBuilderMode from "./realmBuilderMode.js";
 export default class SelectRealmBuilderMode extends RealmBuilderMode {
 
     #mouseHeld=false;
-    #startDragPos=new pc.Vec2();
-    screenStart;
+    #screenStart;
     selectedEntities=[];
     #screenEnd;
     get #mp(){
-        return Mouse.getMousePositionInElement(realmEditor.gui.mapPanel);
-
+        return new pc.Vec2(Mouse.xMap,Mouse.y);
     }
+    
     onEnter(){
     }
 
@@ -29,38 +28,37 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
 
     
          // Step 1: Get screen positions
-        const screenEnd = new pc.Vec2(Mouse.xMap,Mouse.y);
-
-        // Step 2: Convert screen positions to world space (on ground plane, assume y = 0)
-        const getWorldPoint = (screenPos) => {
-            const raycastResult = realmEditor.camera.cameraComponent.screenPointToRay(screenPos.x, screenPos.y);
-             //Utils3.debugSphere({position:raycastResult.point})
-            if (raycastResult){
-                // Utils3.debugSphere({position:raycastResult.point,color:pc.Color.BLUE,timeout:30000})
-                return raycastResult.point;
-            } else {
-                const worldDir = realmEditor.camera.cameraComponent.screenPointToWorldDir(screenPos.x, screenPos.y);
-                let approxDist = realmEditor.currentLevel.terrain.entity.getPosition().clone().sub(realmEditor.camera.entity.getPosition()).length();
-                let distAdjust = 1 + Mouse.y / pc.app.graphicsDevice.height; // from 0.5 to 1.5
-                const pt = realmEditor.camera.entity.getPosition().clone().add(worldDir.normalize().mulScalar(approxDist*distAdjust));
-                // Utils3.debugSphere({position:pt,color:pc.Color.RED,timeout:10000})
-                return pt;
-            }
-        };
-
-        const worldStart = getWorldPoint(this.screenStart);
-        const worldEnd = getWorldPoint(screenEnd);
-
-        const worldCorner1 = getWorldPoint(new pc.Vec2(this.screenStart.x,screenEnd.y));
-        const worldCorner2 = getWorldPoint(new pc.Vec2(screenEnd.x,this.screenStart.y));
+        this.#screenEnd = this.#mp;//new pc.Vec2(Mouse.xMap,Mouse.y);
 
 
-        // Step 3: Build bounding box on X/Z plane
-        const minX = Math.min(worldStart.x, worldEnd.x);
-        const maxX = Math.max(worldStart.x, worldEnd.x);
-        const minZ = Math.min(worldStart.z, worldEnd.z);
-        const maxZ = Math.max(worldStart.z, worldEnd.z);
 
+
+       // box abcd at screen and box efgh extruded forward form camera.
+        let cam = realmEditor.camera.cameraComponent;
+        let s = 1;
+        let h = pc.app.graphicsDevice.height;
+        let A = new pc.Vec3(); cam.screenToWorld(this.#screenStart.x,h-this.#screenStart.y,s,A);
+        let B = new pc.Vec3(); cam.screenToWorld(this.#screenEnd.x,h-this.#screenStart.y,s,B);
+        let C = new pc.Vec3(); cam.screenToWorld(this.#screenEnd.x,h-this.#screenEnd.y,s,C);
+        let D = new pc.Vec3(); cam.screenToWorld(this.#screenStart.x,h-this.#screenEnd.y,s,D);
+        let z = realmEditor.camera.currentZoom*2; // note: possible to miss on deep canyons
+        let E = new pc.Vec3(); cam.screenToWorld(this.#screenStart.x,h-this.#screenStart.y,z,E);
+        let F = new pc.Vec3(); cam.screenToWorld(this.#screenEnd.x,h-this.#screenStart.y,z,F);
+        let G = new pc.Vec3(); cam.screenToWorld(this.#screenEnd.x,h-this.#screenEnd.y,z,G);
+        let H = new pc.Vec3(); cam.screenToWorld(this.#screenStart.x,h-this.#screenEnd.y,z,H);
+
+        if (pc.app.keyboard.isPressed(pc.KEY_SHIFT)){
+            Utils3.debugSphere({scale:2,position:E,timeout:20000,color:pc.Color.BLACK})
+            Utils3.debugSphere({scale:2,position:F,timeout:20000,color:pc.Color.BLUE})
+            Utils3.debugSphere({scale:2,position:G,timeout:20000,color:pc.Color.INDIGO})
+            Utils3.debugSphere({scale:2,position:H,timeout:20000,color:pc.Color.VIOLET})
+            Utils3.debugSphere({scale:2,position:A,timeout:20000,color:pc.Color.WHITE})
+            Utils3.debugSphere({scale:2,position:B,timeout:20000,color:pc.Color.ORANGE})
+            Utils3.debugSphere({scale:2,position:C,timeout:20000,color:pc.Color.YELLOW})
+            Utils3.debugSphere({scale:2,position:D,timeout:20000,color:pc.Color.GREEN})
+        }
+ 
+        Camera.outline.thickness = clamp((1/realmEditor.camera.currentZoom)*300,1,4);
         // Step 4: Check each entity
         this.clearHighlights();
         this.selectedEntities = [];
@@ -68,14 +66,10 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         for (const item of realmEditor.currentLevel.templateInstances) {
             const entity = item.entity;
             const pos = entity.getPosition();
-            function flatPos(pos){
-                return new pc.Vec2(pos.x,pos.z);
-            }
-            let quad = [flatPos(worldStart),flatPos(worldCorner1),flatPos(worldEnd),flatPos(worldCorner2)];
-            let point = flatPos(pos);
-            if (Utils.isPointInQuad(point,quad)){
+            let points = [A,B,C,D,E,F,G,H];
+            if (Utils.isPointInsidePolyhedra(points,pos)){
                 entity.getComponentsInChildren('render').forEach(x=>{
-                    x.layers = x.layers.concat(Camera.outline.layers);
+                    x.layers = x.layers.concat(Camera.outline.cameraComponent.layers);
                 });
                 this.selectedEntities.push(entity);
             }
@@ -87,17 +81,17 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         if (!realmEditor.gui.isMouseOverMap){
             return;
         }
-        this.screenStart = new pc.Vec2(Mouse.xMap,Mouse.y);
+        this.#screenStart = this.#mp.clone();
         this.#mouseHeld=true; 
         realmEditor.gui.dragBox.enabled=true;
-        this.#startDragPos = new pc.Vec2(this.#mp[0],this.#mp[1]);
         this.updateBoxSize();
         super.onMouseDown(e);
     }
   
     updateBoxSize(){
         if (!realmEditor.gui.isMouseOverMap){ return; }
-        let anchor = [this.#startDragPos.x,this.#startDragPos.y,this.#mp[0],this.#mp[1]];
+        let c = pc.app.graphicsDevice.canvas;
+        let anchor = [this.#screenStart.x/c.width,this.#screenStart.y/c.height,this.#mp.x/c.width,this.#mp.y/c.height];
 
         // Flip x start and end if they are inverted
         if (anchor[0] > anchor[2]){
@@ -123,7 +117,32 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         realmEditor.gui.dragBox.enabled=false; 
         super.onMouseUp(e);
     }
+    
+    onMouseScroll(e){
+        let r = realmEditor.camera.entity.right.mulScalar(0.22);
+        this.cameraIsLerping = false;
+        if (realmEditor.camera.cameraComponent.projection == 1){
+//            if (e.wheelDelta > 0){
+//                if (Camera.sky.orthoHeight < 100) {
+//                    Camera.sky.orthoHeight++;
+//                    Camera.sky.entity.translate(-r.x,-r.y,-r.z);
+//                }
+//            } else {
+//                if (Camera.sky.orthoHeight > 10) {
+//                    Camera.sky.orthoHeight--;
+//                    Camera.sky.entity.translate(r.x,r.y,r.z);
+//                }
+//            }
+        } else if (realmEditor.camera.cameraComponent.projection == 0) {
+            const fwd = e.wheelDelta < 0 ? 1 : -1; // scroll up or down?
+            const heightFactor = realmEditor.camera.entity.getLocalPosition().length(); // closer to ground? scroll slower
+            const factor = 0.05;
+            const dir = realmEditor.camera.entity.forward;
+            const m = dir.mulScalar(fwd * heightFactor * factor)
+            realmEditor.camera.entity.translate(m); 
+        }
 
+    }
 
 
 }

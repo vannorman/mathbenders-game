@@ -8,7 +8,8 @@ export default class EditorCamera {
     targetZoomFactor;
     degreesRotated;
     targetPivot; // for rotation, it's easier and more straightforward to have a dummy entity snap to rotation then lerp to that rotation
-    
+    get currentZoom(){ return this.entity.getLocalPosition().length(); }
+
     constructor(args) {
         this.defaultSettings = {
             // height: 25,

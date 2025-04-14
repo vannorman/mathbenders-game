@@ -217,9 +217,9 @@ class RealmEditor {
         this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
         // To re-load the existing level ..
         // console.log("%c ENABLE","color:#77f;font-weight:bold;");
-        if (this.#RealmData.Levels?.length > 0 && this.#RealmData.Levels[0].templateInstances.length > 0){
-            console.log(this.#RealmData.Levels[0].templateInstances[0].uuid);
-         }
+//        if (this.#RealmData.Levels?.length > 0 && this.#RealmData.Levels[0].templateInstances.length > 0){
+//            console.log(this.#RealmData.Levels[0].templateInstances[0].uuid);
+//         }
         const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
 
         this.#RealmData.Clear(); // delete everything
@@ -296,7 +296,7 @@ class RealmEditor {
     
     LoadJson(realmJson){
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
-        try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
+        // try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
@@ -313,7 +313,7 @@ class RealmEditor {
             console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
                 try {
-                    console.log("x uuid:"+x.uuid);
+                    // console.log("x uuid:"+x.uuid);
                     let obj = this.InstantiateTemplate({
                         level:thisLevel,
                         ItemTemplate:templateNameMap[x.templateName],

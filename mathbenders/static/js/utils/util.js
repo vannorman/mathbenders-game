@@ -1,46 +1,91 @@
 Utils = {
-    isPointInTriangle(A,B,C,P){
-         // using Barycentric technique:
 
-        // A, B, and C are the triangle end points, P is the point under test
-
-        // Compute vectors        
-        v0 = C.clone().sub(A)
-        v1 = B.clone().sub(A)
-        v2 = P.clone().sub(A)
-
-        // Compute dot products
-        dot00 = v0.clone().dot(v0);
-        dot01 = v0.clone().dot(v1);
-        dot02 = v0.clone().dot(v2)
-        dot11 = v1.clone().dot(v1);
-        dot12 = v1.clone().dot(v2);
-
-        // Compute barycentric coordinates
-        invDenom = 1 / (dot00 * dot11 - dot01 * dot01)
-        u = (dot11 * dot02 - dot01 * dot12) * invDenom
-        v = (dot00 * dot12 - dot01 * dot02) * invDenom
-
-        // Check if point is in triangle
-        return (u > 0) && (v > 0) && (u + v < 1)
-    },
-
-    isPointInQuad(pt,quad){
-        // quad: array of 4 points like [{x, y}, {x, y}, {x, y}, {x, y}]
-        
-        function sign(p1, p2, p3) {
-            return (p1.x - p3.x) * (p2.y - p3.y) - 
-                   (p2.x - p3.x) * (p1.y - p3.y);
+    isPointInsidePolyhedra(points, point) {
+        function safeDot(a, b) {
+            return Math.min(1, Math.max(-1, a.dot(b)));
         }
 
+        function solidAngleSum(p, triangles) {
+            let sum = 0;
 
-        const b1 = sign(pt, quad[0], quad[1]) < 0.0;
-        const b2 = sign(pt, quad[1], quad[2]) < 0.0;
-        const b3 = sign(pt, quad[2], quad[3]) < 0.0;
-        const b4 = sign(pt, quad[3], quad[0]) < 0.0;
+            for (let tri of triangles) {
+                const [a, b, c] = tri;
 
-        // All signs must be the same for the point to be inside
-        return (b1 === b2) && (b2 === b3) && (b3 === b4);
+                const va = new pc.Vec3().sub2(a, p).normalize();
+                const vb = new pc.Vec3().sub2(b, p).normalize();
+                const vc = new pc.Vec3().sub2(c, p).normalize();
+
+                const cross = new pc.Vec3().cross(vb, vc);
+                const numerator = va.dot(cross);
+                const denom = 1 + safeDot(va, vb) + safeDot(vb, vc) + safeDot(vc, va);
+                const angle = 2 * Math.atan2(numerator, denom);
+
+                sum += angle;
+            }
+
+            return sum;
+        }
+
+        function getBoxFrustumTriangles(points) {
+            const [A, B, C, D, E, F, G, H] = points;
+            return [
+                [A, B, C], [A, C, D],
+                [E, G, F], [E, H, G],
+                [A, E, F], [A, F, B],
+                [B, F, G], [B, G, C],
+                [C, G, H], [C, H, D],
+                [D, H, E], [D, E, A],
+            ];
+        }
+
+        const triangles = getBoxFrustumTriangles(points);
+        const sum = solidAngleSum(point, triangles);
+        return Math.abs(Math.abs(sum) - 4 * Math.PI) < 1e-3;
+    },
+
+    isPointInBox(center,dx,dy,dz,half,point){
+// https://stackoverflow.com/questions/52673935/check-if-3d-point-inside-a-box
+
+        let d = new pc.Vec3().sub2(point,center);
+        let inside = Math.abs(d.dot(dx)) <= half.x &&
+                      Math.abs(d.dot(dy)) <= half.y &&
+                      Math.abs(d.dot(dz)) <= half.z;
+        return inside;
+    },
+    isPointInBox_old(corners, point) {
+        // Assume corners is an array of 8 vec3 representing the box corners
+        // and point is a vec3. Use any three non-coplanar corners to define the box.
+        const [p0, p1, p2] = [corners[0], corners[1], corners[2]];
+
+        // Create edge vectors
+        const u = new pc.Vec3().sub2(p1, p0);
+        const v = new pc.Vec3().sub2(p2, p0);
+        const w = new pc.Vec3().sub2(corners[4], p0); // pick another non-coplanar corner
+
+        // Vector from p0 to point
+        const d = new pc.Vec3().sub2(point, p0);
+
+        const dotUU = u.dot(u);
+        const dotUV = u.dot(v);
+        const dotUW = u.dot(w);
+        const dotVV = v.dot(v);
+        const dotVW = v.dot(w);
+        const dotWW = w.dot(w);
+
+        const dotDU = d.dot(u);
+        const dotDV = d.dot(v);
+        const dotDW = d.dot(w);
+
+        // Solve for scalar projections (must be between 0 and 1 for point to be inside box)
+        const uProj = dotDU / dotUU;
+        const vProj = dotDV / dotVV;
+        const wProj = dotDW / dotWW;
+
+        return (
+            uProj >= 0 && uProj <= 1 &&
+            vProj >= 0 && vProj <= 1 &&
+            wProj >= 0 && wProj <= 1
+        );
     },
 
     addMeshCollider(clone,asset,rbType){

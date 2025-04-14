@@ -3,7 +3,7 @@ class OutlineEffect extends pc.PostEffect {
         super(graphicsDevice);
 
         const fshader = `
-            #define THICKNESS ${thickness.toFixed(0)}
+            uniform int uThickness;
             uniform float uWidth;
             uniform float uHeight;
             uniform vec4 uOutlineCol;
@@ -16,8 +16,8 @@ class OutlineEffect extends pc.PostEffect {
                 float sample0 = texture2D(uOutlineTex, flippedUv).a;
                 float outline = 0.0;
                 if (sample0 == 0.0) {
-                    for (int x = -THICKNESS; x <= THICKNESS; x++) {
-                        for (int y = -THICKNESS; y <= THICKNESS; y++) {
+                    for (int x = -uThickness; x <= uThickness; x++) {
+                        for (int y = -uThickness; y <= uThickness; y++) {
                             float tex = texture2DLod(uOutlineTex, flippedUv + vec2(float(x) / uWidth, float(y) / uHeight), 0.0).a;
                             if (tex > 0.0) {
                                 outline = 1.0;
@@ -37,6 +37,7 @@ class OutlineEffect extends pc.PostEffect {
         this.texture = new pc.Texture(graphicsDevice);
         this.texture.name = 'pe-outline';
         this._colorData = new Float32Array(4);
+        this.thickness=thickness;
     }
 
     render(inputTarget, outputTarget, rect) {
@@ -53,6 +54,7 @@ class OutlineEffect extends pc.PostEffect {
         scope.resolve('uOutlineCol').setValue(this._colorData);
         scope.resolve('uColorBuffer').setValue(inputTarget.colorBuffer);
         scope.resolve('uOutlineTex').setValue(this.texture);
+        scope.resolve('uThickness').setValue(this.thickness);
 
         this.drawQuad(outputTarget, this.shader, rect);
     }

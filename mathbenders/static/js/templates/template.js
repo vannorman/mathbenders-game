@@ -118,7 +118,6 @@ export default class Template {
 
     getInstanceData(args={}){
         const {terrainCentroidOffset = pc.Vec3.ZERO} = args;
-        console.log("getinstdata:"+this.uuid);
         return {
             templateName : this.constructor.name,
             uuid : this.uuid,

@@ -5,7 +5,6 @@ window.treeAsset = assets.models.trees.tree1.resource.instantiateRenderEntity();
 export class Tree1 extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.trees;
-    index;
 
     static propertiesMap = [
          new PropertyMap({  
@@ -27,13 +26,7 @@ export class Tree1 extends Template {
 
 
 
-    constructor(args={}){
-        const { index = 0 } = args;
-        super(args);
-        this.index=index;
-    }
     setup(){
-        const index = this.index == 0 ? 2 : 3;
         const tree = window.treeAsset.clone();
         let r = function(){ return 0.008 + Math.random() * 0.006; }
         tree.setLocalScale(r(),r(),r());
