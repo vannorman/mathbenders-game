@@ -267,6 +267,22 @@ export class ScaleProperty extends Property {
 
 }
 
+export class CopyProperty extends Property {
+    static icon = assets.textures.ui.builder.moveItem;
+    constructor(args){
+        super(args);
+    }
+
+    buildUiButton({parentEl:parentEl}){
+        const moveButton = UI.SetUpItemButton({
+            parentEl:parentEl,
+            width:30,height:30,textureAsset:assets.textures.ui.builder.copy,
+            mouseDown:function(){realmEditor.CopyEditedObject();} 
+        });
+        return moveButton;
+    }
+}
+
 export class MoveProperty extends Property {
     static icon = assets.textures.ui.builder.moveItem;
     constructor(args){

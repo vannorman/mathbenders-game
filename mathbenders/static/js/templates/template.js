@@ -50,7 +50,6 @@ export default class Template {
             this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
         }
         this.entity.addComponent('script');
-        this.entity._templateInstance = this;
         this.name = this.constructor.name;
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
@@ -59,13 +58,21 @@ export default class Template {
             this.setProperties(properties);
         }
         this.updateColliderMap();
-
-
+        this.entity._templateInstance = this; // partial, incomplete ref
 
     }
 
-    setup(args={}){ this.setup(); }
-    setup(){console.log("ERR: No setup method on "+this.constructor.name);}
+    setup(args={}){console.log("ERR: No setup method on "+this.constructor.name);}
+
+    duplicate() {
+        let copies = []; 
+        let copy = { // copy or duplicate template should be its own class.
+            data : this.getInstanceData(),
+            Template : this.constructor,
+        }
+        copies.push(copy);
+        return { copies:copies};
+    }
 
     updateColliderMap(){
         this.colliders = new Map();

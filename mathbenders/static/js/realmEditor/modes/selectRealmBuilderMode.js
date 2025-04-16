@@ -117,13 +117,7 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         realmEditor.gui.dragBox.enabled=false; 
         super.onMouseUp(e);
         if (this.selectedEntities.length > 0){
-            let pos = Utils.getCenterOfEntities(this.selectedEntities);; 
-            console.log('selents:');
-            console.log(this.selectedEntities);
-            let group = new Group({entities:this.selectedEntities,position:pos});
-            let uuids = [];
-            this.selectedEntities.forEach(x=>{uuids.push(x._templateInstance.uuid);});
-            group.uuidsList = uuids;
+            let group = new Group({entities:this.selectedEntities});
             realmEditor.editItem(group.entity);
         }
     }

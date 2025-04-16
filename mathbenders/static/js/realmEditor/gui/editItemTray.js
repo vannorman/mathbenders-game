@@ -14,9 +14,9 @@ export default class EditItemTray {
         popUpEditItemTray.addComponent('element', {
             layers: [pc.LAYERID_UI],
             type: 'group',  // This makes it a UI element
-            anchor: [0.5,0.5,0.5,0.5],
+            anchor: [0.4,0.4,0.6,0.6],
             pivot: [0.5, 0.5],
-            margin: [leftMargin, 0, 0, 0],
+            margin: [0, 0, 0, 0],
             width: 320, 
             height: 360, 
         });
@@ -69,8 +69,17 @@ export default class EditItemTray {
             el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
         });
 
+        this.copyBtnContainer = new pc.Entity();
+        this.copyBtnContainer.addComponent('element',{
+            type: 'image',
+            color:pc.Color.YELLOW,
+            anchor:[0.8,0.1,0.8,0.2],
+            width:30,height:30
+        })
+
         popUpEditItemTray.enabled = false;
         this.entity = popUpEditItemTray;
+        this.entity.addChild(this.copyBtnContainer);
     }
 
 
@@ -90,6 +99,10 @@ export default class EditItemTray {
         const rotateProperty = new RotateProperty({template:entity._templateInstance}); 
         const rotateBtn = rotateProperty.buildUiButton();
         this.buttonContainers[3].addChild(rotateBtn);
+
+        const copyProperty = new CopyProperty({entity:entity});
+        const copyBtn = copyProperty.buildUiButton({parentEl:this.copyBtnContainer});
+        this.buttonContainers[3].addChild(copyBtn);
 
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)

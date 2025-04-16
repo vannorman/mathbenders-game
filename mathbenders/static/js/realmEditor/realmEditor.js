@@ -410,6 +410,37 @@ class RealmEditor {
 
     }
 
+    CopyEditedObject(){
+        if (this.#mode != this.#modes.get('editingItem')){
+            console.log('cant begin dragging edited item if no item being edited.');
+            console.log("mode:"+typeof(this.#mode));
+        }
+        const entity = this.#mode.entity;
+        const itemTemplate = entity._templateInstance; 
+        let duplicate = entity._templateInstance.duplicate(); //itemTemplate.duplicate();
+        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20);
+        let copiedEntities = [];
+        duplicate.copies.forEach(copy => {
+            let c = this.InstantiateTemplate({
+                ItemTemplate:copy.Template,
+                position:copy.data.position.clone().add(copyDelta),
+                rotation:copy.data.rotation,
+                properties:copy.data,
+            });
+            console.log("Crea:");
+            console.log(c);
+            copiedEntities.push(c.entity);
+       });
+        if (duplicate.postCopyFn) {
+            console.log("post copy:"+duplicate.postCopyFn);
+            console.log(duplicate);
+            duplicate.postCopyFn(copiedEntities);
+        } else {
+            this.editItem(copiedEntities[0]);
+        }
+        
+    }
+
     mapClicked(){
         this.#mode.mapClicked();
     }
@@ -436,15 +467,15 @@ class RealmEditor {
             uuid=crypto.randomUUID(),
             properties={},
             } = args;
-            const instance = new ItemTemplate({uuid:uuid,position:position,rotation:rotation,properties:properties});
-            const entity = instance.entity;
-            entity.tags.add(Constants.Tags.BuilderItem);
+        const instance = new ItemTemplate({uuid:uuid,position:position,rotation:rotation,properties:properties});
+        const entity = instance.entity;
+        entity.tags.add(Constants.Tags.BuilderItem);
 
-            level.registerPlacedTemplateInstance(instance);
-            instance.entity.on('destroy',function(){
-                level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
-            });
-            return instance;
+        level.registerPlacedTemplateInstance(instance);
+        instance.entity.on('destroy',function(){
+            level.deRegisterPlacedTemplateInstance(instance); // does it work ..? perhaps better by entity?
+        });
+        return instance;
     }
     
     editItem(entity){

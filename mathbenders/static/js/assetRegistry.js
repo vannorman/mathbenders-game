@@ -152,6 +152,8 @@ const assets = {
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
             },
             builder : {
+                copy : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/copy.png" }),
+
                 select : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/builder_select.png" }),
                 undo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/undo.png" }),
                 redo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/redo.png" }),

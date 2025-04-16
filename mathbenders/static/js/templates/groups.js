@@ -24,12 +24,39 @@ export class Group extends Template {
         this.entities = entities;
 
         console.log("set w ents:"+this.entities);
-        let group = new pc.Entity();
+        let pos = Utils.getCenterOfEntities(this.entities);
+        this.entity.moveTo(pos);
         this.entities.forEach(x=>{
             let p = x.getPosition();
             this.entity.addChild(x);
             x.moveTo(p);
         })
+    }
+
+    duplicate(){
+        let copies = []; 
+        let templatesToCopy = [];
+        this.entity.children.forEach(x=>{
+            if (x._templateInstance) templatesToCopy.push(x._templateInstance)
+        });
+        templatesToCopy.forEach(x=>{
+            let copy = {
+                data : x.getInstanceData(),
+                position : x.entity.getPosition(),
+                Template : x.constructor,
+            }
+            copies.push(copy);
+        });
+
+        const $this = this;
+        return { 
+            copies:copies, 
+            postCopyFn:(entities)=>{
+                console.log(`Copying group`);
+                let group = new Group({entities:entities});
+                realmEditor.editItem(group.entity);
+            }
+        };
     }
 
     // need to detect unselect.

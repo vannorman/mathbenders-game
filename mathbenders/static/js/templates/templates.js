@@ -2,11 +2,11 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+import {PropertyMap,Property,CopyProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
 import HeldItem from './gadgets/heldItem.js';
-const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
+const globalProperties = [Property,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {
@@ -24,7 +24,7 @@ class NumberHoop extends Template {
   
     static _icon = assets.textures.ui.icons.hoop;
 
-    setup(){
+    setup(args={}){
         const scale = 1.5;
         this.renderEntity = assets.numberHoop.resource.instantiateRenderEntity();
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
@@ -71,7 +71,7 @@ class NumberFaucet extends Template {
 
     ]
 
-    setup(){
+    setup(args={}){
         const scale = 2;
     
         this.renderEntity = assets.models.faucet.resource.instantiateRenderEntity();
@@ -110,7 +110,7 @@ class PlayerStart extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.start;
 
-    setup () {
+    setup (args={}) {
         const childOffset = new pc.Vec3(0,0,0.5)
         const scale = 1.5
         
@@ -179,7 +179,7 @@ class NumberWall extends Template {
     get size() { return this.script.size; }
 
 
-    setup(){
+    setup(args={}){
         this.entity.addComponent('script'); 
         this.entity.script.create('machineNumberWall');
         // @Eytan, I have a PlacedItem problem here. PlacedItem 
@@ -195,7 +195,7 @@ class PlayerPortal extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.portal;
 
-    setup(){
+    setup(args={}){
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
 
@@ -209,7 +209,7 @@ class CastleTurret extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.turret1;
 
-    setup(){
+    setup(args={}){
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
@@ -243,7 +243,7 @@ class CastleWall extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.wall;
 
-    setup(){ 
+    setup(args={}){ 
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -297,7 +297,7 @@ class BigConcretePad extends Template {
     updateHalfExtents(){
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
     }
-    setup(){
+    setup(args={}){
         const pad = new pc.Entity("concrete pad");
         pad.addComponent("render", {  type: "box" }); 
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
@@ -345,7 +345,7 @@ class NumberCube extends Template {
         super(args);
     }
  
-    setup(){
+    setup(args={}){
         let cube =this.entity;
         // cube.tags.add(Constants.Tags.PlayerCanPickUp);
         cube.addComponent("render",{ type : "box" });
@@ -398,7 +398,7 @@ class NumberSphereGfxOnly extends Template {
          }),
     ]
 
-     setup(){
+     setup(args={}){
         let sphere = this.entity;
         sphere.addComponent("render",{ type : "sphere" });
         const s = sphere.getLocalScale.x;
@@ -446,7 +446,7 @@ class NumberSphere extends Template {
         super(args);
     }
  
-    setup(){
+    setup(args={}){
         let sphere =this.entity;
         sphere.tags.add(Constants.Tags.PlayerCanPickUp);
         sphere.addComponent("render",{ type : "sphere" });
@@ -497,7 +497,7 @@ class MultiblasterPickup extends GadgetPickup {
         return Multiblaster;
     }
 
-    setup(){
+    setup(args={}){
 
         // graphics
 
@@ -524,7 +524,7 @@ class SwordPickup extends GadgetPickup {
         return Sword;
     }
 
-    setup(){
+    setup(args={}){
 
         // graphics
 
