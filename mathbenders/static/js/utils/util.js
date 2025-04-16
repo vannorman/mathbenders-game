@@ -1,5 +1,10 @@
 Utils = {
-
+    getCenterOfEntities(entities){
+        let p = new pc.Vec3();
+        entities.forEach(x=>{p.add(x.getPosition());});
+        p.mulScalar(1/entities.length);
+        return p;
+    },
     isPointInsidePolyhedra(points, point) {
         function safeDot(a, b) {
             return Math.min(1, Math.max(-1, a.dot(b)));

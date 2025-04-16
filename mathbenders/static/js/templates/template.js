@@ -12,6 +12,18 @@ export default class Template {
 
     static get isGadget(){ return false;  }
 
+    static findEntityByUuid(uuid){
+        let cont = true;
+        let ret = null;
+        pc.app.root.getComponentsInChildren('entity').forEach(x=>{
+            if (cont && x._templateInstance && x._templateInstance.uuid == uuid){
+                cont = false;
+                ret = x;
+            }
+        });
+        return ret;
+    }
+
     constructor(args={}) {
         // NOTE: "properties" arg will contain the specific settings per template (e.g. Fraction) 
         // and must match editablePropertyMap as defined per template
@@ -26,7 +38,6 @@ export default class Template {
         this.entity = new pc.Entity(this.constructor.name);
         if (uuid==null){
             uuid=crypto.randomUUID();
-            console.log("new null, gen new uuid:"+uuid);
         }
         this.uuid=uuid;
 
@@ -43,7 +54,7 @@ export default class Template {
         this.name = this.constructor.name;
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
-        this.setup();
+        this.setup(args);
         if (properties) {
             this.setProperties(properties);
         }
@@ -53,6 +64,7 @@ export default class Template {
 
     }
 
+    setup(args={}){ this.setup(); }
     setup(){console.log("ERR: No setup method on "+this.constructor.name);}
 
     updateColliderMap(){

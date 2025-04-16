@@ -2,8 +2,9 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
+import {PropertyMap,Property,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty} from './properties.js';
 import {Tree1} from './trees.js';
+import {Group} from './groups.js';
 import HeldItem from './gadgets/heldItem.js';
 const globalProperties = [Property,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,RotateProperty]; 
 globalProperties.forEach(x=>{window[x.name]=x});
@@ -561,6 +562,7 @@ window.templateNameMap = {
     "MultiblasterPickup" : MultiblasterPickup,
     "SwordPickup" : SwordPickup,
     "Tree1" : Tree1,
+    "Group" : Group,
 }
 
 // Export all templates to global scope for use in rest of app

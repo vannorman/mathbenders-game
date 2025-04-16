@@ -160,6 +160,24 @@ export class Property {
     }
 }
 
+export class GroupProperty extends Property {
+    static icon = assets.textures.ui.trash;
+
+    buildUiButton(){
+        const groupButton = UI.SetUpItemButton({
+            parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
+            width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
+            mouseDown:function(){
+                realmEditor.BeginDraggingEditedObject();
+                } 
+        });
+        return moveButton;
+    }
+}
+
+
+
+
 export class ScaleProperty extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
 

@@ -25,7 +25,6 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         super.onMouseMove(e);
         if (!this.#mouseHeld) return;
         this.updateBoxSize();
-
     
          // Step 1: Get screen positions
         this.#screenEnd = this.#mp;//new pc.Vec2(Mouse.xMap,Mouse.y);
@@ -111,11 +110,22 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
 
     }
 
+
     onMouseUp(e) {
         this.clearHighlights();
         this.#mouseHeld=false; 
         realmEditor.gui.dragBox.enabled=false; 
         super.onMouseUp(e);
+        if (this.selectedEntities.length > 0){
+            let pos = Utils.getCenterOfEntities(this.selectedEntities);; 
+            console.log('selents:');
+            console.log(this.selectedEntities);
+            let group = new Group({entities:this.selectedEntities,position:pos});
+            let uuids = [];
+            this.selectedEntities.forEach(x=>{uuids.push(x._templateInstance.uuid);});
+            group.uuidsList = uuids;
+            realmEditor.editItem(group.entity);
+        }
     }
     
     onMouseScroll(e){
