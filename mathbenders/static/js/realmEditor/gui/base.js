@@ -66,6 +66,7 @@ export default class GUI {
         const is = Mouse.isMouseOverEntity(this.mapPanel) 
 
         && !Mouse.isMouseOverEntity(this.#mapControlPanel) // shouldn't need  to check "mouse isn't over" each. awkward.
+        && (!this.editItemTray.entity.enabled || !Mouse.isMouseOverEntity(this.editItemTray.entity))
 //        && !Mouse.isMouseOverEntity(this.#setHandPanModeBtn)
 //        && !Mouse.isMouseOverEntity(this.#setSelectPanModeBtn)
 //        && !Mouse.isMouseOverEntity(this.#saveBtn)
@@ -187,7 +188,11 @@ export default class GUI {
             opacity:1,
             useInput : true,
         });
-        this.mapPanel.element.on('mousedown',function(){realmEditor.mapClicked()}) // i don't love binding this here, awkward.
+        this.mapPanel.element.on('mousedown',function(){
+            if (realmEditor.gui.isMouseOverMap){
+                realmEditor.mapClicked();
+            }
+        }) // i don't love binding this here, awkward.
 
         this.dragBox = new pc.Entity();
         this.dragBox.addComponent('element',{
@@ -545,12 +550,12 @@ export default class GUI {
  
 
                 // Edit item
-        this.editItemTray = new EditItemTray({leftMargin:this.leftMargin});
+        this.editItemTray = new EditItemTray();
 
 
 
         // Entire editor
-        this.#screen.addChild(this.editItemTray.entity);
+        this.mapPanel.addChild(this.editItemTray.entity);
         // this.CreatePopUpEditItemTray({realmEditor:this.realmEditor});
         this.#screen.enabled = false;
 

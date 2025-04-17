@@ -442,6 +442,7 @@ class RealmEditor {
     }
 
     mapClicked(){
+        console.log("mapclicked");
         this.#mode.mapClicked();
     }
 

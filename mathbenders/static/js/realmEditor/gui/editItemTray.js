@@ -8,46 +8,40 @@ export default class EditItemTray {
     propertyBtns = [];
 
     constructor(args={}){
-        const {leftMargin} = args; // move this to a static somehwere plz
+        //const {} = args; // move this to a static somehwere plz
         // Define pop-up gui for editing itmes.
-        const popUpEditItemTray = new pc.Entity('Parent');
-        popUpEditItemTray.addComponent('element', {
+        this.entity = new pc.Entity('Parent');
+        this.entity.addComponent('element', {
             layers: [pc.LAYERID_UI],
             type: 'group',  // This makes it a UI element
-            anchor: [0.4,0.4,0.6,0.6],
+            anchor: [0.2,0.15,0.8,0.85],
             pivot: [0.5, 0.5],
             margin: [0, 0, 0, 0],
-            width: 320, 
-            height: 360, 
         });
-        popUpEditItemTray.element.margin = new pc.Vec4(leftMargin,0,0,0);
 
         const editableItemMenu = new pc.Entity("eidtablemenu");
         editableItemMenu.addComponent("element", {
             type: pc.ELEMENTTYPE_GROUP,
             layers:[pc.LAYERID_UI],
-            anchor: [0.0, 0.95, 0.5, 0.05], // [ left, top, ?, ? 
+            anchor: [0,0,1,1],
             pivot: [0.5, 0.5],
             // the element's width and height dictate the group's bounds
-            width: 320,
-            height: 360,
         });
 
 
         this.#editableItemBackboard = new pc.Entity("inv");
         this.#editableItemBackboard.addComponent("element", {
-            anchor: [0.5, 0.5, 0.5, 0.5],
+            anchor: [0,0,1,1],
             pivot: [0.5, 0.5],
+            margin:[0,0,0,0],
             type: 'image',
-            width: 320,
-            height: 360,
             useInput: true,
-
+            opacity:0.5,
             textureAsset: assets.textures.ui.builder.editItemBackboard,
         });
 
-        popUpEditItemTray.addChild(this.#editableItemBackboard);
-        popUpEditItemTray.addChild(editableItemMenu);
+        this.entity.addChild(this.#editableItemBackboard);
+        this.entity.addChild(editableItemMenu);
 //        realmEditor.SetEditableItemMode(EditableItemMode.Editing); // TODO: Eytan, how pass thru realmeditor to set this mode?
 
         // Define a circle of buttons for various actions like copy, delete
@@ -63,7 +57,7 @@ export default class EditItemTray {
                 height:50,
                 textureAsset: assets.textures.ui.numberSpherePos,
             })
-            popUpEditItemTray.addChild(el);
+            this.entity.addChild(el);
             this.buttonContainers.push(el);
             const offCenter = 20;
             el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
@@ -72,13 +66,13 @@ export default class EditItemTray {
         this.copyBtnContainer = new pc.Entity();
         this.copyBtnContainer.addComponent('element',{
             type: 'image',
-            color:pc.Color.YELLOW,
-            anchor:[0.8,0.1,0.8,0.2],
-            width:30,height:30
+            color:pc.Color.GRAY,
+
+            anchor:[0.8,0.1,0.8,0.1],
+            width:80,height:30
         })
 
-        popUpEditItemTray.enabled = false;
-        this.entity = popUpEditItemTray;
+        this.entity.enabled = false;
         this.entity.addChild(this.copyBtnContainer);
     }
 
@@ -96,13 +90,13 @@ export default class EditItemTray {
         const moveBtn = moveProperty.buildUiButton();
         this.buttonContainers[0].addChild(moveBtn);
 
-        const rotateProperty = new RotateProperty({template:entity._templateInstance}); 
-        const rotateBtn = rotateProperty.buildUiButton();
-        this.buttonContainers[3].addChild(rotateBtn);
+        const nudgeProperty = new NudgeProperty({template:entity._templateInstance}); 
+        const nudgeBtns = nudgeProperty.buildUiButton();
+        this.buttonContainers[3].addChild(nudgeBtns);
 
         const copyProperty = new CopyProperty({entity:entity});
         const copyBtn = copyProperty.buildUiButton({parentEl:this.copyBtnContainer});
-        this.buttonContainers[3].addChild(copyBtn);
+        //this.buttonContainers[3].addChild(copyBtn);
 
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)

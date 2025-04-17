@@ -274,12 +274,13 @@ export class CopyProperty extends Property {
     }
 
     buildUiButton({parentEl:parentEl}){
-        const moveButton = UI.SetUpItemButton({
+        const copyBtn = UI.SetUpItemButton({
             parentEl:parentEl,
             width:30,height:30,textureAsset:assets.textures.ui.builder.copy,
-            mouseDown:function(){realmEditor.CopyEditedObject();} 
+            mouseDown:function(){realmEditor.CopyEditedObject();},
+            text:"Copy",
         });
-        return moveButton;
+        return copyBtn;
     }
 }
 
@@ -299,7 +300,7 @@ export class MoveProperty extends Property {
     }
 }
 
-export class RotateProperty extends Property {
+export class NudgeProperty extends Property {
     static icon = null; // blank. Special property where 2 buttons exist on the ring instead of a signle button which pops up a ui.
     constructor(args){
         super(args);
@@ -332,6 +333,7 @@ export class RotateProperty extends Property {
                 var p = $this.template.entity.getPosition();
                 p.add(new pc.Vec3(0,0.5,0));
                 $this.template.entity.moveTo(p);
+                realmEditor.editItem($this.template.entity);
             }
         });
 
@@ -343,6 +345,7 @@ export class RotateProperty extends Property {
                 var p = $this.template.entity.getPosition();
                 p.add(new pc.Vec3(0,10,0));
                 $this.template.entity.moveTo(p);
+                realmEditor.editItem($this.template.entity);
             }
         });
 
@@ -354,6 +357,7 @@ export class RotateProperty extends Property {
                 var p = $this.template.entity.getPosition();
                 p.add(new pc.Vec3(0,-0.5,0));
                 $this.template.entity.moveTo(p);
+                realmEditor.editItem($this.template.entity);
             }
         });
 
@@ -365,6 +369,7 @@ export class RotateProperty extends Property {
                 var p = $this.template.entity.getPosition();
                 p.add(new pc.Vec3(0,-10,0));
                 $this.template.entity.moveTo(p);
+                realmEditor.editItem($this.template.entity);
             }
         });
 
