@@ -21,7 +21,7 @@ Portal.prototype.initialize = function () {
     const portalPlane = new pc.Entity("PortalPlane");
     portalPlane.addComponent("render", {
           type: "plane",
-           material: new pc.StandardMaterial(),
+           material: new pc.Material(),//StandardMaterial(),
            layers: [pc.LAYERID_WORLD],
       });
     portalPlane.setLocalPosition(0, 1.14, -0.3);
@@ -29,6 +29,7 @@ Portal.prototype.initialize = function () {
     portalPlane.setLocalScale(3.7,1.0,5.5);
     portalPlane.render.enabled=false;
     this.portalPlane = portalPlane;
+    this.portalPlane.render.castShadows=false;
 
     const pivot = new pc.Entity("PortalPlanePivot");
     this.entity.addChild(pivot);
