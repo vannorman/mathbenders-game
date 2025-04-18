@@ -67,6 +67,7 @@ PortalCameraRenderTexture.prototype.updateConfig = function(){
 
 PortalCameraRenderTexture.prototype.setupTexture = function(){
     // Set the shader to use the camera texture
+
     this.renderTexture= new pc.Texture(pc.app.graphicsDevice, {
         width: pc.app.graphicsDevice.canvas.clientWidth,
         height: pc.app.graphicsDevice.canvas.clientHeight,
@@ -87,7 +88,7 @@ PortalCameraRenderTexture.prototype.setupTexture = function(){
     });
 
 
-    let vert = `
+    this.vertShader = `
         attribute vec3 vertex_position;
         uniform mat4 matrix_model;
         uniform mat4 matrix_viewProjection;
@@ -101,7 +102,7 @@ PortalCameraRenderTexture.prototype.setupTexture = function(){
         }
     `;
 
-    let frag = `
+    this.fragShader = `
         precision mediump float;
         varying vec2 uv;
         uniform sampler2D uEmissiveMap; // The render texture is applied to emissive map.
@@ -112,42 +113,27 @@ PortalCameraRenderTexture.prototype.setupTexture = function(){
         }
     `;
 
-
  
 
     // Create a custom material with the shader on it that 
     this.targetCam.camera.renderTarget = this.renderTarget;
     this.renderMaterial = new pc.ShaderMaterial({
-
-        vertexCode: vert,
-        fragmentCode: frag,
         attributes: {
             vertex_position : pc.SEMANTIC_POSITION,
             aNormal: pc.SEMANTIC_NORMAL,
         },
-        name:'portalmaterial'
-
+        vertexCode: this.vertShader,
+        fragmentCode: this.fragShader,
+        name:'portalshader',
     });
- 
-    this.renderMaterial.depthWrite = false;
-    this.renderMaterial.depthTest = false;
-    this.renderMaterial.cull = pc.CULLFACE_NONE;
-    this.renderMaterial.setParameter('uEmissiveMap', this.renderTexture);
-    this.renderMaterial.update();
 
+ 
+    this.renderMaterial.setParameter('uEmissiveMap', this.renderTexture)
 //    this.renderMaterial.shader = shader;
 
 }
 
 PortalCameraRenderTexture.prototype.postUpdate = function(dt){
-    if (this.renderPlane?.render?.material) {
-        this.renderPlane.render.material = this.renderMaterial;
-        this.renderPlane.render.material.emissiveMap = this.renderTexture;
-        this.renderPlane.render.material.update();
-        this.renderPlane.render.castShadows=false;
-    }else {
-        console.log('no');
-    }
     // is there a pre- or early- or even late- update?
     // noticing lag that the render texture here lags behind player camera movement, they should be in sync
     // check_proto.setFrameBuffer and more in playcanvas source around line 261ound line 26147
@@ -166,9 +152,9 @@ PortalCameraRenderTexture.prototype.postUpdate = function(dt){
 
             pc.app.root.getComponentsInChildren('portal').forEach(portal => { 
                 portal.portalPlane.render.enabled = false; 
-                // portal.portalPlane.render.emissiveMap = null;
+                portal.portalPlane.render.emissiveMap = null;
             //    portal.portalPlane.render.material.update();
-                portal.portalPlane.render.material.enabled=false;
+                portal.portalPlane.render.material = null;
                 portal.portalPlane.enabled=false;
 
             })
@@ -176,7 +162,7 @@ PortalCameraRenderTexture.prototype.postUpdate = function(dt){
             this.renderPlane = nearestPortal.script.portal.portalPlane;
             this.renderPlane.enabled=true;
             this.renderPlane.render.material = this.renderMaterial; 
-            // cvn this.renderPlane.render.material.emissiveMap = this.renderTexture;     // assign the rendered texture as an emissive texture
+            this.renderPlane.render.material.emissiveMap = this.renderTexture;     // assign the rendered texture as an emissive texture
             this.renderPlane.render.enabled = true;
             this.renderPlane.render.material.update();
             //console.log("Eh:"+this.renderPlane);
