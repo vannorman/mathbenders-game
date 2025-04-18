@@ -77,8 +77,6 @@ export default class Multiblaster extends Gadget {
     }
 
     loadNumber(args={}){
-        console.log('load?');
-        console.log(args);
         const {fraction=new Fraction(-9,8)}=args;
         if (this.ammo.length == 10){
             PlayerMessenger.Say("Ammo full!");

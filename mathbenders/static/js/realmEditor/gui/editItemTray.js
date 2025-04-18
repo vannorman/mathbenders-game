@@ -94,7 +94,7 @@ export default class EditItemTray {
         const nudgeBtns = nudgeProperty.buildUiButton();
         this.buttonContainers[3].addChild(nudgeBtns);
 
-        const copyProperty = new CopyProperty({entity:entity});
+        const copyProperty = new CopyProperty({template:entity._templateInstance});
         const copyBtn = copyProperty.buildUiButton({parentEl:this.copyBtnContainer});
         //this.buttonContainers[3].addChild(copyBtn);
 

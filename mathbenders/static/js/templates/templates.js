@@ -479,8 +479,6 @@ class NumberSphere extends Template {
             }
         } 
         let template = new NumberSphereGfxOnly(options);
-        console.log('template');
-        console.log(template);
         return new HeldItem({
             entity:template.entity,
         });

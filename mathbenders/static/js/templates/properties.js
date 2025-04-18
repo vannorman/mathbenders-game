@@ -269,26 +269,42 @@ export class ScaleProperty extends Property {
 
 export class CopyProperty extends Property {
     static icon = assets.textures.ui.builder.moveItem;
-    constructor(args){
-        super(args);
-    }
 
     buildUiButton({parentEl:parentEl}){
+        const $this = this; 
         const copyBtn = UI.SetUpItemButton({
             parentEl:parentEl,
             width:30,height:30,textureAsset:assets.textures.ui.builder.copy,
-            mouseDown:function(){realmEditor.CopyEditedObject();},
+            mouseDown:function(){$this.duplicateTemplate();}, //.CopyEditedObject();},
             text:"Copy",
         });
         return copyBtn;
+    }
+
+    duplicateTemplate(){
+        let duplicate = this.template.duplicate(); //itemTemplate.duplicate();
+        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20); // copy "north" from Camera view
+        let copiedEntities = [];
+        duplicate.copies.forEach(copy => {
+            let c = realmEditor.InstantiateTemplate({
+                ItemTemplate:copy.Template,
+                position:copy.data.position.clone().add(copyDelta),
+                rotation:copy.data.rotation,
+                properties:copy.data.properties,
+            });
+            copiedEntities.push(c.entity);
+       });
+        if (duplicate.postCopyFn) {
+            duplicate.postCopyFn(copiedEntities);
+        } else {
+            realmEditor.editItem(copiedEntities[0]);
+        }
+        
     }
 }
 
 export class MoveProperty extends Property {
     static icon = assets.textures.ui.builder.moveItem;
-    constructor(args){
-        super(args);
-    }
 
     buildUiButton(){
         const moveButton = UI.SetUpItemButton({
@@ -302,9 +318,6 @@ export class MoveProperty extends Property {
 
 export class NudgeProperty extends Property {
     static icon = null; // blank. Special property where 2 buttons exist on the ring instead of a signle button which pops up a ui.
-    constructor(args){
-        super(args);
-    }
 
     buildUiButton(){
         const $this = this;
@@ -381,10 +394,6 @@ export class NudgeProperty extends Property {
 export class FractionProperty extends Property {
     static icon = assets.textures.ui.icons.fraction; 
 
-    constructor(args={}){
-        super(args);
-    }
-
     buildUi(){
         const $this = this; 
         const panel = Property.panel();
@@ -414,9 +423,7 @@ export class FractionProperty extends Property {
 }
 
 export class SizeProperty extends Property {
-    constructor(args){
-        super(args);
-    }
+    
     buildUi(){
         // TODO: Combine this with SizeProperty UI (they're the same almost);
         const $this = this;

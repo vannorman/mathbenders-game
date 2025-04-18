@@ -313,7 +313,8 @@ class RealmEditor {
             console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
                 try {
-                    // console.log("x uuid:"+x.uuid);
+                    console.log("x prop:"+x.uuid);
+                    console.log(x.properties);
                     let obj = this.InstantiateTemplate({
                         level:thisLevel,
                         ItemTemplate:templateNameMap[x.templateName],
@@ -410,39 +411,9 @@ class RealmEditor {
 
     }
 
-    CopyEditedObject(){
-        if (this.#mode != this.#modes.get('editingItem')){
-            console.log('cant begin dragging edited item if no item being edited.');
-            console.log("mode:"+typeof(this.#mode));
-        }
-        const entity = this.#mode.entity;
-        const itemTemplate = entity._templateInstance; 
-        let duplicate = entity._templateInstance.duplicate(); //itemTemplate.duplicate();
-        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20);
-        let copiedEntities = [];
-        duplicate.copies.forEach(copy => {
-            let c = this.InstantiateTemplate({
-                ItemTemplate:copy.Template,
-                position:copy.data.position.clone().add(copyDelta),
-                rotation:copy.data.rotation,
-                properties:copy.data,
-            });
-            console.log("Crea:");
-            console.log(c);
-            copiedEntities.push(c.entity);
-       });
-        if (duplicate.postCopyFn) {
-            console.log("post copy:"+duplicate.postCopyFn);
-            console.log(duplicate);
-            duplicate.postCopyFn(copiedEntities);
-        } else {
-            this.editItem(copiedEntities[0]);
-        }
-        
-    }
+    
 
     mapClicked(){
-        console.log("mapclicked");
         this.#mode.mapClicked();
     }
 

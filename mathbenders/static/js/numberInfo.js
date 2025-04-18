@@ -54,7 +54,8 @@ NumberInfo.prototype.Setup = function() {
         // this.entity.script.create('rigidbodySleep',{attributes:{radius:200}});
         this.ints = [this.int1];
         this.pivot.addChild(sphereText);
-        sphereText.setLocalPosition(0,0,0.51);
+        const zDist = 0.52;
+        sphereText.setLocalPosition(0,0,zDist);
 
         // Can we move the "text" to its own shader so that we don't need Update loop checking 1,000,000 numbers every frame to see if they need to face the player? @Eytan #Performance
 

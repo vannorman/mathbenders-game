@@ -26,7 +26,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
 
     setEntity(entity){
         if (this.entity && this.entity.getGuid()==entity.getGuid()) {
-            console.log("Dupe. return..");
+            // ?? so
         }
         this.entity = entity;
         this.ItemTemplate = entity._templateInstance.constructor;
