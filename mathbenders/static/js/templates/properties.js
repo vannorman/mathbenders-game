@@ -277,6 +277,7 @@ export class CopyProperty extends Property {
             width:30,height:30,textureAsset:assets.textures.ui.builder.copy,
             mouseDown:function(){$this.duplicateTemplate();}, //.CopyEditedObject();},
             text:"Copy",
+            textAnchor:[0.5,1.5,0.5,1.5],
         });
         return copyBtn;
     }
@@ -316,14 +317,17 @@ export class MoveProperty extends Property {
     }
 }
 
-export class NudgeProperty extends Property {
+export class BasicProperties extends Property {
     static icon = null; // blank. Special property where 2 buttons exist on the ring instead of a signle button which pops up a ui.
 
     buildUiButton(){
         const $this = this;
         const container = new pc.Entity();
+
+        // Take up the bottom 20% of the "editItemTray"
         container.addComponent('element',{type:'image',anchor:[0,0,1,0.2],color:pc.Color.RED,opacity:0.2,margin:[0,0,0,0]});
 
+        // Enable rotate left and right for selected item
         function Rotate(args){
             const {texture,amt,anchor,size}=args;
             const rotateLeft = UI.SetUpItemButton({
@@ -340,7 +344,7 @@ export class NudgeProperty extends Property {
         Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.36,.65,.36,.65],size:18});
         Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.4,.4,.4,.4],size:30});
 
-        
+        // Enable nudge move left right up down for selected item 
         const moveIconsParent = new pc.Entity();
         moveIconsParent.addComponent('element',{type:'image',anchor:[0,0,0.2,1],margin:[0,0,0,0],opacity:0.2,color:pc.Color.BLUE});
 
@@ -393,7 +397,18 @@ export class NudgeProperty extends Property {
         MoveIcons({amt:5,size:1.2});
         MoveIcons({amt:0.5,size:0.7});
 
+        // enable copy
+        let copyBtnContainer = new pc.Entity();
+        copyBtnContainer.addComponent('element',{
+            type: 'image',
+            color:pc.Color.GRAY,
+            anchor:[0.7,0,1,1],
+            margin:[0,0,0,0],
+        })
 
+        const copyProperty = new CopyProperty({template:this.template});
+        const copyBtn = copyProperty.buildUiButton({parentEl:copyBtnContainer});
+        container.addChild(copyBtnContainer); 
 
  
         return container;

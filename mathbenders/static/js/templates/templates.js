@@ -2,11 +2,11 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,CopyProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,NudgeProperty} from './properties.js';
+import {PropertyMap,Property,CopyProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
 import HeldItem from './gadgets/heldItem.js';
-const globalProperties = [Property,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,NudgeProperty]; 
+const globalProperties = [Property,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties]; 
 globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {

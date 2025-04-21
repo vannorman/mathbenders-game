@@ -63,18 +63,8 @@ export default class EditItemTray {
             el.setLocalPosition(new pc.Vec3(point.x,point.y+offCenter,0));
         });
 
-        this.copyBtnContainer = new pc.Entity();
-        this.copyBtnContainer.addComponent('element',{
-            type: 'image',
-            color:pc.Color.GRAY,
-
-            anchor:[0.8,0.1,0.8,0.1],
-            width:80,height:30
-        })
-
-        this.entity.enabled = false;
-        this.entity.addChild(this.copyBtnContainer);
-    }
+       this.entity.enabled = false;
+ }
 
 
     buildUiForItem(args){
@@ -93,14 +83,12 @@ export default class EditItemTray {
         const moveBtn = moveProperty.buildUiButton();
         this.buttonContainers[0].addChild(moveBtn);
 
-        const nudgeProperty = new NudgeProperty({template:entity._templateInstance}); 
-        const nudgeBtns = nudgeProperty.buildUiButton();
+        const basicProperties = new BasicProperties({template:entity._templateInstance}); 
+        const nudgeBtns = basicProperties.buildUiButton();
         this.entity.addChild(nudgeBtns);
         this.nudgeBtns = nudgeBtns;
 
-        const copyProperty = new CopyProperty({template:entity._templateInstance});
-        const copyBtn = copyProperty.buildUiButton({parentEl:this.copyBtnContainer});
-        //this.buttonContainers[3].addChild(copyBtn);
+       //this.buttonContainers[3].addChild(copyBtn);
 
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)
