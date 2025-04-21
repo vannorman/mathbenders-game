@@ -152,6 +152,7 @@ const assets = {
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
             },
             builder : {
+                arrow : new pc.Asset("","texture",{ url:"/static/assets/textures/ui/down-arrow.png"}),
                 curved_arrow : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/curved_arrow.png" }),
                 curved_arrow2 : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/curved_arrow2.png" }),
                 copy : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/copy.png" }),

@@ -287,9 +287,11 @@ export class CopyProperty extends Property {
         const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20); // copy "north" from Camera view
         let copiedEntities = [];
         duplicate.copies.forEach(copy => {
+            let p = copy.data.position.clone().add(copyDelta);
+            p = Utils.getGroundPosFromPos(p);
             let c = realmEditor.InstantiateTemplate({
                 ItemTemplate:copy.Template,
-                position:copy.data.position.clone().add(copyDelta),
+                position:p,
                 rotation:copy.data.rotation,
                 properties:copy.data.properties,
             });
@@ -337,12 +339,13 @@ export class BasicProperties extends Property {
                 mouseDown:function(){   $this.template.entity.rotate(amt);    }
             });
         }
+       
         
-        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:45,anchor:[.28,.4,.28,.4],size:30});
-        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:5,anchor:[.32,.65,.32,.65],size:18});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:5,anchor:[.39,.45,.39,.45],size:18});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:45,anchor:[0.4,.65,0.4,.65],size:30});
 
-        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.36,.65,.36,.65],size:18});
-        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.4,.4,.4,.4],size:30});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.6,.65,.6,.65],size:30});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.61,.45,.61,.45],size:18});
 
         // Enable nudge move left right up down for selected item 
         const moveIconsParent = new pc.Entity();
@@ -402,7 +405,7 @@ export class BasicProperties extends Property {
         copyBtnContainer.addComponent('element',{
             type: 'image',
             color:pc.Color.GRAY,
-            anchor:[0.7,0,1,1],
+            anchor:[0.75,0,1,1],
             margin:[0,0,0,0],
         })
 
@@ -410,7 +413,34 @@ export class BasicProperties extends Property {
         const copyBtn = copyProperty.buildUiButton({parentEl:copyBtnContainer});
         container.addChild(copyBtnContainer); 
 
- 
+        // Enable move up and down.
+        let moveUpDownContainer = new pc.Entity();
+        function Move(args){
+            const { anchor, texture, amt, size=30, rotate=false } = args;
+
+            const moveUpDown = UI.SetUpItemButton({
+                parentEl:container,
+                width:size,height:size*.62,textureAsset:texture,
+                anchor:anchor,
+                mouseDown:function(){   
+                    let e = $this.template.entity;
+                    let p = e.getPosition();
+                    p.add(new pc.Vec3(0,amt,0));
+                    e.moveTo(p);
+                    realmEditor.editItem({entity:e,pop:false});
+                }
+            });
+            if (rotate) {
+                moveUpDown.setLocalEulerAngles(0,0,180);
+            }
+
+        }
+        container.addChild(moveUpDownContainer);
+        let moveX = 0.5;
+        Move({texture:assets.textures.ui.builder.arrow,anchor:[moveX,0.85,moveX,0.85],size:15,amt:1,rotate:true});
+        Move({texture:assets.textures.ui.builder.arrow,anchor:[moveX,0.65,moveX,0.65],size:30,amt:20,rotate:true});
+        Move({texture:assets.textures.ui.builder.arrow,anchor:[moveX,0.35,moveX,0.35],size:30,amt:-20});
+        Move({texture:assets.textures.ui.builder.arrow,anchor:[moveX,0.15,moveX,0.15],size:15,amt:-1});
         return container;
     }
 }

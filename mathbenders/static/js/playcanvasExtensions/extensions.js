@@ -17,6 +17,8 @@ pc.CameraComponent.prototype.screenPointToRay = function(x,y){
     return raycastResult;
 }
 
+
+
 pc.Color.ORANGE = new pc.Color(1,0.5,0);
 pc.Color.INDIGO = new pc.Color(0.25,0,0.5);
 pc.Color.VIOLET = new pc.Color(1,0,1);

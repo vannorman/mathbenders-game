@@ -470,8 +470,15 @@ Utils = {
             Utils3.debugSphere({position:entity.getPosition()});
             return -1;
         }
-
-             
+    },
+    getGroundPosFromPos(pos){
+        const result = pc.app.systems.rigidbody.raycastFirst(pos.clone().add(new pc.Vec3(0,400,0)), pos.clone().add(new pc.Vec3(0,-1000,0)));
+        if (result) {
+            return result.point;
+        } else {
+            return pos;
+        }
+         
     },
     adjustMeshToGround(options) {
         // performanceHelp
