@@ -167,7 +167,7 @@ Utils = {
 
         // calc count based on scale and radius
         // lower scale = higher point count
-        if (autoCount) Math.round((degreesToComplete * radius / scale / 60)); 
+        // if (autoCount) Math.round((degreesToComplete * radius / scale / 60)); 
 
         const arcLength = degreesToComplete / count;
         const ret = new Array(count);
@@ -181,8 +181,13 @@ Utils = {
 
 
     GetCircleOfPoints(options={}){
-        const { degreesToComplete=360, radius=150, scale=5 } = options; // lower scale = higher point count
-        const count = Math.round((degreesToComplete * radius / scale / 60));
+        const { count=8, degreesToComplete=360, radius=150, scale=5 } = options; // lower scale = higher point count
+        if (count){
+            
+        } else {
+            count = Math.round((degreesToComplete * radius / scale / 60));
+
+        }
         const arcLength = degreesToComplete / count;
         const ret = new Array(count);
         for (let i=0;i<count;i++){

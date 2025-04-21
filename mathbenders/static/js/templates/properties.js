@@ -297,7 +297,7 @@ export class CopyProperty extends Property {
         if (duplicate.postCopyFn) {
             duplicate.postCopyFn(copiedEntities);
         } else {
-            realmEditor.editItem(copiedEntities[0]);
+            realmEditor.editItem({entity:copiedEntities[0]});
         }
         
     }
@@ -322,7 +322,7 @@ export class NudgeProperty extends Property {
     buildUiButton(){
         const $this = this;
         const container = new pc.Entity();
-        container.addComponent('element');
+        container.addComponent('element',{type:'image',anchor:[0,0,1,0.2],color:pc.Color.RED,opacity:0.2,margin:[0,0,0,0]});
         const rotateLeft = UI.SetUpItemButton({
             parentEl:container,
             width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
@@ -337,6 +337,61 @@ export class NudgeProperty extends Property {
             anchor:[.8,.5,.8,.5],
             mouseDown:function(){   $this.template.entity.rotate(-45);    }
         });
+
+        
+        const moveIconsParent = new pc.Entity();
+        moveIconsParent.addComponent('element',{type:'image',anchor:[0,0,0.2,1],margin:[0,0,0,0],opacity:0.2,color:pc.Color.BLUE});
+
+        function MoveIcons(args){
+            const {amt,size} = args;
+            const moveCirclePoints = Utils.GetCircleOfPoints({count:8,degreesToComplete:360,radius:size*.3,scale:size*.13});
+            let moveIcons = [];
+            let rot = 0;
+            let index = 0;
+            moveCirclePoints.forEach(p=>{
+                // const item = new pc.Entity();
+                // item.addComponent('element',{useInput:true,type:'image',anchor:[0.5,0.5,0.5,0.5],pivot:[0.5,0.5],textureAsset:assets.textures.ui.builder.moveUp,width:20,height:20});
+                let anchor=[0.5+p.x,0.5+p.y,0.5+p.x,0.5+p.y];
+                const a=index;
+                const item = UI.SetUpItemButton({
+                    parentEl:moveIconsParent,
+                    width:size*15,height:size*15,textureAsset:assets.textures.ui.builder.moveUp,
+                    anchor:anchor,
+                    mouseDown:function(){   
+                        var p = $this.template.entity.getPosition().clone();
+
+                        // move item in one of 8 cardinal xz directions, depending on the index
+    //                    let xDir = Math.sin(Math.PI/4 * index);
+    //                    let zDir = Math.sin(Math.PI/4 * (index % 2));
+                        let xDir = Math.sin(Math.PI/4 * a);
+                        let zDir = Math.sin(Math.PI/4 * (a + 2));
+                        console.log("X:"+xDir+", Z:"+zDir+", index;"+a);
+                        let dir = new pc.Vec3();
+                        dir.add(realmEditor.camera.entity.forward.flat().normalize().mulScalar(zDir));
+                        dir.add(realmEditor.camera.entity.right.flat().normalize().mulScalar(xDir));
+                        p.add(dir.mulScalar(amt));
+                        $this.template.entity.moveTo(p);
+                        realmEditor.editItem({entity:$this.template.entity,pop:false});
+
+                    }
+                });
+                index++;
+
+     
+
+                item.setLocalEulerAngles(0,0,rot);
+                rot -= 45;
+
+            //    moveIcons.push(item);
+            })
+            container.addChild(moveIconsParent);
+            moveIconsParent.setLocalPosition(-0.5,0,0);
+        } 
+        
+        MoveIcons({amt:5,size:1.2});
+        MoveIcons({amt:0.5,size:0.7});
+
+
 
         const moveUp = UI.SetUpItemButton({
             parentEl:container,

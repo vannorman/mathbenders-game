@@ -448,10 +448,11 @@ class RealmEditor {
         return instance;
     }
     
-    editItem(entity){
+    editItem(args={}){
+        const {entity,pop=true} = args;
         if (entity){
             this.toggle('editingItem');
-            this.#mode.setEntity(entity);
+            this.#mode.setEntity(entity,pop);
 //            this.#mode.setItemTemplate(ItemTemplate)
         } else {
             console.log("Toggle normal");

@@ -118,7 +118,7 @@ export default class SelectRealmBuilderMode extends RealmBuilderMode {
         super.onMouseUp(e);
         if (this.selectedEntities.length > 0){
             let group = new Group({entities:this.selectedEntities});
-            realmEditor.editItem(group.entity);
+            realmEditor.editItem({entity:group.entity});
         }
     }
     

@@ -172,7 +172,7 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
         this.#instantiatedItem.enableColliders();
         this.#instantiatedItem = null;
         this.dragger.realmEditor.undoRedo.CaptureAndRegisterState();
-        this.dragger.realmEditor.editItem(entity);
+        this.dragger.realmEditor.editItem({entity:entity});
     }
  
 }

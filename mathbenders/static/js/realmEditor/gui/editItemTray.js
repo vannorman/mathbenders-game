@@ -84,6 +84,9 @@ export default class EditItemTray {
         this.propertyBtns.forEach(x=>{x.destroy();x=null;})
         this.propertyBtns = [];
         this.currentProperties.forEach(x=>{x.destroy();x=null;});
+        if (this.nudgeBtns){
+        }
+        this.nudgeBtns?.destroy();
 
         // Build Move and Rotate first.
         const moveProperty = new MoveProperty({entity:entity});
@@ -92,7 +95,8 @@ export default class EditItemTray {
 
         const nudgeProperty = new NudgeProperty({template:entity._templateInstance}); 
         const nudgeBtns = nudgeProperty.buildUiButton();
-        this.buttonContainers[3].addChild(nudgeBtns);
+        this.entity.addChild(nudgeBtns);
+        this.nudgeBtns = nudgeBtns;
 
         const copyProperty = new CopyProperty({template:entity._templateInstance});
         const copyBtn = copyProperty.buildUiButton({parentEl:this.copyBtnContainer});

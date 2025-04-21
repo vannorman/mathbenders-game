@@ -24,7 +24,7 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
     }
 
 
-    setEntity(entity){
+    setEntity(entity,pop=true){
         if (this.entity && this.entity.getGuid()==entity.getGuid()) {
             // ?? so
         }
@@ -34,17 +34,19 @@ export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
         // Note that positions "0" and "3" around the cirlce are already taken.
         let i=1;
         const $this=this;
-        realmEditor.gui.editItemTray.buildUiForItem({ItemTemplate:this.ItemTemplate,entity:entity});
-        this.toggle('poppingIn');
+        if (pop) realmEditor.gui.editItemTray.buildUiForItem({ItemTemplate:this.ItemTemplate,entity:entity});
+        this.toggle('poppingIn',pop);
     }
 
-    toggle(editMode) {
+    toggle(editMode,pop=true) {
         if (!editMode) return;
         if (!this.#modes.has(editMode)) return;
 
-        this.#mode.onExit();
-        this.#mode = this.#modes.get(editMode);
-        this.#mode.onEnter();
+        if (pop){
+            this.#mode.onExit();
+            this.#mode = this.#modes.get(editMode);
+            this.#mode.onEnter();
+        }
 
         // iterate through placed entity editable features
         // foreach feature create a button

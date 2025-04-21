@@ -24,7 +24,7 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
         const itemToEdit = this.realmEditor.gui.editableItemUnderCursor;
         
         if (itemToEdit != null){
-            realmEditor.editItem(this.realmEditor.gui.editableItemUnderCursor);
+            realmEditor.editItem({entity:this.realmEditor.gui.editableItemUnderCursor});
         }
         super.onMouseUp(e);
     }
