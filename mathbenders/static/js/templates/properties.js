@@ -323,20 +323,22 @@ export class NudgeProperty extends Property {
         const $this = this;
         const container = new pc.Entity();
         container.addComponent('element',{type:'image',anchor:[0,0,1,0.2],color:pc.Color.RED,opacity:0.2,margin:[0,0,0,0]});
-        const rotateLeft = UI.SetUpItemButton({
-            parentEl:container,
-            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemLeft,
-            anchor:[.2,.5,.2,.5],
-            mouseDown:function(){   $this.template.entity.rotate(45);    }
-        });
 
-        // Set up Rotate Right button
-        const rotateRight = UI.SetUpItemButton({
-            parentEl:container,
-            width:30,height:30,textureAsset:assets.textures.ui.builder.rotateItemRight,
-            anchor:[.8,.5,.8,.5],
-            mouseDown:function(){   $this.template.entity.rotate(-45);    }
-        });
+        function Rotate(args){
+            const {texture,amt,anchor,size}=args;
+            const rotateLeft = UI.SetUpItemButton({
+                parentEl:container,
+                width:size,height:size,textureAsset:texture,
+                anchor:anchor,
+                mouseDown:function(){   $this.template.entity.rotate(amt);    }
+            });
+        }
+        
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:45,anchor:[.28,.4,.28,.4],size:30});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:5,anchor:[.32,.65,.32,.65],size:18});
+
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.36,.65,.36,.65],size:18});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.4,.4,.4,.4],size:30});
 
         
         const moveIconsParent = new pc.Entity();
@@ -393,55 +395,7 @@ export class NudgeProperty extends Property {
 
 
 
-        const moveUp = UI.SetUpItemButton({
-            parentEl:container,
-            width:18,height:18,textureAsset:assets.textures.ui.builder.moveUp,
-            anchor:[-1,.8,-1,.8],
-            mouseDown:function(){   
-                var p = $this.template.entity.getPosition();
-                p.add(new pc.Vec3(0,0.5,0));
-                $this.template.entity.moveTo(p);
-                realmEditor.editItem($this.template.entity);
-            }
-        });
-
-         const moveUpBig = UI.SetUpItemButton({
-            parentEl:container,
-            width:18,height:18,textureAsset:assets.textures.ui.builder.moveUpBig,
-            anchor:[-.5,.8,-.5,.8],
-            mouseDown:function(){   
-                var p = $this.template.entity.getPosition();
-                p.add(new pc.Vec3(0,10,0));
-                $this.template.entity.moveTo(p);
-                realmEditor.editItem($this.template.entity);
-            }
-        });
-
-        const moveDown = UI.SetUpItemButton({
-            parentEl:container,
-            width:18,height:18,textureAsset:assets.textures.ui.builder.moveDown,
-            anchor:[-1,.2,-1,.2],
-            mouseDown:function(){   
-                var p = $this.template.entity.getPosition();
-                p.add(new pc.Vec3(0,-0.5,0));
-                $this.template.entity.moveTo(p);
-                realmEditor.editItem($this.template.entity);
-            }
-        });
-
-        const moveDownBig = UI.SetUpItemButton({
-            parentEl:container,
-            width:18,height:18,textureAsset:assets.textures.ui.builder.moveDownBig,
-            anchor:[-.5,0.2,-0.5,0.2],
-            mouseDown:function(){   
-                var p = $this.template.entity.getPosition();
-                p.add(new pc.Vec3(0,-10,0));
-                $this.template.entity.moveTo(p);
-                realmEditor.editItem($this.template.entity);
-            }
-        });
-
-  
+ 
         return container;
     }
 }
