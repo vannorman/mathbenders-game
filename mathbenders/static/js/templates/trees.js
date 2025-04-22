@@ -35,9 +35,10 @@ export class Tree1 extends Template {
         tree.setLocalPosition(new pc.Vec3(0,-1,0));
         const col = new pc.Entity("tree collider");
         col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_STATIC});
-        col.addComponent('collision',{type:'cylinder',height:20,radius:2.5});
+        col.addComponent('collision',{type:'cylinder',height:20,radius:1});
+        //  col.addComponent('render',{type:'cylinder',material:Materials.red}); // debug collider position.
         this.entity.addChild(col);
-        col.setLocalPosition(-1.5,0,1);
+        col.setLocalPosition(-.3,0,.3);
         // tree.render.meshInstances[0].material=Materials.brown;
         // tree.render.meshInstances[1].material=Materials.green;
         Game.t = this;

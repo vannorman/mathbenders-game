@@ -96,27 +96,25 @@ class RealmEditor {
     placeTrees(args={}){
         
 
-        const {level=this.currentLevel,numTrees=5} = args;
+        const {terrain=this.currentLevel?.terrain,numTrees=5} = args;
         // Remove other trees on this level.
-
         this.clearTrees();
 
         for(let j=0;j<numTrees;j++){
-            let aabb = level.terrain.entity.render.meshInstances[0].aabb;
+            let aabb = terrain.entity.render.meshInstances[0].aabb;
             let scale = aabb.halfExtents.length();
             let randLocalPos =  Utils3.flattenVec3(Utils.getRandomUnitVector()).mulScalar(scale*0.85);
-            let from = level.terrain.centroid.clone().add(new pc.Vec3(0,100,0)).add(randLocalPos);
+            let from = terrain.centroid.clone().add(new pc.Vec3(0,100,0)).add(randLocalPos);
             let to = from.clone().add(new pc.Vec3(0,-200,0));
             let result = pc.app.systems.rigidbody.raycastFirst(from, to);
 
             if (result) {
                 const pos = result.point;
-                const terrain = level.terrain;
-                console.log('wl: '+terrain.waterLineY+", wlv: "+terrain._data.waterLevel+", to:"+terrain._data.textureOffset);
+                // const terrain = terrain;
                 const waterLevel = terrain.waterLineY; //terrain.centroid.y-terrain._data.textureOffset+terrain._data.waterLevel;
                 if (result.point.y > waterLevel && result.entity.tags._list.includes(Constants.Tags.Terrain)){
                     let obj = this.InstantiateTemplate({
-                        level:level,
+                        level:this.currentLevel,
                         ItemTemplate:Tree1,
                         position:pos,
                         rotation:new pc.Vec3(0,Math.random()*180,0),
@@ -322,13 +320,9 @@ class RealmEditor {
                         rotation:x.rotation,
                     });
                     if (obj == null){
-                        console.log("prob2 w X:"+index);
-                        console.log(x);
 
                     }
                 } catch {
-                    console.log("prob w X:"+index);
-                    console.log(x);
                 } 
                 index++;
 

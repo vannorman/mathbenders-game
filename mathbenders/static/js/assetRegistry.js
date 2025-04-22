@@ -161,6 +161,7 @@ const assets = {
                 undo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/undo.png" }),
                 redo : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/redo.png" }),
                 scaleItem : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/scale.png" }),
+                concretePad : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/concretePad.png" }),
                 concretePadBig : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/concretePadBig.png" }),
                 editTerrain : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconEditTerrain.png" }),
                 portal : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconPortal2.png" }),

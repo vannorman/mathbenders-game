@@ -261,9 +261,9 @@ class CastleWall extends Template {
     }
 }
 
-class BigConcretePad extends Template {
+class ConcretePad extends Template {
     static isStaticCollider = true;
-    static _icon = assets.textures.ui.builder.concretePadBig;
+    static _icon = assets.textures.ui.builder.concretePad;
     static propertiesMap = [
          new PropertyMap({  
             // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
@@ -297,6 +297,8 @@ class BigConcretePad extends Template {
     updateHalfExtents(){
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
     }
+
+    static defaultScale = new pc.Vec3(10,10,10);
     setup(args={}){
         const pad = new pc.Entity("concrete pad");
         pad.addComponent("render", {  type: "box" }); 
@@ -307,12 +309,18 @@ class BigConcretePad extends Template {
         mat.update();
 
         this.pad = pad;
-        this.scale = new pc.Vec3(10,10,10);
+        this.scale = this.constructor.defaultScale; // new pc.Vec3(10,10,10); //this.defaultScale;
         this.entity.addChild(pad);
 
     }
 
 }
+
+class BigConcretePad extends ConcretePad { 
+    static _icon = assets.textures.ui.builder.concretePadBig;
+    static defaultScale = new pc.Vec3(50,20,50);
+}
+
 
 class NumberCube extends Template {
 
@@ -556,6 +564,7 @@ window.templateNameMap = {
     "PlayerPortal" : PlayerPortal,
     "CastleTurret" : CastleTurret,
     "CastleWall" : CastleWall,
+    "ConcretePad" : ConcretePad,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
     "SwordPickup" : SwordPickup,

@@ -54,7 +54,7 @@ export class Group extends Template {
             postCopyFn:(entities)=>{
                 console.log(`Copying group`);
                 let group = new Group({entities:entities});
-                realmEditor.editItem(group.entity);
+                realmEditor.editItem({entity:group.entity,pop:true});
             }
         };
     }

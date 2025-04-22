@@ -298,6 +298,7 @@ export class CopyProperty extends Property {
             copiedEntities.push(c.entity);
        });
         if (duplicate.postCopyFn) {
+            console.log(duplicate.postCopyFn);
             duplicate.postCopyFn(copiedEntities);
         } else {
             realmEditor.editItem({entity:copiedEntities[0]});

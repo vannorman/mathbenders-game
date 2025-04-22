@@ -10,13 +10,13 @@ export default class Terrain {
         let data = {
             name : "New Terrain", 
             heightTruncateInterval : Math.random()*.1, // 0 : smooth, 1 : blocky
-            textureOffset : 32,
+            waterLine : 32,
+            snowLine : 30,
             heightScale : Math.random()*0.5+0.5, // how tall hills
             seed : Math.random(),  
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
             sampleResolution : Math.random()/100, // higher values : more coarse terrain
             size : 128 + Math.round(Math.random()*128),
-            waterLevel : 1,
             resolution:.09 + Math.random()*.05,
             // Overlay a second terrain
             resolution2 : 0,
@@ -39,11 +39,15 @@ export default class Terrain {
     }
 
     get waterLineY(){
-        return this.centroid.y - this._data.textureOffset + Terrain.baseTextureOffset;
+        return this.centroid.y + this._data.waterLine + Terrain.baseTextureOffset;
     }
-    static baseTextureOffset = 32; 
+    static baseTextureOffset = -32; 
     postGenerationFunction() { 
-        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y-this._data.textureOffset+Terrain.baseTextureOffset,waterLevel:this._data.waterLevel});
+        const mat = Shaders.GrassDirtByHeight({
+            yOffset:this.centroid.y+this._data.waterLine+Terrain.baseTextureOffset,
+            snowLine:this._data.snowLine
+            // waterLevel:this._data.waterLevel
+        });
         this.entity.render.meshInstances[0].material = mat;
     }
     
@@ -73,9 +77,12 @@ export default class Terrain {
     
     generate(source="none"){
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
-        this.realmEditor.clearTrees();
+        // this.realmEditor.clearTrees();
         this.entity = TerrainGenerator.Generate(this.data);
         this.postGenerationFunction();
+        const $this = this;
+        // setTimeout(function(){$this.realmEditor.placeTrees({numTrees:$this.data.trees})},100);
+        // Don't place trees because it will reset trees every time .. only reset trees when user slides the slider.
         //setTimeout(function(){realmEditor.placeTrees({numTrees:1})},100);
     }
    

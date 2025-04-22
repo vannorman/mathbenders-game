@@ -161,7 +161,11 @@ export default class TerrainGui {
             colorOn:pc.Color.GREEN,
             text:"Globals",
             colorOff:pc.Color.BLUE,
-            mouseDown:function(){realmEditor.gui.terrain.seconds.enabled=false;realmEditor.gui.terrain.globals.enabled=true;console.log('globals on/off');},
+            mouseDown:function(){
+                realmEditor.gui.terrain.seconds.enabled=false;
+                realmEditor.gui.terrain.globals.enabled=true;
+               // console.log('globals on/off');
+            },
             cursor:'pointer',
         });
 
@@ -178,14 +182,16 @@ export default class TerrainGui {
         this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale = CreateTerrainEditingSlider({key:'heightScale',maxVal:4,minStep:0.02});
         this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingSlider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
-        this.#TerrainTools.textureOffset = CreateTerrainEditingSlider({key:'textureOffset',maxVal:64,minStep:1});
+        this.#TerrainTools.waterLine = CreateTerrainEditingSlider({key:'waterLine',maxVal:128,minStep:1});
+        this.#TerrainTools.snowLine = CreateTerrainEditingSlider({key:'snowLine',maxVal:512,minStep:1});
         globals.addChild(this.#TerrainTools.size.group);
         globals.addChild(this.#TerrainTools.dimension.group);
         globals.addChild(this.#TerrainTools.seed.group);
         globals.addChild(this.#TerrainTools.resolution.group);
         globals.addChild(this.#TerrainTools.heightScale.group);
         globals.addChild(this.#TerrainTools.heightTruncateInterval.group);
-        globals.addChild(this.#TerrainTools.textureOffset.group);
+        globals.addChild(this.#TerrainTools.waterLine.group);
+        globals.addChild(this.#TerrainTools.snowLine.group);
 //        this.#TerrainTools.spacer = spacer();
 
 
@@ -201,7 +207,7 @@ export default class TerrainGui {
             pivot:[0.5,0],
             mouseDown:function(){
                 realmEditor.gui.terrain.seconds.enabled=true;realmEditor.gui.terrain.globals.enabled=false;
-                console.log('seconds on/off');},
+                },
             cursor:'pointer',
         });
         this.toggleSeconds=toggleSeconds;
@@ -213,6 +219,8 @@ export default class TerrainGui {
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
         const treeChangeFn =(val)=>{
             // console.log('t?'+val);
+            const curTer = realmEditor.currentLevel.terrain;
+            curTer.data['trees'] = val;
             realmEditor.placeTrees({numTrees:val})
         }
         this.#TerrainTools.trees = CreateTerrainEditingSlider({onChangeFn:treeChangeFn,key:'trees',maxVal:2000,minStep:1});

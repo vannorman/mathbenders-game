@@ -304,8 +304,11 @@ var Shaders = {
         return material;
     },
     GrassDirtByHeight(options={}) {
-        const {yOffset=0,waterLevel=1}=options;
-        console.log("yof:"+yOffset);
+        const {
+            yOffset=0, // waterlevel set here
+            snowLine=30,
+            // waterLevel=1
+        }=options;
         let material = new pc.StandardMaterial(); // StandardMaterial gives shadows but doesn't let you set textures.
         // Solution: Create standard material, then overwrite materials.chunks.diffusePS and material.chunks.startVS 
         // But, we need to start with playcanvas's original diffuseos/startvs since we cant just overwrite it with our random one
@@ -323,7 +326,8 @@ var Shaders = {
             uniform sampler2D uTexture1;
             uniform sampler2D uTexture2;
             uniform sampler2D uTexture3;
-            uniform float uWaterLevel;
+            // uniform float uWaterLevel;
+            uniform float uSnowLine;
             varying vec2 uvv;
             uniform float uTime;
             uniform float uYoffset;
@@ -337,7 +341,7 @@ var Shaders = {
                              cos(vPositionW.z  + uTime/300.0 * 0.7) * 0.1;
                 float blueShade = 0.5 + wave * 0.5; // Keep within range [0,1]
                 vec3 waterColor = vec3(0.0, 0.0, blueShade); 
-                if (y < uWaterLevel) { // Water
+                if (y < 0.0){ // uWaterLevel) { // Water
                     vec2 uv = vPositionW.xz / 15.0;
                     color = vec4(waterColor, 1.0);
                     // color = texture2D(uTexture3, uv);
@@ -350,7 +354,7 @@ var Shaders = {
                     vec4 color1 = texture2D(uTexture1, uv);
                     vec4 color2 = texture2D(uTexture2, uv);
                     color = mix(color1, color2, t); // mix the colors based on vY
-                } else if (y < 30.0) { // Rock
+                } else if (y < uSnowLine) { // Rock
                     vec2 uv = vPositionW.xz / 15.0;
                     color = texture2D(uTexture2, uv);
                 } else { // Snow
@@ -368,7 +372,9 @@ var Shaders = {
         material.setParameter('uTexture2',assets.textures.terrain.dirt.resource);
         material.setParameter('uTexture3',assets.textures.terrain.water.resource);
         material.setParameter('uYoffset',yOffset);
-        material.setParameter('uWaterLevel',waterLevel);
+        material.setParameter('uSnowLine',snowLine);
+        // material.setParameter('uWaterLevel',waterLevel);
+        
         pc.app.on('update',function(dt){
             material.setParameter('uTime',pc.app._time);
         });

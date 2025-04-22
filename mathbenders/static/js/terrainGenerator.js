@@ -63,7 +63,6 @@ TerrainGenerator = {
     },
     SecondLayerWithExponentialHeights(options){
         const {exp,heights,dim,resolution2,heightScale2} = options;
-        console.log(options);
         // Second layer of heights
         const heights2d2 = perlin.get2dPerlinArr({
             dim:dim,

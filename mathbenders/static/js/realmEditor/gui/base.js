@@ -359,7 +359,7 @@ export default class GUI {
                     anchor:[.05,.95,.05,.95],
                     selectedColor: new pc.Color(0, 1, 0),
                     onClick: () => {
-                        console.log("button A was clicked")
+                        // console.log("button A was clicked")
                         realmEditor.toggle('normal');
                     }
                 },
@@ -372,7 +372,7 @@ export default class GUI {
                     selectedColor: new pc.Color(0, 1, 0),
                     onClick: () => {
                         realmEditor.toggle('select');
-                        console.log("button B was clicked")
+                        // console.log("button B was clicked")
                     }
                 }
             ]
@@ -433,6 +433,7 @@ export default class GUI {
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
                     { ItemTemplate:CastleTurret } ,
                     { ItemTemplate:CastleWall } ,
+                    { ItemTemplate:ConcretePad} ,
                     { ItemTemplate:BigConcretePad} ,
                     { ItemTemplate:Tree1} ,
             ],}));
