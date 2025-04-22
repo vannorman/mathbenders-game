@@ -10,7 +10,7 @@ export default class Terrain {
         let data = {
             name : "New Terrain", 
             heightTruncateInterval : Math.random()*.1, // 0 : smooth, 1 : blocky
-            textureOffset : 0,
+            textureOffset : 32,
             heightScale : Math.random()*0.5+0.5, // how tall hills
             seed : Math.random(),  
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
@@ -22,6 +22,7 @@ export default class Terrain {
             resolution2 : 0,
             heightScale2 : 0,
             exp : 0,
+            trees : 10,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
        const { realmEditor } = args;
@@ -31,14 +32,18 @@ export default class Terrain {
                 data[k] = args.data[k];
             });
         }
+       
 
-        // data.textureOffset -= 128; // normalize 0-256 range to -128 to 128; shouldn't be hardcoded here but i don't have <0 range for this slider yet
         this._data = data;
         this.placeTreeFn = null;
     }
 
+    get waterLineY(){
+        return this.centroid.y - this._data.textureOffset + Terrain.baseTextureOffset;
+    }
+    static baseTextureOffset = 32; 
     postGenerationFunction() { 
-        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y+this._data.textureOffset,waterLevel:this._data.waterLevel});
+        const mat = Shaders.GrassDirtByHeight({yOffset:this.centroid.y-this._data.textureOffset+Terrain.baseTextureOffset,waterLevel:this._data.waterLevel});
         this.entity.render.meshInstances[0].material = mat;
     }
     

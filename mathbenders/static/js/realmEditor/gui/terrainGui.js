@@ -172,13 +172,13 @@ export default class TerrainGui {
        this.screen.addChild(globals);
        this.globals=globals;
 
-        this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:512,minStep:10});
+        this.#TerrainTools.size= CreateTerrainEditingSlider({key:'size',minVal:16,maxVal:1024,minStep:10});
         this.#TerrainTools.dimension = CreateTerrainEditingSlider({key:'dimension',maxVal:128,minStep:1});
         this.#TerrainTools.seed = CreateTerrainEditingSlider({key:'seed',maxVal:1.0,minStep:.001,precision:3});
         this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale = CreateTerrainEditingSlider({key:'heightScale',maxVal:4,minStep:0.02});
         this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingSlider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
-        this.#TerrainTools.textureOffset = CreateTerrainEditingSlider({key:'textureOffset',maxVal:256,minStep:1});
+        this.#TerrainTools.textureOffset = CreateTerrainEditingSlider({key:'textureOffset',maxVal:64,minStep:1});
         globals.addChild(this.#TerrainTools.size.group);
         globals.addChild(this.#TerrainTools.dimension.group);
         globals.addChild(this.#TerrainTools.seed.group);
@@ -212,8 +212,10 @@ export default class TerrainGui {
         this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
         const treeChangeFn =(val)=>{
-            realmEditor.placeTrees({numTrees:val})}
-        this.#TerrainTools.trees = CreateTerrainEditingSlider({onChangeFn:treeChangeFn,key:'trees',maxVal:200,minStep:1});
+            // console.log('t?'+val);
+            realmEditor.placeTrees({numTrees:val})
+        }
+        this.#TerrainTools.trees = CreateTerrainEditingSlider({onChangeFn:treeChangeFn,key:'trees',maxVal:2000,minStep:1});
         seconds.addChild(this.#TerrainTools.resolution2.group);
         seconds.addChild(this.#TerrainTools.heightScale2.group);
         seconds.addChild(this.#TerrainTools.exp.group);
@@ -260,9 +262,11 @@ export default class TerrainGui {
         // console.log('update ter val from:'+source);
         Object.keys(this.#TerrainTools).forEach(key=>{
             // relies on terrain tools keys having same name as terrain data keys
-            if (terrainData[key]){
+            if (key in terrainData){
                 const val = terrainData[key] / this.#TerrainTools[key]._maxVal; 
                 this.#TerrainTools[key].SetVal({resultX:val,fireOnChangeFn:false});
+            } else {
+                // console.log("terdatakey not exist:"+key);
             }
         });
     } 

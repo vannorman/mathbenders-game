@@ -305,7 +305,7 @@ var Shaders = {
     },
     GrassDirtByHeight(options={}) {
         const {yOffset=0,waterLevel=1}=options;
-
+        console.log("yof:"+yOffset);
         let material = new pc.StandardMaterial(); // StandardMaterial gives shadows but doesn't let you set textures.
         // Solution: Create standard material, then overwrite materials.chunks.diffusePS and material.chunks.startVS 
         // But, we need to start with playcanvas's original diffuseos/startvs since we cant just overwrite it with our random one

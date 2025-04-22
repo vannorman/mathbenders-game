@@ -61,10 +61,12 @@ class LoginWeb {
               .then((data) => {
 //                    console.log('hi');
 //                    console.log(data);
+                try { 
                     data.levels.forEach(realm=>{
-                    realms.push(realm);
-                    // $('#levels').append("<li>Level:"+realm.name);
-                });
+                        realms.push(realm);
+                        // $('#levels').append("<li>Level:"+realm.name);
+                    });
+                } catch { console.log( "No levels for this user"); }
                 // Redirect or take other actions if needed
                 if (typeof(callback)==='function'){
                     callback(realms);

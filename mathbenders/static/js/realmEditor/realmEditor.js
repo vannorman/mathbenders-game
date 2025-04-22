@@ -112,8 +112,8 @@ class RealmEditor {
             if (result) {
                 const pos = result.point;
                 const terrain = level.terrain;
-
-                const waterLevel = terrain.centroid.y+terrain._data.textureOffset+terrain._data.waterLevel;
+                console.log('wl: '+terrain.waterLineY+", wlv: "+terrain._data.waterLevel+", to:"+terrain._data.textureOffset);
+                const waterLevel = terrain.waterLineY; //terrain.centroid.y-terrain._data.textureOffset+terrain._data.waterLevel;
                 if (result.point.y > waterLevel && result.entity.tags._list.includes(Constants.Tags.Terrain)){
                     let obj = this.InstantiateTemplate({
                         level:level,
