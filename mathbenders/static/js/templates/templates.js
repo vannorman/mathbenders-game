@@ -2,11 +2,12 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,CopyProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
+import {PropertyMap,Property,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
+import {Spikey,SpikeyGroup} from './monsters/spikey.js';
 import HeldItem from './gadgets/heldItem.js';
-const globalProperties = [Property,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties]; 
+const globalProperties = [Property,QuantityProperty,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties]; 
 globalProperties.forEach(x=>{window[x.name]=x});
 
 class NumberHoop extends Template {
@@ -570,6 +571,8 @@ window.templateNameMap = {
     "SwordPickup" : SwordPickup,
     "Tree1" : Tree1,
     "Group" : Group,
+    "Spikey" : Spikey,
+    "SpikeyGroup" : SpikeyGroup,
 }
 
 // Export all templates to global scope for use in rest of app

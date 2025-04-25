@@ -1,7 +1,7 @@
 var CreatureSpikey = pc.createScript('creatureSpikey');
 // Used for pickup detection and fx only
 
-CreatureSpikey.attributes.add('onPickupFn', { type: 'object' });
+// CreatureSpikey.attributes.add('onPickupFn', { type: 'object' });
 CreatureSpikey.attributes.add('type', { type: 'string', default:'none' });
 CreatureSpikey.attributes.add('subCreatureSpikey', { type: 'object'});
 CreatureSpikey.attributes.add('movementRange', { type: 'number', default: 10 });
@@ -15,7 +15,24 @@ CreatureSpikey.prototype.initialize = function(){
     this.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_DYNAMIC});
     this.entity.script.create('numberInfo',{attributes:{type:NumberInfo.Sphere}});
 
-//    this.subCreatureSpikey.name = this.subCreatureSpikey.entity.name + "script";
+
+    this.growlFn=(pos)=>{
+        AudioManager.play({
+            source:PickRandomFromObject(assets.sounds.spikeySounds),
+            position:pos,
+            positional:true
+        });
+    }
+
+
+    // From Prefabs
+    let icosphere = assets.models.icosphere.resource.instantiateRenderEntity();
+    ApplyTextureAssetToEntity({entity:this.entity,textureAsset:assets.textures.gadget});
+    this.entity.addChild(icosphere);
+
+    
+
+    // this.subCreatureSpikey.name = this.subCreatureSpikey.entity.name + "script";
 }
 
 CreatureSpikey.CreateGroup = function(pos,count){

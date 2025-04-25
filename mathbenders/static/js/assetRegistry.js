@@ -138,6 +138,7 @@ const assets = {
             numberSpherePos: new pc.Asset("numberSpherePos", "texture", { url: "/static/assets/textures/ui/numberSpherePos.png", }),
             numberSphereNeg: new pc.Asset("numberSphereNeg", "texture", { url: "/static/assets/textures/ui/numberSphereNeg.png", }),
             icons : {
+                spikey : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/spikey.png", }),
                 trees : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/trees.png", }),
                 fraction : new pc.Asset("", "texture", { url: "/static/assets/textures/ui/fraction.jpg", }),
                 bow : new pc.Asset("iconBow", "texture", { url: "/static/assets/textures/ui/iconBow.png", }),
@@ -175,6 +176,7 @@ const assets = {
                 changeMapBtn : new pc.Asset("editItemBackboard", "texture", {url : "/static/assets/textures/ui/changeMapBtn.png" }),
                 editItemBackboard: new pc.Asset("editItemBackboard", "texture", {url : "/static/assets/textures/ui/builder_gui_edit_item_backboard.png" }),
                 moveItem: new pc.Asset("moveItem","texture",{ url: "/static/assets/textures/ui/builder_moveItem.png" }),
+                quantity : new pc.Asset("","texture",{ url: "/static/assets/textures/ui/quantity.png" }),
                 rotateItemLeft: new pc.Asset("rotateItemLeft","texture",{ url: "/static/assets/textures/ui/builder_rotate_item_left.png" }),
                 rotateItemRight: new pc.Asset("rotateItemRight","texture",{ url: "/static/assets/textures/ui/builder_rotate_item_right.png" }),
                 moveUp: new pc.Asset("","texture",{ url: "/static/assets/textures/ui/builder_move_up.png" }),

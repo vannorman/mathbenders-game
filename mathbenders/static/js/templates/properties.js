@@ -139,6 +139,13 @@ export class Property {
         return upBtn;
     }
 
+    static downBtn(){
+        const downBtn = Property.upBtn;
+        downBtn.element.color = new pc.Color(0.2,0.2,0.8);
+        downBtn.element.anchor = [0.7, 0.5, 0.7, 0.5];
+        return downBtn;
+    }
+
     static text(args){
         const text = new pc.Entity();
         const {
@@ -313,10 +320,51 @@ export class MoveProperty extends Property {
     buildUiButton(){
         const moveButton = UI.SetUpItemButton({
             parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
-            width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
-            mouseDown:function(){realmEditor.BeginDraggingEditedObject();} 
+            width:30,height:30,
+            textureAsset:this.constructor.icon,
+            mouseDown:function(){
+                realmEditor.BeginDraggingEditedObject();
+            } 
         });
         return moveButton;
+    }
+}
+
+export class QuantityProperty extends Property {
+    static icon = assets.textures.ui.builder.quantity;
+
+    buildUi(){
+        const $this = this;
+        const panel = Property.panel();
+        const qtyText = Property.text({parent:panel});
+
+        function setQtyText(qty){
+            qtyText.element.text = qty.toString();
+        }
+        setQtyText(this.getCurValFn($this.template));
+ 
+        const upBtn = Property.upBtn(); // why don't i use the "new" keyword .. can this be another class?
+        upBtn.element.on('mousedown',function(){
+            let curQty = $this.getCurValFn($this.template);
+            let newQty = curQty+1;
+            $this.onChangeFn($this.template,newQty);
+            setQtyText(newQty);
+        });
+
+        const downBtn = Property.upBtn(); // why don't i use the "new" keyword .. can this be another class?
+        downBtn.element.on('mousedown',function(){
+            let curQty = $this.getCurValFn($this.template);
+            let newQty = curQty-1;
+            $this.onChangeFn($this.template,newQty);
+            setQtyText(newQty);
+        });
+
+        panel.addChild(upBtn);
+        panel.addChild(downBtn);
+ 
+        this.ui=panel;
+        console.log("p2");
+        console.log(panel); 
     }
 }
 

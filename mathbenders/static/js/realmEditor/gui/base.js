@@ -427,6 +427,7 @@ export default class GUI {
             new BuilderPanel({ gui:this,  name:"Numbers", items : [
                     { ItemTemplate:NumberFaucet },
                     { ItemTemplate:NumberWall },
+                    { ItemTemplate:SpikeyGroup },
                    // { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
                    //  { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
