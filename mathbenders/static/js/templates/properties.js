@@ -140,7 +140,7 @@ export class Property {
     }
 
     static downBtn(){
-        const downBtn = Property.upBtn;
+        const downBtn = Property.upBtn();
         downBtn.element.color = new pc.Color(0.2,0.2,0.8);
         downBtn.element.anchor = [0.7, 0.5, 0.7, 0.5];
         return downBtn;
@@ -351,7 +351,7 @@ export class QuantityProperty extends Property {
             setQtyText(newQty);
         });
 
-        const downBtn = Property.upBtn(); // why don't i use the "new" keyword .. can this be another class?
+        const downBtn = Property.downBtn(); // why don't i use the "new" keyword .. can this be another class?
         downBtn.element.on('mousedown',function(){
             let curQty = $this.getCurValFn($this.template);
             let newQty = curQty-1;

@@ -1,3 +1,12 @@
+.fix rigidbody state / save it and load it on levelbuilder start/stop.
+
+class TemplateState {
+    rigidbodyType,
+    colliderType
+}
+
+this.entity.colliders.forEach(x=>{this.physicalState[collider]=new TemplateState({rigidbody:static,collision:normal})})
+
 export default class Template {
 
     static _icon;
@@ -114,6 +123,7 @@ export default class Template {
     }
 
     enableColliders(){
+        // Need to store both the rigidbody state and collision state.
         for (const [colliderComponent, activeState] of this.colliders) {
             if (activeState) colliderComponent.enabled = true;
         }

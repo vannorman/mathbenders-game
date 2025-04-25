@@ -93,7 +93,6 @@ export default class EditItemTray {
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)
         ItemTemplate.propertiesMap.forEach(x => {
-            console.log(x);
             const property = new x.property({
                 template:entity._templateInstance, 
                 onChangeFn:x.onChangeFn,
@@ -104,7 +103,6 @@ export default class EditItemTray {
             });
 
             property.buildUi();
-            console.log(property);
             property.hideUi();
 
             // reparent ui to container's parent and position it over all siblings from parent
