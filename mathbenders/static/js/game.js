@@ -31,7 +31,7 @@ class GameManagerClass {
     }
 
     unsubscribe(listener) {
-        this.listeners = this.listeners.filter(l => l !== listener);
+        this.listeners = this.listeners.filter(x => {return x.listener != listener});
     } 
 }
 

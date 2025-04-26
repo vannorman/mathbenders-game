@@ -5,7 +5,6 @@ import { Multiblaster } from './gadgets/multiblaster.js';
 import {PropertyMap,Property,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
-import {Spikey,SpikeyGroup} from './monsters/spikey.js';
 import HeldItem from './gadgets/heldItem.js';
 const globalProperties = [Property,QuantityProperty,MoveProperty,CopyProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties]; 
 globalProperties.forEach(x=>{window[x.name]=x});
@@ -54,7 +53,6 @@ class NumberHoop extends Template {
 
     get fraction(){ return this.script.fraction; }
     set fraction(value) { this.script.setFraction(value); }
-
 }
 
 class NumberFaucet extends Template {
@@ -426,7 +424,7 @@ class NumberSphereGfxOnly extends Template {
 
 }
 
-class NumberSphere extends Template {
+export class NumberSphere extends Template {
     static _icon = assets.textures.ui.numberSpherePos;
     static _icon_neg = assets.textures.ui.numberSphereNeg;
     static icon(properties){
@@ -550,6 +548,223 @@ class SwordPickup extends GadgetPickup {
 }
 
 
+// Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
+class Spikey extends NumberSphere {
+    static _icon = assets.textures.ui.icons.spikey;
+    timer = 0; 
+    //growlFn=(pos)=>{console.log("growl:"+pos);};
+    originPoint=pc.Vec3.ZERO;
+    movementRange=5;
+    currentDirection=pc.Vec3.ZERO;
+    setup(args={}){
+        super.setup(args);
+    }
+    constructor(args={}){
+        super(args);
+
+        let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
+        this.entity.addChild(spikeyClothes);
+        spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
+        this.originPoint = this.entity.getPosition();
+
+        const $this=this;
+        $this.growlFn=(pos)=>{
+            AudioManager.play({
+                source:PickRandomFromObject(assets.sounds.spikeySounds),
+                position:pos,
+                positional:true
+            });
+        }
+
+        pc.app.on('update',this.update,this);
+
+    }
+
+    get randomInterval(){
+        const i = Math.random() * 3 + 2; // Random interval between 2-5 seconds
+        return i;
+
+    }
+
+
+    update(dt){
+        this.timer -= dt;
+        // If the timer reaches zero, change direction and reset timer
+        if (this.timer <= 0) {
+            this.growlFn(this.entity.getPosition());
+            this.currentDirection = new pc.Vec3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
+            this.timer = this.randomInterval * 5;
+        }
+
+        // Give it a chance to redirect efforts toward player, if player is close enough
+        var distToPlayer = Player.entity.getPosition().sub(this.entity.getPosition()).length();
+        if (distToPlayer < 10){
+            this.currentDirection = Player.entity.getPosition().sub(this.entity.getPosition()).normalize();
+        }
+
+        // Calculate distance from origin point
+        var distance = this.entity.getPosition().sub(this.originPoint).length();
+        // If creature is too far from origin, move towards it
+        if (distance > this.movementRange) {
+            this.currentDirection = this.originPoint.clone().sub(this.entity.getPosition()).normalize();
+        }
+
+
+        // Apply force in the current direction of movement
+
+        var force = 1 * dt;// (10*dt); // You can adjust the force value
+        this.entity.rigidbody.applyForce(this.currentDirection.clone().normalize().mulScalar(force));
+    }
+
+    entityWasDestroyed(){
+        super.entityWasDestroyed();
+        pc.app.off('update',this.update,this);
+    }
+
+
+
+}
+
+
+class SpikeyGroup extends Template {
+    static _icon = assets.textures.ui.icons.spikey;
+    _quantity = 1;
+    range=5;
+    setup(args={}){}
+    static propertiesMap = [
+         new PropertyMap({  
+            name : QuantityProperty.constructor.name,
+            property : QuantityProperty,
+            onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
+            getCurValFn : (template) => { return template.quantity },
+            min:1,
+            max:7,
+         }),
+    ];
+
+    get quantity(){ 
+        return this._quantity;
+    }
+    set quantity(value) { 
+        this._quantity = value;
+    }
+    Rebuild(){
+        this.DestroyGroup();
+        this.CreateGroup();
+    }
+
+    DestroyGroup(){
+        this.entity.destroy();
+    }
+
+    gatherLooseRigidbodies(){
+        console.log(this.spikeys);
+        this.spikeys.forEach(x=>{
+            x.entity.moveTo(this.randomSpikeyPos);
+            if (x.entity.rigidbody){
+                x.entity.rigidbody.linearVelocity=pc.Vec3.ZERO;
+                x.entity.rigidbody.angularVelocity=pc.Vec3.ZERO;
+
+            }
+        });
+        // if they fell away, reset them to be close to the center of the group
+    }
+    onBeginDragByEditor(){
+        super.onBeginDragByEditor();
+        this.freezeRigidbodies(); 
+        this.gatherLooseRigidbodies();
+    }
+    onEndDragByEditor(){
+        super.onEndDragByEditor();
+        this.unfreezeRigidbodies(); 
+    }
+
+    CreateGroup(q){
+        this.spikeys=[];
+        for (let i=0;i<this._quantity;i++){
+            let p = this.randomSpikeyPos;
+            let s = new Spikey({position:p});
+            this.entity.addChild(s.entity);
+            this.spikeys.push(s);
+            //s.moveTo(p); // addchild changes local pos?
+        } 
+    }
+
+    get randomSpikeyPos(){
+        let p = this.entity.getPosition().clone().add(new pc.Vec3(0,10,0));
+        p.add(pc.Vec3.onUnitSphere().clone().flat().mulScalar(this.range));
+        return p;
+    }
+
+    freezeRigidbodies(){
+        this.spikeys.forEach(x=>{
+            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_STATIC;
+        });
+    }
+    
+    unfreezeRigidbodies(){
+        console.log('unf');
+        this.gatherLooseRigidbodies();
+        this.spikeys.forEach(x=>{
+            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_DYNAMIC;
+            x.originPoint = x.entity.getPosition();
+        });
+    }
+
+    constructor(args){
+        super(args);
+        this.CreateGroup();
+        console.log("created?")
+        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition()});
+        this.entity.addChild(visibleSpikey.entity);
+        let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
+        visibleSpikey.entity.addChild(spikeyClothes);
+        let s = 3;
+        visibleSpikey.entity.setLocalScale(s,s,s);
+        visibleSpikey.entity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(s/2,s/2,s/2)});
+        visibleSpikey.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
+        visibleSpikey.entity.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,3,0)));
+        this.visibleSpikey=visibleSpikey;
+
+        pc.app.on('update',this.update,this);
+    }
+
+    entityWasDestroyed(){
+        super.entityWasDestroyed();
+
+        
+        this.spikeys.forEach(x=>{x.entity.destroy()});
+        this.spikeys=[];
+        pc.app.off('update',this.update);
+    }
+
+    tick=0;
+    update(dt){
+        this.tick++;
+        if (this.tick > 105){
+            this.tick=0;
+            this.spikeys.forEach(x=>{
+                if (pc.Vec3.distance(x.entity.getPosition(),this.entity.getPosition()) > this.range * 10){
+                    x.entity.moveTo(this.randomSpikeyPos);
+                    x.entity.rigidbody.linearVelocity=pc.Vec3.ZERO;
+                    x.entity.rigidbody.angularVelocity=pc.Vec3.ZERO;
+
+                }
+            });
+        }
+    }
+    
+    onGameStateChange(state){
+        super.onGameStateChange(state);
+        switch(state){
+        case GameState.RealmBuilder: this.visibleSpikey.entity.enabled=true; break;
+        case GameState.Playing: this.visibleSpikey.entity.enabled=false; this.gatherLooseRigidbodies(); break;
+        default:break;
+        }
+
+    }
+
+}
 
 
 

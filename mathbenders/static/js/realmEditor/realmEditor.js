@@ -161,13 +161,15 @@ class RealmEditor {
         switch(state){
         case GameState.RealmBuilder:
             this.enable();
-            if (!this.#UpdateInitialized){
-                this.#UpdateInitialized=true;
-                pc.app.on('update',function(dt){realmEditor.update(dt);}); // weird; if I use "this" it loops infinite
+            // if (!this.#UpdateInitialized){
+             //   this.#UpdateInitialized=true;
+                pc.app.on('update',this.update,this);
+               // function(dt){realmEditor.update(dt);}); // weird; if I use "this" it loops infinite
                 
-            }
+            //}
             break;
         case GameState.Playing:
+            pc.app.off('update',this.update,this);
             this.ConnectPortals();
             this.disable();
             break;
@@ -259,6 +261,7 @@ class RealmEditor {
     onMouseUp(e) {
         if (!this.#isEnabled) return;
         this.#mode.onMouseUp();
+
     }
 
     onMouseDown(e) {
@@ -280,7 +283,6 @@ class RealmEditor {
     }
 
     update(dt) {
-        // console.log("update new");
         if (this.mode ) this.mode.update(dt);
         this.camera.update(dt);
         if (pc.app.keyboard.wasPressed(pc.KEY_H) || pc.app.keyboard.wasPressed(pc.KEY_Q)){

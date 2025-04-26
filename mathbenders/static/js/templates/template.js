@@ -62,19 +62,21 @@ export default class Template {
         this.name = this.constructor.name;
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
+        this.setup(args);// All templates need to be "setup" BEFORE updateColliderMap is called. But, this leads to "this" confusion between superclass and subclass; SomeClass extends Template { setup() } cannot refer to the "this" of that local class.
         if (properties) {
             this.setProperties(properties);
         }
-        this.updateColliderMap();
+        this.updateColliderMap(); // All templates need to have their colliders registered. I don't want to do this in each indivdually.
         this.entity._templateInstance = this; // partial, incomplete ref
         GameManager.subscribe(this,this.onGameStateChange);
         this.entity.on('destroy',this.entityWasDestroyed,this);
-        this.setup(args);
 
     }
 
     entityWasDestroyed(){
-        // pc.app.off('update',this.update,this);
+        //cleanup
+        GameManager.unsubscribe(this);
+       // pc.app.off('update',this.update,this);
     }
 
     setup(args={}){console.log("ERR: No setup method on "+this.constructor.name);}
@@ -180,10 +182,10 @@ export default class Template {
         })
     }
 
-    destroy(){
-        this.entity.destroy();
-        pc.app.off('update',this.update); 
-    }
+//    destroy(){
+//        this.entity.destroy();
+        // pc.app.off('update',this.update); 
+//    }
 
     static createHeldItem(){
         console.log("huh? no createHeldGfx for this template:"+this.constructor);
