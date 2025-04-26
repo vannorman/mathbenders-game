@@ -1,11 +1,11 @@
-.fix rigidbody state / save it and load it on levelbuilder start/stop.
+// .fix rigidbody state / save it and load it on levelbuilder start/stop.
 
-class TemplateState {
-    rigidbodyType,
-    colliderType
-}
-
-this.entity.colliders.forEach(x=>{this.physicalState[collider]=new TemplateState({rigidbody:static,collision:normal})})
+//class TemplateState {
+//    rigidbodyType,
+//    colliderType
+//}
+//
+//this.entity.colliders.forEach(x=>{this.physicalState[collider]=new TemplateState({rigidbody:static,collision:normal})})
 
 export default class Template {
 
@@ -62,12 +62,13 @@ export default class Template {
         this.name = this.constructor.name;
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
-        this.setup(args);
         if (properties) {
             this.setProperties(properties);
         }
         this.updateColliderMap();
         this.entity._templateInstance = this; // partial, incomplete ref
+        GameManager.subscribe(this,this.onGameStateChange);
+        this.setup(args);
 
     }
 
@@ -135,6 +136,14 @@ export default class Template {
         }
     }
 
+    onBeginDragByEditor(){
+        this.disableColliders();
+    }
+    onEndDragByEditor(){
+        this.enableColliders();
+    }
+    onGameStateChange(state){
+    }
     get properties() {
         // awkward that this is irrelevant for gadgets being held in inventory
         // and that we overwrite this in Gadget get properties() {return this.ammo....}

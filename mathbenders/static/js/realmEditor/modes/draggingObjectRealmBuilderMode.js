@@ -33,7 +33,8 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     startDraggingExistingItem(itemTemplate){
         this.ItemTemplate = itemTemplate.constructor;
-        itemTemplate.disableColliders();
+        itemTemplate.onBeginDragByEditor();
+        //itemTemplate.disableColliders();
         this.toggle('post');
         this.mode.setDraggingItem(itemTemplate);
     }
@@ -123,7 +124,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
     instantiateItem(){
         const instantiatedItem = realmEditor.InstantiateTemplate({ItemTemplate:this.dragger.ItemTemplate});
         //console.log(this.dragger.ItemTemplate);
-        instantiatedItem.disableColliders();
+        instantiatedItem.onBeginDragByEditor();
         this.dragger.toggle('post');
         this.dragger.mode.setDraggingItem(instantiatedItem);
 
@@ -169,7 +170,8 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
     
     placeItem(){
         const entity = this.#instantiatedItem.entity;
-        this.#instantiatedItem.enableColliders();
+        this.#instantiatedItem.onEndDragByEditor();
+//        this.#instantiatedItem.enableColliders();
         this.#instantiatedItem = null;
         this.dragger.realmEditor.undoRedo.CaptureAndRegisterState();
         this.dragger.realmEditor.editItem({entity:entity});

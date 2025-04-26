@@ -31,6 +31,8 @@ export class Spikey extends Template {
         pc.app.on('update',function(dt){
             $this.update(dt);
         });
+
+
     }
 
     get randomInterval(){
@@ -95,23 +97,79 @@ export class SpikeyGroup extends Template {
         this.entity.destroy();
     }
 
+    gatherLooseRigidbodies(){
+        this.spikeys.forEach(x=>{
+            x.entity.moveTo(this.randomSpikeyPos);
+            x.entity.rigidbody.linearVelocity=pc.Vec3.ZERO;
+        });
+        // if they fell away, reset them to be close to the center of the group
+    }
+    onBeginDragByEditor(){
+        super.onBeginDragByEditor();
+        this.freezeRigidbodies(); 
+
+        this.gatherLooseRigidbodies();
+    }
+    onEndDragByEditor(){
+        super.onEndDragByEditor();
+        this.unfreezeRigidbodies(); 
+    }
+
     CreateGroup(q){
         console.log("this q:"+this._quantity);
+        this.spikeys=[];
         for (let i=0;i<this._quantity;i++){
             console.log("create group  # "+i);
-            let p = this.entity.getPosition().clone();
-            console.log("this range:"+this.range);
-            p.add(pc.Vec3.onUnitSphere().clone().flat().mulScalar(this.range));
+            let p = this.gandomSpikeyPos;
             let s = new Spikey({position:p});
             this.entity.addChild(s.entity);
+            this.spikeys.push(s);
             //s.moveTo(p); // addchild changes local pos?
         } 
+    }
+
+    get randomSpikeyPos(){
+        let p = this.entity.getPosition().clone().add(new pc.Vec3(0,10,0));
+        p.add(pc.Vec3.onUnitSphere().clone().flat().mulScalar(this.range));
+        return p;
+    }
+
+    freezeRigidbodies(){
+        this.spikeys.forEach(x=>{
+            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_STATIC;
+        });
+    }
+    
+    unfreezeRigidbodies(){
+        this.spikeys.forEach(x=>{
+            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_DYNAMIC;
+        });
     }
 
     setup(){
         this.quantity = 3;
         this.range=5;
         this.CreateGroup();
+        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition()});
+        this.entity.addChild(visibleSpikey.entity);
+        let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
+        visibleSpikey.entity.addChild(spikeyClothes);
+        let s = 3;
+        visibleSpikey.entity.setLocalScale(s,s,s);
+        visibleSpikey.entity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(s/2,s/2,s/2)});
+        visibleSpikey.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
+        visibleSpikey.entity.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,3,0)));
+        this.visibleSpikey=visibleSpikey;
         console.log("Group create");
     }
+    
+    onGameStateChange(state){
+        switch(state){
+        case GameState.RealmBuilder: break;
+        case GameState.Playing: this.gatherLooseRigidbodies(); break;
+        default:break;
+        }
+
+    }
+
 }
