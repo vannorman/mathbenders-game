@@ -68,8 +68,13 @@ export default class Template {
         this.updateColliderMap();
         this.entity._templateInstance = this; // partial, incomplete ref
         GameManager.subscribe(this,this.onGameStateChange);
+        this.entity.on('destroy',this.entityWasDestroyed,this);
         this.setup(args);
 
+    }
+
+    entityWasDestroyed(){
+        // pc.app.off('update',this.update,this);
     }
 
     setup(args={}){console.log("ERR: No setup method on "+this.constructor.name);}
@@ -177,6 +182,7 @@ export default class Template {
 
     destroy(){
         this.entity.destroy();
+        pc.app.off('update',this.update); 
     }
 
     static createHeldItem(){

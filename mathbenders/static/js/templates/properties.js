@@ -363,8 +363,6 @@ export class QuantityProperty extends Property {
         panel.addChild(downBtn);
  
         this.ui=panel;
-        console.log("p2");
-        console.log(panel); 
     }
 }
 

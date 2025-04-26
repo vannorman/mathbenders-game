@@ -8,7 +8,9 @@ export class Spikey extends Template {
     originPoint=pc.Vec3.ZERO;
     movementRange=5;
     currentDirection=pc.Vec3.ZERO;
-    setup(args={}){
+    setup(args={}){}
+    constructor(args={}){
+        super(args);
         this.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_DYNAMIC});
         let s = new NumberSphereGfxOnly();
         this.entity.addComponent('collision',{type:'sphere',radius:0.5});
@@ -28,10 +30,7 @@ export class Spikey extends Template {
             });
         }
 
-        pc.app.on('update',function(dt){
-            $this.update(dt);
-        });
-
+        pc.app.on('update',this.update,this);
 
     }
 
@@ -42,27 +41,28 @@ export class Spikey extends Template {
     }
 
     update(dt){
-        return;
-        this.timer -= dt;
+        return;this.timer -= dt;
         // If the timer reaches zero, change direction and reset timer
         if (this.timer <= 0) {
             this.growlFn(this.entity.getPosition());
             this.currentDirection = new pc.Vec3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
-            this.timer = this.randomInterval;
+            this.timer = this.randomInterval * 5;
         }
-        
         // Calculate distance from origin point
         var distance = this.entity.getPosition().sub(this.originPoint).length();
-        
         // If creature is too far from origin, move towards it
         if (distance > this.movementRange) {
             var toOrigin = this.originPoint.clone().sub(this.entity.getPosition()).normalize();
             this.currentDirection = toOrigin;
         }
-        
         // Apply force in the current direction of movement
         var force = this.currentDirection.clone().length() * 10 * dt;// (10*dt); // You can adjust the force value
-        this.entity.rigidbody.applyImpulse(force);
+        this.entity.rigidbody.applyImpulse(this.currentDirection.clone().mulScalar(force));
+    }
+
+    destroy(){
+        console.log('dest');
+        pc.app.off('update',this.update,this);
     }
 }
 
@@ -143,6 +143,7 @@ export class SpikeyGroup extends Template {
     unfreezeRigidbodies(){
         this.spikeys.forEach(x=>{
             x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_DYNAMIC;
+            x.originPoint = x.entity.getPosition();
         });
     }
 
@@ -160,13 +161,12 @@ export class SpikeyGroup extends Template {
         visibleSpikey.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
         visibleSpikey.entity.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,3,0)));
         this.visibleSpikey=visibleSpikey;
-        console.log("Group create");
     }
     
     onGameStateChange(state){
         switch(state){
-        case GameState.RealmBuilder: break;
-        case GameState.Playing: this.gatherLooseRigidbodies(); break;
+        case GameState.RealmBuilder: this.visibleSpikey.entity.enabled=true; break;
+        case GameState.Playing: this.visibleSpikey.entity.enabled=false; this.gatherLooseRigidbodies(); break;
         default:break;
         }
 
