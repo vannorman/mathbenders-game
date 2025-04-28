@@ -224,7 +224,7 @@ NumberInfo.prototype.updateNumberText = function() {
 NumberInfo.prototype.onCollisionStart = function (result) {
     // if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return; //huh?
     if (this.entity._templateInstance.constructor.name == "NumberCube" && result.other._templateInstance?.constructor.name == "NumberCube"){
-        console.log("Cubes");
+        // console.log("Cubes");
         // cubes don't combine
         return;
     }

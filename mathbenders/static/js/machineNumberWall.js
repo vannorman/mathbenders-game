@@ -1,7 +1,7 @@
 var MachineNumberWall = pc.createScript('machineNumberWall');
 MachineNumberWall.attributes.add('fraction1', { type:'object', default:new Fraction(1,2) });
 MachineNumberWall.attributes.add('fraction2', { type:'object', default:new Fraction(1,2) });
-MachineNumberWall.attributes.add('size', { type:'integer', array:true, default:[2,3,1]});
+MachineNumberWall.attributes.add('size', { type:'integer', array:true, default:[2,1,1]});
 
 
 
@@ -38,10 +38,16 @@ MachineNumberWall.prototype.rebuildWall = function(){
     function createCube(pos,frac){
         const args = {
             rigidbodyType:pc.RIGIDBODY_TYPE_KINEMATIC,
-            position:pos,
-            numberInfo:{ fraction:frac,}
+            properties: {
+                position:pos,
+                "NumberCube": frac,
+            }
         }
-        return new NumberCube(args).entity;//Game.Instantiate.NumberCubeFixed(args);
+        console.log("Creating:");
+        console.log(args);
+        let cube = new NumberCube(args);
+        return cube.entity;//Game.Instantiate.NumberCubeFixed(args);
+
                       
     }
     let count = 0;

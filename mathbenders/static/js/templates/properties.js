@@ -53,6 +53,7 @@ export class Property {
     }
 
     allowChange(value){
+        console.log("allow?"+this+","+value);
         var result = null;
         const min = this.min;
         const max = this.max;
@@ -80,7 +81,14 @@ export class Property {
             if (value < min || value > max) {
                 return false;
             }
+        } else if (Object.getPrototypeOf(value).constructor.name == 'Fraction'){
+            let v = value.numerator * min.denominator * max.denominator;
+            let minV = min.numerator * value.denominator * max.denominator;
+            let maxV = max.numerator * value.denominator * min.denominator;
+            let ret = v >= minV && v <= maxV;
+            return ret
         } else {
+ 
             return false;
         }
      

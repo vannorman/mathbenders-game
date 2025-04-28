@@ -13,7 +13,6 @@ class NumberHoop extends Template {
     static isStaticCollider = true;
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "NumberHoop",
             property : FractionProperty, 
             onChangeFn : (template,value) => {  template.fraction=value; },
@@ -61,7 +60,6 @@ class NumberFaucet extends Template {
     static _icon = assets.textures.ui.icons.faucet;
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : "Fraction",
             property : FractionProperty, 
             onChangeFn : (template,value) => {  template.fraction=value; },
@@ -152,6 +150,8 @@ class NumberWall extends Template {
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction1 = value; }, 
             getCurValFn : (template) => { return template.fraction1; }, 
+            min : new Fraction(-5,1),
+            max : new Fraction(5,1),
          }),
 
          new PropertyMap({  
@@ -159,6 +159,8 @@ class NumberWall extends Template {
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction2 = value; }, 
             getCurValFn : (template) => { return template.fraction2; }, 
+            min : new Fraction(-5,1),
+            max : new Fraction(5,1),
          }),
          new PropertyMap({  
             name : "Size",
@@ -265,8 +267,7 @@ class ConcretePad extends Template {
     static _icon = assets.textures.ui.builder.concretePad;
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
-            name : ScaleProperty.constructor.name,
+            name : ScaleProperty.name,
             property : ScaleProperty,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  template.scale = value; },
@@ -348,11 +349,11 @@ class NumberCube extends Template {
     ]
     
     constructor(args={}) {
+        console.log("Creating number cube w args:");
+        console.log(args);
         // args['rigidbodyType'] = pc.RIGIDBODY_TYPE_KINEMATIC;
         super(args);
-    }
  
-    setup(args={}){
         let cube =this.entity;
         // cube.tags.add(Constants.Tags.PlayerCanPickUp);
         cube.addComponent("render",{ type : "box" });
@@ -361,18 +362,31 @@ class NumberCube extends Template {
         cube.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
         cube.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE.clone().mulScalar(0.5)});//new pc.Vec3(s/2, s/2, s/2)});
         cube.addComponent('script');
-        // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
-        // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
-        // Anyway, playerPickupService can check if collided with Number tag..?
         cube.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
         cube.script.numberInfo.Setup();
-        cube.script.numberInfo.setFraction(new Fraction(2,1));
-
-        this.script = cube.script.numberInfo;
+        if (this.fraction) cube.script.numberInfo.setFraction(this.fraction); // this fraction should have been set by template.super.setProps
+        else {
+            console.log("no frac:");
+        }
     }
 
-    get fraction(){ return this.script.fraction; }
-    set fraction(value) { this.script.setFraction(value); }
+    
+    getFraction(){ 
+        if (this.script){
+            return this.script.fraction; 
+        } else {
+            return this.fraction;
+        }
+    }
+    setFraction(value) { 
+        if (this.script){
+            this.script.setFraction(value);
+        }  else {
+            this.fraction=value;
+        }
+   }
+
+   get script(){ return this.entity.script.numberInfo; }
 
     static createHeldItem(properties){
         // The "incorrect" (?) way to create a non collision graphics only item; not a Template; 
@@ -397,7 +411,6 @@ class NumberCube extends Template {
 class NumberSphereGfxOnly extends Template {
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.fraction = value; }, 
@@ -474,7 +487,6 @@ export class NumberSphereRaw extends Template {
 export class NumberSphere extends NumberSphereRaw {
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
             onChangeFn : (template,value) => { template.setFraction(value); }, 
@@ -579,7 +591,6 @@ class Spikey extends NumberSphereRaw {
     currentDirection=pc.Vec3.ZERO;
     static propertiesMap = [
          new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
             onChangeFn : (template,value) => { console.log("Ch numbersphere"); template.setFraction(value); }, 
@@ -592,7 +603,6 @@ class Spikey extends NumberSphereRaw {
     }
     constructor(args={}){
         super(args);
-        console.log("%c create sp:"+this.uuid.substr(0,5),"color:white");
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         this.entity.addChild(spikeyClothes);
         spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
@@ -623,7 +633,6 @@ class Spikey extends NumberSphereRaw {
         // If the timer reaches zero, change direction and reset timer
         if (this.timer <= 0) {
             this.timer = this.randomInterval * 5;
-             console.log("Growling:"+this.uuid.substr(0,5)+"+ at:"+this.entity.getPosition().trunc());
             if (isNaN(this.entity.getPosition().x)){ return;}
             this.growlFn(this.entity.getPosition());
             this.currentDirection = new pc.Vec3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
@@ -664,14 +673,13 @@ class SpikeyGroup extends Template {
     static _icon = assets.textures.ui.icons.spikey;
     _quantity = 1;
     range=5;
-    spikeys=[];
     setup(args={}){}
     static propertiesMap = [
          new PropertyMap({  
-            name : QuantityProperty.constructor.name,
+            name : this.name,
             property : QuantityProperty,
-            onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
-            onInitFn : (template,value) => { template.quantity = value; },
+            onChangeFn : (template,value) => {  console.log('ch'); template.quantity = value; template.Rebuild(); },
+            onInitFn : (template,value) => { console.log('init'); template.quantity = value; },
             getCurValFn : (template) => { return template.quantity },
             min:1,
             max:7,
@@ -685,17 +693,16 @@ class SpikeyGroup extends Template {
         this._quantity = value;
     }
     Rebuild(){
+        console.log('ch');
         this.DestroyGroup();
         this.CreateGroup();
     }
 
     DestroyGroup(){
-        console.log("Desgro:"+this.uuid.substr(0,5));
         this.entity.destroy();
     }
 
     gatherLooseRigidbodies(){
-        console.log(this.spikeys);
         this.spikeys.forEach(x=>{
             x.entity.moveTo(this.randomSpikeyPos);
             if (x.entity.rigidbody){
@@ -718,7 +725,6 @@ class SpikeyGroup extends Template {
     }
 
     CreateGroup(){
-        console.log("Create group");
         this.spikeys=[];
         for (let i=0;i<this._quantity;i++){
             let p = this.randomSpikeyPos;
@@ -742,7 +748,6 @@ class SpikeyGroup extends Template {
     }
     
     unfreezeRigidbodies(){
-        console.log('unf');
         this.gatherLooseRigidbodies();
         this.spikeys.forEach(x=>{
             x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_DYNAMIC;
@@ -752,7 +757,6 @@ class SpikeyGroup extends Template {
 
     constructor(args){
         super(args);
-        console.log("created group? uuid:"+this.uuid.substr(0,5))
         this.CreateGroup();
         let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition()});
         this.entity.addChild(visibleSpikey.entity);

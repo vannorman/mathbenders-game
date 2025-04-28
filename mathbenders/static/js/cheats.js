@@ -282,10 +282,7 @@ $(document).on("keydown", function (e) {
         const options = {
             position : Player.droppedPosition,
             properties : {
-                'numberInfo' : {
-                    numerator:num,
-                    denominator:1
-                },
+                NumberSphere : new Fraction(num,1),
             }
         }
         const ns = new NumberSphere(options);

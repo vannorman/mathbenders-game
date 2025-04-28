@@ -179,7 +179,9 @@ export default class Template {
     }
 
     setProperties(properties) {
-        // mismatch between NumberSphere and NumberSphereRaw in PropertiesMap.
+        if (properties != {}){
+            console.log(properties);
+        }
         this.constructor.propertiesMap.forEach(x=>{
             if (properties[x.name] !== undefined){
                 const val = properties[x.name];
@@ -189,7 +191,6 @@ export default class Template {
                 // TWO, the template was already created, and needs to be modified, onChangeFn()
                 x.onInitFn(this,val);
             } else{
-                // console.log("undef");
             }
         })
     }
