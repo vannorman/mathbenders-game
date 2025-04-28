@@ -3,14 +3,23 @@ NumberInfo.attributes.add('moveSpeed', { type: 'number', default: 4, title: 'Mov
 NumberInfo.attributes.add('destroyFxFn', { type:'object'});
 NumberInfo.attributes.add('ignoreCollision', { type:'boolean', default: false});
 NumberInfo.attributes.add('allowCombination', { type: 'boolean', default: true, });
-NumberInfo.attributes.add('combinationHierarchy', { type: 'number', default: 1, });
 NumberInfo.attributes.add('fraction', { type: 'object' });
+
+NumberInfo.Type = {
+    Bullet : 0,
+    Sphere: 1,
+    Cube: 2,
+    Creature : 3
+};
+
+NumberInfo.attributes.add('numberType', { type: 'number', default: NumberInfo.Type.Sphere });
+
 
 NumberInfo.Shape = {
     Sphere : "Sphere",
     Cube : "Cube",
     None : "None",
-}
+};
 
 NumberInfo.prototype.initialize = function() {
     Object.defineProperty(this,'numberType', {get: function(){
@@ -237,13 +246,53 @@ NumberInfo.prototype.onCollisionStart = function (result) {
         return;
     }
     this.OfflineCollision(result);
-
-
 }
+
+
+NumberInfo.GetCombinationHierarchyResult = function(ni1,ni2){
+    switch(ni1.type){
+        case NumberInfo.Type.Bullet:
+            switch(ni2.type){
+                case NumberInfo.Type.Bullet: return ni1;
+                case NumberInfo.Type.Sphere: 
+                case NumberInfo.Type.Cube:
+                case NumberInfo.Type.Creature: return ni2;
+            }
+         case NumberInfo.Type.Sphere:
+            switch(ni2.type){
+                case NumberInfo.Type.Bullet: 
+                case NumberInfo.Type.Sphere: return ni1;
+                case NumberInfo.Type.Cube:
+                case NumberInfo.Type.Creature: return ni2;
+            }
+         case NumberInfo.Type.Cube:
+            switch(ni2.type){
+                case NumberInfo.Type.Bullet:
+                case NumberInfo.Type.Sphere: return ni1;
+                case NumberInfo.Type.Cube:  
+                case NumberInfo.Type.Creature: return null;
+            }
+         case NumberInfo.Type.Creature:
+            switch(ni2.type){
+                case NumberInfo.Type.Bullet: 
+                case NumberInfo.Type.Sphere: return ni1;
+                case NumberInfo.Type.Cube:
+                case NumberInfo.Type.Creature: return null;
+            }
+        default: console.log("NOCOMB");break;
+    }
+    console.error("ERRRO");
+    return null;
+}
+
 
 NumberInfo.prototype.OfflineCollision = function (result){
     const resultNi = result.other?.script?.numberInfo;
     if (this.allowCombination && resultNi && resultNi.allowCombination){
+
+        // comibination hierarchy is needed
+        // spikeys combine with "regular" number spheres, but not each other, nor with walls
+        
         this.entity.enabled = false;
         NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
     } else {
@@ -425,11 +474,19 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         // console.log("k1:"+wasKin1+", k2:"+wasKin2);
     }
 
+    let n1 = obj1.script.numberInfo;
+    let n2 = obj2.script.numberInfo;
+    let resultNi = NumberInfo.GetCombinationHierarchyResult(n1,n2);
+    if (!resultNi){
+        console.log("%c failed comb:"+n1.entity.getGuid()+","+n2.entity.getGuid(),"color:red");
+        return;
+    }
+    const TemplateToClone = resultNi.entity._templateInstance.constructor;
+    const rbType = resultNi.entity.rigidbody.type;
+    const rot = resultNi.entity.getEulerAngles();
+    /*
     // Somehow need to prevent collision between two kinematic numbers .. in general
-    const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    var TemplateToConle = null;
-    let h1 = obj1.script.numberInfo.collisionHierarchy;
-    let h2 = obj2.script.numberInfo.collisionHierarchy;
+    const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATdIC : pc.RIGIDBODY_TYPE_DYNAMIC;
     if (h1 != h2){
         TemplateToClone = h1 > h2 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
         console.log("Hierarchy says:"+TemplateToClone.name);
@@ -439,9 +496,11 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         TemplateToClone = wasKin1 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
         console.log("Hierarchy equal:"+TemplateToClone.name);
     }
-    // need collisionHierarchy here.
+
+    // need combinationHierarchty here.
     // console.log("TTC:"+TemplateToClone.name);
     const rot = wasKin1 ? obj1.getEulerAngles() : wasKin2 ? obj2.getEulerAngles : pc.Vec3.ZERO;
+    */
 
     // Did both numbers have "destroy after seconds"? If so, this new one has it too
     const destroyAfterSecondsScript = (obj1.script.destroyAfterSeconds && obj2.script.destroyAfterSeconds) ? true : false;
@@ -475,6 +534,3 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
     return resultData;
 }
 
-NumberInfo.prototype.setCombinationHierarchy = function(num){
-    this.combinationHierarchy = num;
-}

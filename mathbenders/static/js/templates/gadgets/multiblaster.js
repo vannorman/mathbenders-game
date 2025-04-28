@@ -57,7 +57,11 @@ export default class Multiblaster extends Gadget {
             const firePos = this.heldItemGfx.getPosition().clone().add(this.heldItemGfx.down);
             const sc = this.#bulletScale;
 
-            const s = new NumberSphere({position:firePos}).entity;
+            
+            const ns = new NumberSphere({position:firePos,properties:{NumberSphere:frac}}); // should be Bullet template.
+            ns.type = NumberInfo.Type.Bullet;
+            const s = ns.entity;
+
             s.tags.add(Constants.Tags.MultiblasterBullet);
 //            Game.Instantiate.NumberSphere({position:firePos});
             // s.script.destroy('pickUpItem');
@@ -67,7 +71,6 @@ export default class Multiblaster extends Gadget {
 
             s.name="bullet";
             s.script.create('destroyAfterSeconds');
-            s.script.numberInfo.setFraction(frac);
             s.rigidbody.linearVelocity=this.heldItemGfx.down.clone().mulScalar(50)
             this.#lastFiredTime = Date.now();
             this.ammoGfx.pop().entity.destroy();

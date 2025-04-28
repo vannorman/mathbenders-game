@@ -76,11 +76,9 @@ export default class Template {
     }
 
     entityWasDestroyed(){
-        console.log("%c destroyed "+this.name+":"+this.uuid.substr(0,5),"color:#f88")
-
+        // console.log("%c destroyed "+this.name+":"+this.uuid.substr(0,5),"color:#f88")
         //cleanup
         GameManager.unsubscribe(this);
-       // pc.app.off('update',this.update,this);
     }
 
     setup(args={}){
@@ -180,7 +178,7 @@ export default class Template {
 
     setProperties(properties) {
         if (properties != {}){
-            console.log(properties);
+            //console.log(properties);
         }
         this.constructor.propertiesMap.forEach(x=>{
             if (properties[x.name] !== undefined){
