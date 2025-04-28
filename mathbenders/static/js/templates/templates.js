@@ -340,7 +340,6 @@ class NumberCube extends Template {
 
     static propertiesMap = [
          new PropertyMap({  
-            // awkward but, we follow the pattern that the name is my constructor name unless otherwise noted.
             name : this.name, // if this changes, data will break 
             property : FractionProperty, 
             onInitFn : (template,value) => { template.fraction = value; },
@@ -643,6 +642,7 @@ class Spikey extends NumberSphereRaw {
         this.timer -= dt;
         // If the timer reaches zero, change direction and reset timer
         if (this.timer <= 0) {
+            console.log("im alive:"+this.uuid.substr(0,5));
             this.timer = this.randomInterval * 5;
             if (isNaN(this.entity.getPosition().x)){ console.log("N"); return;}
             this.growlFn(this.entity.getPosition());
@@ -665,8 +665,10 @@ class Spikey extends NumberSphereRaw {
 
         // Apply force in the current direction of movement
 
-        var force = Game.f * 10 * dt;// (10*dt); // You can adjust the force value
-        this.entity.rigidbody.applyForce(this.currentDirection.clone().normalize().mulScalar(force));
+        var force = Game.f * 30 * dt;// (10*dt); // You can adjust the force value
+        const force3d = this.currentDirection.clone().normalize().mulScalar(force);
+        this.entity.rigidbody.applyForce(force3d);
+        Utils3.debugForce({entity:this.entity,force:force3d});
     }
 
     entityWasDestroyed(){
@@ -683,12 +685,11 @@ class Spikey extends NumberSphereRaw {
 class SpikeyGroup extends Template {
     fraction;
     static _icon = assets.textures.ui.icons.spikey;
-    _quantity = 1;
     range=5;
     setup(args={}){}
     static propertiesMap = [
          new PropertyMap({  
-            name : this.name,
+            name : "SpikeyGroupQuantity",
             property : QuantityProperty,
             onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
             onInitFn : (template,value) => { template.quantity = value; },
@@ -698,19 +699,13 @@ class SpikeyGroup extends Template {
          }),
     ];
 
-    get quantity(){ 
-        return this._quantity;
-    }
-    set quantity(value) { 
-        this._quantity = value;
-    }
     Rebuild(){
         this.DestroyGroup();
         this.CreateGroup();
     }
 
     DestroyGroup(){
-        this.entity.destroy();
+        this.spikeys.forEach(x=>{x.entity.destroy();})
     }
 
     gatherLooseRigidbodies(){
@@ -737,7 +732,7 @@ class SpikeyGroup extends Template {
 
     CreateGroup(){
         this.spikeys=[];
-        for (let i=0;i<this._quantity;i++){
+        for (let i=0;i<this.quantity;i++){
             let p = this.randomSpikeyPos;
             const args = {
                 position : p,
@@ -746,10 +741,17 @@ class SpikeyGroup extends Template {
                 }
             } 
             const s = new Spikey(args);
+            s.entity.on('destroy',function(){ this.spikeyDestroyed(s.entity); },this);
             this.entity.addChild(s.entity);
             this.spikeys.push(s);
             //s.moveTo(p); // addchild changes local pos?
         } 
+    }
+
+    spikeyDestroyed(entity){
+        console.log("dest 1:"+this.spikeys.length);
+        this.spikeys = this.spikeys.filter(x=>{return x.entity.getGuid()!==entity.getGuid()});
+        console.log("dest 2:"+this.spikeys.length);
     }
 
     get randomSpikeyPos(){
@@ -774,7 +776,12 @@ class SpikeyGroup extends Template {
 
     constructor(args){
         super(args);
-        this.fraction = new Fraction(3,1);
+        // @Eytan; awkward competition for who sets properties when and from where.
+        // When dragging a new item instantiated from editor, it has no properties and relies on defaults.
+        // When reloading a level from saved data, it inflates each one with properties and must let those values override defaults.
+        this.quantity = this.quantity ?? 2; 
+
+        this.fraction = this.fraction ?? new Fraction(-2,1);
         this.CreateGroup();
         let frac = this.fraction;
         let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition(),properties:{NumberSphereGfxOnly:frac}});

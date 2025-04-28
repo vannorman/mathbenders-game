@@ -1,6 +1,6 @@
 var MachineNumberWall = pc.createScript('machineNumberWall');
-MachineNumberWall.attributes.add('fraction1', { type:'object', default:new Fraction(1,2) });
-MachineNumberWall.attributes.add('fraction2', { type:'object', default:new Fraction(1,2) });
+MachineNumberWall.attributes.add('fraction1', { type:'object', default:new Fraction(1,1) });
+MachineNumberWall.attributes.add('fraction2', { type:'object', default:new Fraction(1,1) });
 MachineNumberWall.attributes.add('size', { type:'integer', array:true, default:[2,1,1]});
 
 

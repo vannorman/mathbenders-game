@@ -782,12 +782,29 @@ var Utils3 = {
         sphere.setLocalScale(scale,scale,scale);
         return sphere;
     },
+    debugForce : function(args={}){
+        const {entity,force,autoDestruct=true,timeout=0.05}=args;
+        const a = entity.getPosition().clone();
+        const b = a.clone().add(force);
+        const mid = new pc.Vec3().add2(a,b).mulScalar(0.5);
+        Utils3.debugSphere({position:b})
+        const cube = new pc.Entity();
+        cube.addComponent('render',{type:'box'});
+        cube.setLocalScale(new pc.Vec3(0.05,0.05,force.length()));
+        cube.moveTo(mid);
+        cube.render.material = Materials.red;
+        pc.app.root.addChild(cube);
+        cube.setRotation(Quaternion.LookRotation(force));
+        if (autoDestruct) setTimeout(function(){cube.remove()},timeout);    
+        return cube;
+
+    },
     debugSphere : function(options){
         const { position,scale=1.0,color=pc.Color.RED,timeout=4000,autoDestruct=true} = options;
          var entity = new pc.Entity();
         if (autoDestruct) setTimeout(function(){entity.remove()},timeout);    
         // Add a new Model Component and add it to the Entity.
-        entity.addComponent("model", { type: 'sphere' });
+        //entity.addComponent("model", { type: 'sphere' });
         entity.addComponent("render", { type: 'sphere' });
         
         // Create a new Standard material

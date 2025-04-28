@@ -16,7 +16,8 @@ export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
     constructor(args){
-        const {template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
+        const {name,template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
+        this.name=name;
         this.template = template;
         this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
         this.onInitFn = onInitFn ?? onChangeFn;
@@ -53,7 +54,6 @@ export class Property {
     }
 
     allowChange(value){
-        console.log("allow?"+this+","+value);
         var result = null;
         const min = this.min;
         const max = this.max;
@@ -80,6 +80,8 @@ export class Property {
             // We're modding a number, was it within min max bounds?
             if (value < min || value > max) {
                 return false;
+            } else{
+                return true;
             }
         } else if (Object.getPrototypeOf(value).constructor.name == 'Fraction'){
             let v = value.numerator * min.denominator * max.denominator;
@@ -126,7 +128,7 @@ export class Property {
     static upBtn(){
         const upBtn =  new pc.Entity("up");
         upBtn.addComponent("element", {
-            anchor: [0.3, 0.5, 0.3, 0.5],
+            anchor: [0.7, 0.5, 0.7, 0.5],
             pivot: [0.5, 0.5],
             type: 'image',
             color:pc.Color.WHITE,
@@ -149,7 +151,7 @@ export class Property {
     static downBtn(){
         const downBtn = Property.upBtn();
         downBtn.element.color = new pc.Color(0.2,0.2,0.8);
-        downBtn.element.anchor = [0.7, 0.5, 0.7, 0.5];
+        downBtn.element.anchor = [0.3, 0.5, 0.3, 0.5];
         return downBtn;
     }
 
@@ -352,19 +354,30 @@ export class QuantityProperty extends Property {
  
         const upBtn = Property.upBtn(); // why don't i use the "new" keyword .. can this be another class?
         upBtn.element.on('mousedown',function(){
-            let curQty = $this.getCurValFn($this.template);
+            let curQty = this.getCurValFn(this.template);
             let newQty = curQty+1;
-            $this.onChangeFn($this.template,newQty);
-            setQtyText(newQty);
-        });
+            if(this.allowChange(newQty)) {
+                this.onChangeFn(this.template,newQty);
+                setQtyText(newQty);
+            } else {
+                upBtn.addComponent('script');
+                upBtn.script.create('sinePop');
+
+            }
+        },this);
 
         const downBtn = Property.downBtn(); // why don't i use the "new" keyword .. can this be another class?
         downBtn.element.on('mousedown',function(){
-            let curQty = $this.getCurValFn($this.template);
+            let curQty = this.getCurValFn(this.template);
             let newQty = curQty-1;
-            $this.onChangeFn($this.template,newQty);
-            setQtyText(newQty);
-        });
+            if(this.allowChange(newQty)) {
+                this.onChangeFn(this.template,newQty);
+                setQtyText(newQty);
+            } else {
+                downBtn.addComponent('script');
+                downBtn.script.create('sinePop');
+            }
+        },this);
 
         panel.addChild(upBtn);
         panel.addChild(downBtn);

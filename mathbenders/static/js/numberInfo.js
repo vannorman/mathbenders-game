@@ -2,7 +2,6 @@ var NumberInfo = pc.createScript('numberInfo');
 NumberInfo.attributes.add('moveSpeed', { type: 'number', default: 4, title: 'Move Speed' });
 NumberInfo.attributes.add('destroyFxFn', { type:'object'});
 NumberInfo.attributes.add('ignoreCollision', { type:'boolean', default: false});
-NumberInfo.attributes.add('allowCombination', { type: 'boolean', default: true, });
 NumberInfo.attributes.add('fraction', { type: 'object' });
 
 NumberInfo.Type = {
@@ -281,22 +280,19 @@ NumberInfo.GetCombinationHierarchyResult = function(ni1,ni2){
             }
         default: console.log("NOCOMB");break;
     }
-    console.error("ERRRO");
+    console.error("ERRROR: No combination "+ni1.getGuid()+","+ni2.getGuid());
     return null;
 }
 
 
 NumberInfo.prototype.OfflineCollision = function (result){
     const resultNi = result.other?.script?.numberInfo;
-    if (this.allowCombination && resultNi && resultNi.allowCombination){
-
-        // comibination hierarchy is needed
-        // spikeys combine with "regular" number spheres, but not each other, nor with walls
-        
-        this.entity.enabled = false;
-        NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
-    } else {
-        // console.log('no ni:"'+resultNi+", alow:"+this.allowCombination+", resl al:"+resultNi?.allowCombination);
+    if (resultNi){
+        let combinationResult = NumberInfo.GetCombinationHierarchyResult(this,resultNi);
+        if (combinationResult != null) {
+            this.entity.enabled = false;
+            NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
+        }
     }
 
 }
@@ -362,7 +358,7 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
 
         // Awkward way to propagate "destroy after seconds" which was detected if both parent numbers had destroyAfterSEconds
         if (collisionResult.destroyAfterSecondsScript){
-            result.script.entiy.create('destroyAfterSeconds',{attributes:{seconds:collisionResult.destroyAfterSeconds}});
+            result.script.entity.create('destroyAfterSeconds',{attributes:{seconds:collisionResult.destroyAfterSeconds}});
         }
 
         AudioManager.play({source:assets.sounds.numberEat,position:options.position,positional:true,refDist:20});
