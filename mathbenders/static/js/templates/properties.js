@@ -1,10 +1,11 @@
 export class PropertyMap {
     constructor(args){
-        const  {template,name,property,onChangeFn,getCurValFn,min=1,max=10} = args;
+        const  {template,name,property,onInitFn,onChangeFn,getCurValFn,min=1,max=10} = args;
         this.template = template;
         this.name = name;
         this.property = property;
         this.onChangeFn = onChangeFn;
+        this.onInitFn = onInitFn ?? onChangeFn;
         this.getCurValFn = getCurValFn;
         this.min = min;
         this.max = max;
@@ -14,11 +15,11 @@ export class PropertyMap {
 export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
-
     constructor(args){
-        const {template,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
+        const {template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
         this.template = template;
         this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
+        this.onInitFn = onInitFn ?? onChangeFn;
         this.getCurValFn = getCurValFn;
         this.buttonIndex = buttonIndex;
         this.valueType=valueType; // vec3, string, array?
@@ -76,11 +77,9 @@ export class Property {
             return result;
         } else if (typeof(value) == 'number') {
             // We're modding a number, was it within min max bounds?
-            result = true;
             if (value < min || value > max) {
-                result = false;
+                return false;
             }
-            return result;
         } else {
             return false;
         }

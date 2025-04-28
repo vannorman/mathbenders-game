@@ -33,6 +33,7 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
 
     startDraggingExistingItem(itemTemplate){
         this.ItemTemplate = itemTemplate.constructor;
+        console.log("Begin drag");
         itemTemplate.onBeginDragByEditor();//disableColliders();
         this.toggle('post');
         this.mode.setDraggingItem(itemTemplate);

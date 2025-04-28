@@ -424,58 +424,80 @@ class NumberSphereGfxOnly extends Template {
 
 }
 
-export class NumberSphere extends Template {
-    static _icon = assets.textures.ui.numberSpherePos;
+export class NumberSphereRaw extends Template {
+    static isNumber = true;
+//    fraction=new Fraction(1,3);
+   
+    constructor(args={}) {
+        args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
+        super(args); 
+        this.entity.addComponent("render",{ type : "sphere" });
+        const s = this.entity.getLocalScale.x;
+        this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
+        this.entity.rigidbody.linearDamping = 0.5;
+        this.entity.addComponent('script');
+        this.entity.script.create('numberInfo',{attributes:{
+            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
+            fraction:this.fraction,
+            }});
+        this.entity.script.numberInfo.Setup();
+        if (this.fraction){
+            // null if add two and result is zero? What a mess
+            this.entity.script.numberInfo.setFraction(this.fraction); //ugh
+        }
+        // this.script = sphere.script.numberInfo;
+
+    }
+
+    getFraction(){ 
+        // Is there ever a case the script hasn't been created yet? but we stil want the fraction?
+        if (this.script){
+            return this.script.fraction; 
+        } else {
+            console.log("Shouldn?");
+            return this.fraction;
+        }
+    }
+    setFraction(value) { 
+        this.script.setFraction(value); 
+    }
+   
+
+    get script(){
+        console.log("getscript on sphere");
+        return this.entity.script.numberInfo;
+    }
+
+
+}
+
+export class NumberSphere extends NumberSphereRaw {
+    static propertiesMap = [
+         new PropertyMap({  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : this.name, // if this changes, data will break // Should be Fraction1?
+            property : FractionProperty, 
+            onChangeFn : (template,value) => { template.setFraction(value); }, 
+            onInitFn : (template,value) => { template.fraction = value; },
+            getCurValFn : (template) => { return template.getFraction(); }, 
+         }),
+    ]
+     static _icon = assets.textures.ui.numberSpherePos;
     static _icon_neg = assets.textures.ui.numberSphereNeg;
     static icon(properties){
         const pos = Object.values(properties).find(x=>x instanceof Fraction).numerator > 0;
         if (pos) return this._icon;
         else return this._icon_neg;
     }
-    static isNumber = true;
 
-//    static getIcon(properties={}){
-//        return this.fraction.numerator > 0 ? icon : icon_neg; }
 
-    static isThrowable=true;
-    static propertiesMap = [
-         new PropertyMap({  
-            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
-            name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction = value; }, 
-            getCurValFn : (template) => { return template.fraction; }, 
-         }),
-    ]
-    
+    static isThrowable=true; 
+   
     constructor(args={}) {
-        args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args);
-    }
- 
-    setup(args={}){
-        let sphere =this.entity;
-        sphere.tags.add(Constants.Tags.PlayerCanPickUp);
-        sphere.addComponent("render",{ type : "sphere" });
-        const s = sphere.getLocalScale.x;
-        sphere.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
-        sphere.rigidbody.linearDamping = 0.5;
-        sphere.addComponent('script');
-        // sphere.script.create('pickUpItem',{}); // I don't think I want 1,000,000 pickUpItem scripts ..
-        // Infact, I'd probably prefer not to have 1,000,000 NumberInfo scripts instead. Strictly speaking, each Number only needs its Fraction and collision, and a NumberManager can handle the rest.
-        // Anyway, playerPickupService can check if collided with Number tag..?
-        let fraction = new Fraction(2,1);
-        sphere.script.create('numberInfo',{attributes:{
-            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
-            fraction:fraction,
-            }});
-        sphere.script.numberInfo.Setup();
-        this.script = sphere.script.numberInfo;
-
+        this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
     }
 
-    get fraction(){ return this.script.fraction; }
-    set fraction(value) { this.script.setFraction(value); }
 
     static createHeldItem(properties){
         // The "correct" (?) way to create the graphics version is one that is yet another Template, this one without collision.
@@ -505,7 +527,6 @@ class MultiblasterPickup extends GadgetPickup {
     setup(args={}){
 
         // graphics
-
         this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
         const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
         ApplyTextureAssetToEntity({entity:blaster,textureAsset:assets.textures.gadget});
@@ -549,19 +570,29 @@ class SwordPickup extends GadgetPickup {
 
 
 // Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
-class Spikey extends NumberSphere {
+class Spikey extends NumberSphereRaw {
     static _icon = assets.textures.ui.icons.spikey;
     timer = 0; 
     //growlFn=(pos)=>{console.log("growl:"+pos);};
     originPoint=pc.Vec3.ZERO;
     movementRange=5;
     currentDirection=pc.Vec3.ZERO;
-    setup(args={}){
+    static propertiesMap = [
+         new PropertyMap({  
+            // should be new EditableProperty(property,onchangeFn,getCurValfn) class?
+            name : this.name, // if this changes, data will break // Should be Fraction1?
+            property : FractionProperty, 
+            onChangeFn : (template,value) => { console.log("Ch numbersphere"); template.setFraction(value); }, 
+            onInitFn : (template,value) => { console.log("init ns"); template.fraction = value; },
+            getCurValFn : (template) => { return template.getFraction(); }, 
+         }),
+    ]
+     setup(args={}){
         super.setup(args);
     }
     constructor(args={}){
         super(args);
-
+        console.log("%c create sp:"+this.uuid.substr(0,5),"color:white");
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         this.entity.addChild(spikeyClothes);
         spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
@@ -591,9 +622,11 @@ class Spikey extends NumberSphere {
         this.timer -= dt;
         // If the timer reaches zero, change direction and reset timer
         if (this.timer <= 0) {
+            this.timer = this.randomInterval * 5;
+             console.log("Growling:"+this.uuid.substr(0,5)+"+ at:"+this.entity.getPosition().trunc());
+            if (isNaN(this.entity.getPosition().x)){ return;}
             this.growlFn(this.entity.getPosition());
             this.currentDirection = new pc.Vec3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
-            this.timer = this.randomInterval * 5;
         }
 
         // Give it a chance to redirect efforts toward player, if player is close enough
@@ -617,6 +650,7 @@ class Spikey extends NumberSphere {
     }
 
     entityWasDestroyed(){
+    //    console.log("This was destroyed:"+this.uuid);
         super.entityWasDestroyed();
         pc.app.off('update',this.update,this);
     }
@@ -630,12 +664,14 @@ class SpikeyGroup extends Template {
     static _icon = assets.textures.ui.icons.spikey;
     _quantity = 1;
     range=5;
+    spikeys=[];
     setup(args={}){}
     static propertiesMap = [
          new PropertyMap({  
             name : QuantityProperty.constructor.name,
             property : QuantityProperty,
             onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
+            onInitFn : (template,value) => { template.quantity = value; },
             getCurValFn : (template) => { return template.quantity },
             min:1,
             max:7,
@@ -654,6 +690,7 @@ class SpikeyGroup extends Template {
     }
 
     DestroyGroup(){
+        console.log("Desgro:"+this.uuid.substr(0,5));
         this.entity.destroy();
     }
 
@@ -670,6 +707,7 @@ class SpikeyGroup extends Template {
         // if they fell away, reset them to be close to the center of the group
     }
     onBeginDragByEditor(){
+        
         super.onBeginDragByEditor();
         this.freezeRigidbodies(); 
         this.gatherLooseRigidbodies();
@@ -679,7 +717,8 @@ class SpikeyGroup extends Template {
         this.unfreezeRigidbodies(); 
     }
 
-    CreateGroup(q){
+    CreateGroup(){
+        console.log("Create group");
         this.spikeys=[];
         for (let i=0;i<this._quantity;i++){
             let p = this.randomSpikeyPos;
@@ -713,8 +752,8 @@ class SpikeyGroup extends Template {
 
     constructor(args){
         super(args);
+        console.log("created group? uuid:"+this.uuid.substr(0,5))
         this.CreateGroup();
-        console.log("created?")
         let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition()});
         this.entity.addChild(visibleSpikey.entity);
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
@@ -731,8 +770,6 @@ class SpikeyGroup extends Template {
 
     entityWasDestroyed(){
         super.entityWasDestroyed();
-
-        
         this.spikeys.forEach(x=>{x.entity.destroy()});
         this.spikeys=[];
         pc.app.off('update',this.update);

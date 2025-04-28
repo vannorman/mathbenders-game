@@ -26,7 +26,7 @@ NumberInfo.prototype.Setup = function() {
     }})
 
     this.entity.collision?.on('collisionstart', this.onCollisionStart, this);
-    if (this.fraction == null) this.fraction = new Fraction(2,1); // dislike!!!
+    if (this.fraction == null) this.fraction = new Fraction(7,1); // dislike!!!
     this.cubeSize = this.entity.getLocalScale().x;
     if (this.numberType == NumberInfo.Shape.Cube){
         let d = this.cubeSize / 2 + 0.03;
@@ -89,9 +89,8 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
         fontSize: this.getFontSize(this.fraction.asString()),
         fontAsset: assets.fonts.montserrat,
     });
-
     // Create fraction elements if needed
-    if (true || this.fraction.asString().includes('/')) {
+    if (this.fraction.asString().toString().includes('/')) {
         // Create numerator
         let numerator = new pc.Entity('numerator');
         entity.addChild(numerator);

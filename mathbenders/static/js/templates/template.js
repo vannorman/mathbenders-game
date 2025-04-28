@@ -64,6 +64,8 @@ export default class Template {
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup(args);// All templates need to be "setup" BEFORE updateColliderMap is called. But, this leads to "this" confusion between superclass and subclass; SomeClass extends Template { setup() } cannot refer to the "this" of that local class.
         if (properties) {
+            // Can't do this until other constructors have finished..
+            // circular / ordering error
             this.setProperties(properties);
         }
         this.updateColliderMap(); // All templates need to have their colliders registered. I don't want to do this in each indivdually.
@@ -74,12 +76,16 @@ export default class Template {
     }
 
     entityWasDestroyed(){
+        console.log("%c destroyed "+this.name+":"+this.uuid.substr(0,5),"color:#f88")
+
         //cleanup
         GameManager.unsubscribe(this);
        // pc.app.off('update',this.update,this);
     }
 
-    setup(args={}){console.log("ERR: No setup method on "+this.constructor.name);}
+    setup(args={}){
+        // console.log("ERR: No setup method on "+this.constructor.name);
+    }
 
     duplicate() {
         let copies = []; 
@@ -173,35 +179,27 @@ export default class Template {
     }
 
     setProperties(properties) {
-        // Note that all data here is stored in the *game entity* not in the template instance.
+        // mismatch between NumberSphere and NumberSphereRaw in PropertiesMap.
         this.constructor.propertiesMap.forEach(x=>{
             if (properties[x.name] !== undefined){
                 const val = properties[x.name];
-                x.onChangeFn(this,val);
+                // Are we "changing" or  "initting" here?
+                // We have two ways to "modify" a template in this way
+                // ONE, the template was instantiated and passed some properties[] and those need to be initialized, onInitFn()
+                // TWO, the template was already created, and needs to be modified, onChangeFn()
+                x.onInitFn(this,val);
+            } else{
+                // console.log("undef");
             }
         })
     }
 
-//    destroy(){
-//        this.entity.destroy();
-        // pc.app.off('update',this.update); 
-//    }
 
     static createHeldItem(){
         console.log("huh? no createHeldGfx for this template:"+this.constructor);
         return null;
     }
 
-//    toJSON(){
-    // Handle this in Level.toJson()?
-//
-//        return {
-//            position : this.entity.getPosition().sub(this.level.terrain.centroid).trunc(), // I hate how this is here
-//            rotation : this.entity.getEulerAngles().trunc(),
-//            templateName : this.constructor.name,
-//            properties : this.properties,
-//        }
-//    }
 }
 
 
