@@ -64,7 +64,8 @@ const assets = {
     },
     font : new pc.Asset("font-benchnine", "font", { url: "/static/fonts/BenchNine-Bold.json",        }),
     fonts : {
-        montserrat : new pc.Asset("font-montserrat", "font", { url: "/static/fonts/Montserrat-Bold.json",        }),
+        montserrat_bold : new pc.Asset("font-montserrat", "font", { url: "/static/fonts/Montserrat-Bold.json",        }),
+        montserrat : new pc.Asset("font-montserrat", "font", { url: "/static/fonts/Montserrat-Regular.json",        }),
     },
     quad: new pc.Asset("quad", "texture", { url: "/static/assets/textures/ui/quad.jpg",        }),
     sounds : {

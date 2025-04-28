@@ -343,7 +343,8 @@ class NumberCube extends Template {
             // awkward but, we follow the pattern that the name is my constructor name unless otherwise noted.
             name : this.name, // if this changes, data will break 
             property : FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction = value; }, 
+            onInitFn : (template,value) => { console.log("init"); template.fraction = value; },
+            onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
          }),
     ]
@@ -353,21 +354,20 @@ class NumberCube extends Template {
         console.log(args);
         // args['rigidbodyType'] = pc.RIGIDBODY_TYPE_KINEMATIC;
         super(args);
- 
-        let cube =this.entity;
+        console.log("frac set:"+this.fraction); 
         // cube.tags.add(Constants.Tags.PlayerCanPickUp);
-        cube.addComponent("render",{ type : "box" });
+        this.entity.addComponent("render",{ type : "box" });
         // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
-        const s = cube.getLocalScale.x;
-        cube.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
-        cube.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE.clone().mulScalar(0.5)});//new pc.Vec3(s/2, s/2, s/2)});
-        cube.addComponent('script');
-        cube.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
-        cube.script.numberInfo.Setup();
-        if (this.fraction) cube.script.numberInfo.setFraction(this.fraction); // this fraction should have been set by template.super.setProps
-        else {
-            console.log("no frac:");
-        }
+        const s = this.entity.getLocalScale.x;
+        this.entity.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        this.entity.addComponent("collision", { type: "box", halfExtents: pc.Vec3.ONE.clone().mulScalar(0.5)});//new pc.Vec3(s/2, s/2, s/2)});
+        this.entity.addComponent('script');
+        this.entity.script.create('numberInfo',{attributes:{
+            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
+            fraction:this.fraction,
+            }});
+
+
     }
 
     
@@ -400,7 +400,6 @@ class NumberCube extends Template {
         cube.addComponent("render",{ type : "box" });
         cube.addComponent('script');
         cube.script.create('numberInfo');//,{attributes:{ fraction:this.fraction, }});
-        cube.script.numberInfo.Setup();
         cube.script.numberInfo.setFraction(fraction);
         return new HeldItem({
             entity:cube,
@@ -413,36 +412,52 @@ class NumberSphereGfxOnly extends Template {
          new PropertyMap({  
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction = value; }, 
+            onInitFn : (template,value) => {console.log('ini'); template.fraction = value; },
+            onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
          }),
     ]
 
-     setup(args={}){
-        let sphere = this.entity;
-        sphere.addComponent("render",{ type : "sphere" });
-        const s = sphere.getLocalScale.x;
-        sphere.addComponent('script');
-        let fraction = new Fraction(2,1);
-        sphere.script.create('numberInfo',{attributes:{
+    constructor(args={}){
+        super(args);
+        this.entity.addComponent("render",{ type : "sphere" });
+        const s = this.entity.getLocalScale.x;
+        this.entity.addComponent('script');
+        let fraction = this.fraction ?? new Fraction(1,5);
+        this.entity.script.create('numberInfo',{attributes:{
             destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
-            fraction:fraction,
+            fraction:this.fraction,
             }});
-        sphere.script.numberInfo.Setup();
-        this.script = sphere.script.numberInfo;
+         
     }
+     setup(args={}){
+   }
 
-    get fraction(){ return this.script.fraction; }
-    set fraction(value) { this.script.setFraction(value); }
+    get script(){ return this.entity.script.numberInfo; }
+    
+    getFraction(){ 
+        if (this.script){
+            return this.script.fraction; 
+        } else{
+            return this.fraction;
+        }
+    }
+    setFraction(value) { 
+        if( this.script) this.script.setFraction(value); 
+        else this.fraction = value;
+    }
 
 }
 
 export class NumberSphereRaw extends Template {
+    static combinationHierarchy = 1;
     static isNumber = true;
 //    fraction=new Fraction(1,3);
    
     constructor(args={}) {
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
+        console.log("args on nsw");
+        console.log(args);
         super(args); 
         this.entity.addComponent("render",{ type : "sphere" });
         const s = this.entity.getLocalScale.x;
@@ -453,7 +468,6 @@ export class NumberSphereRaw extends Template {
             destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
             fraction:this.fraction,
             }});
-        this.entity.script.numberInfo.Setup();
         if (this.fraction){
             // null if add two and result is zero? What a mess
             this.entity.script.numberInfo.setFraction(this.fraction); //ugh
@@ -508,6 +522,7 @@ export class NumberSphere extends NumberSphereRaw {
     constructor(args={}) {
         super(args);
         this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
+        this.script.setCombinationHierarchy(this.constructor.combinationHierarchy);
     }
 
 
@@ -585,6 +600,7 @@ class SwordPickup extends GadgetPickup {
 class Spikey extends NumberSphereRaw {
     static _icon = assets.textures.ui.icons.spikey;
     timer = 0; 
+    static combinationHierarchy = 3;
     //growlFn=(pos)=>{console.log("growl:"+pos);};
     originPoint=pc.Vec3.ZERO;
     movementRange=5;
@@ -594,7 +610,7 @@ class Spikey extends NumberSphereRaw {
             name : this.name, // if this changes, data will break // Should be Fraction1?
             property : FractionProperty, 
             onChangeFn : (template,value) => { console.log("Ch numbersphere"); template.setFraction(value); }, 
-            onInitFn : (template,value) => { console.log("init ns"); template.fraction = value; },
+            onInitFn : (template,value) => { console.log("init ns: "+value); template.fraction = value; },
             getCurValFn : (template) => { return template.getFraction(); }, 
          }),
     ]
@@ -618,6 +634,7 @@ class Spikey extends NumberSphereRaw {
         }
 
         pc.app.on('update',this.update,this);
+        this.script.setCombinationHierarchy(this.constructor.combinationHierarchy);
 
     }
 
@@ -670,6 +687,7 @@ class Spikey extends NumberSphereRaw {
 
 
 class SpikeyGroup extends Template {
+    fraction;
     static _icon = assets.textures.ui.icons.spikey;
     _quantity = 1;
     range=5;
@@ -728,7 +746,13 @@ class SpikeyGroup extends Template {
         this.spikeys=[];
         for (let i=0;i<this._quantity;i++){
             let p = this.randomSpikeyPos;
-            let s = new Spikey({position:p});
+            const args = {
+                position : p,
+                properties : {
+                    Spikey : this.fraction
+                }
+            } 
+            const s = new Spikey(args);
             this.entity.addChild(s.entity);
             this.spikeys.push(s);
             //s.moveTo(p); // addchild changes local pos?
@@ -757,8 +781,10 @@ class SpikeyGroup extends Template {
 
     constructor(args){
         super(args);
+        this.fraction = new Fraction(3,1);
         this.CreateGroup();
-        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition()});
+        let frac = this.fraction;
+        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition(),properties:{NumberSphereGfxOnly:frac}});
         this.entity.addChild(visibleSpikey.entity);
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         visibleSpikey.entity.addChild(spikeyClothes);

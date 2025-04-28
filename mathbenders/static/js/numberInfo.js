@@ -3,6 +3,7 @@ NumberInfo.attributes.add('moveSpeed', { type: 'number', default: 4, title: 'Mov
 NumberInfo.attributes.add('destroyFxFn', { type:'object'});
 NumberInfo.attributes.add('ignoreCollision', { type:'boolean', default: false});
 NumberInfo.attributes.add('allowCombination', { type: 'boolean', default: true, });
+NumberInfo.attributes.add('combinationHierarchy', { type: 'number', default: 1, });
 NumberInfo.attributes.add('fraction', { type: 'object' });
 
 NumberInfo.Shape = {
@@ -11,7 +12,7 @@ NumberInfo.Shape = {
     None : "None",
 }
 
-NumberInfo.prototype.Setup = function() {
+NumberInfo.prototype.initialize = function() {
     Object.defineProperty(this,'numberType', {get: function(){
         if (this.entity.render === undefined){
             return NumberInfo.Shape.None;
@@ -26,7 +27,10 @@ NumberInfo.prototype.Setup = function() {
     }})
 
     this.entity.collision?.on('collisionstart', this.onCollisionStart, this);
-    if (this.fraction == null) this.fraction = new Fraction(7,1); // dislike!!!
+    if (this.fraction == null) {
+        console.log("%c ERROR: No frac on "+this.entity.getGuid(),"color:red;font-weight:bold;");
+    }
+   // this.fraction = new Fraction(7,1); // dislike!!!
     this.cubeSize = this.entity.getLocalScale().x;
     if (this.numberType == NumberInfo.Shape.Cube){
         let d = this.cubeSize / 2 + 0.03;
@@ -62,6 +66,8 @@ NumberInfo.prototype.Setup = function() {
     } else {
         console.log('shapeless');
     }
+
+    this.setFraction(this.fraction);
 }
 
 
@@ -86,8 +92,8 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
         color: this.getColor(),
         anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
         pivot: new pc.Vec2(0.5, 0.5),
-        fontSize: this.getFontSize(this.fraction.asString()),
-        fontAsset: assets.fonts.montserrat,
+        fontSize: this.getFontSize(this.fraction.asString().toString()),
+        fontAsset: assets.fonts.montserrat_bold,
     });
     // Create fraction elements if needed
     if (this.fraction.asString().toString().includes('/')) {
@@ -95,6 +101,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
         let numerator = new pc.Entity('numerator');
         entity.addChild(numerator);
         numerator.setLocalPosition(0, 3.5, 0);
+        let fontAsset = this.fraction.numerator > 0 ? assets.fonts.montserrat_bold : assets.fonts.montserrat;
         numerator.addComponent('element', {
             type: 'text',
             layers: [pc.LAYERID_WORLD],
@@ -103,13 +110,14 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
             fontSize: this.getFontSize(this.fraction.numerator.toString(),true),
-            fontAsset: assets.fonts.montserrat,
+            fontAsset: fontAsset,
         });
 
         // Create line
         let line = new pc.Entity('line');
         entity.addChild(line);
-        line.setLocalPosition(0, 5, 0);
+        const yPos = this.fraction.numerator > 0 ? 5 : 6;
+        line.setLocalPosition(0, yPos, 0);
         line.addComponent('element', {
             type: 'text',
             layers: [pc.LAYERID_WORLD],
@@ -118,7 +126,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
             fontSize: 15, //this.getFontSize('_'),
-            fontAsset: assets.fonts.montserrat,
+            fontAsset: fontAsset,
         });
 
         // Create denominator
@@ -133,7 +141,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
             anchor: new pc.Vec4(0.5, 0.5, 0.5, 0.5),
             pivot: new pc.Vec2(0.5, 0.5),
             fontSize: this.getFontSize(this.fraction.denominator.toString(),true),
-            fontAsset: assets.fonts.montserrat,
+            fontAsset: fontAsset,
         });
 
 
@@ -419,7 +427,19 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
 
     // Somehow need to prevent collision between two kinematic numbers .. in general
     const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    const TemplateToClone = wasKin1 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
+    var TemplateToConle = null;
+    let h1 = obj1.script.numberInfo.collisionHierarchy;
+    let h2 = obj2.script.numberInfo.collisionHierarchy;
+    if (h1 != h2){
+        TemplateToClone = h1 > h2 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
+        console.log("Hierarchy says:"+TemplateToClone.name);
+    } else {
+        // Hierarchies were equal, so let kinematic decide hierarchy
+        // TODO / awkward : shouldn't there be a hierarchy like "Walls > Spikeys > regular numbers" instead of multiple hierarchies?
+        TemplateToClone = wasKin1 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
+        console.log("Hierarchy equal:"+TemplateToClone.name);
+    }
+    // need collisionHierarchy here.
     // console.log("TTC:"+TemplateToClone.name);
     const rot = wasKin1 ? obj1.getEulerAngles() : wasKin2 ? obj2.getEulerAngles : pc.Vec3.ZERO;
 
@@ -455,22 +475,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
     return resultData;
 }
 
-NumberInfo.prototype.setProperties = function(properties){
-    if (properties.numberInfo) {
-        this.setFraction(JsonUtil.JsonToFraction(properties.numberInfo.fraction));
-    } else {
-        //console.log("FAIL set props on ni:"+JSON.stringify(properties));
-    }
-}
-
-NumberInfo.prototype.getProperties = function(properties){
-    properties.numberInfo = {
-        fraction: this.fraction,
-    }
-    return properties;
-}
-
-Fraction.getFractionAsString = function(fraction){
-    return fraction.denominator == 1 ? fraction.numerator : fraction.numerator + "/" + fraction.denominator;
-
+NumberInfo.prototype.setCombinationHierarchy = function(num){
+    this.combinationHierarchy = num;
 }
