@@ -314,7 +314,6 @@ export class CopyProperty extends Property {
             copiedEntities.push(c.entity);
        });
         if (duplicate.postCopyFn) {
-            console.log(duplicate.postCopyFn);
             duplicate.postCopyFn(copiedEntities);
         } else {
             realmEditor.editItem({entity:copiedEntities[0]});
@@ -516,6 +515,7 @@ export class FractionProperty extends Property {
     static icon = assets.textures.ui.icons.fraction; 
 
     buildUi(){
+        console.log("bui");
         const $this = this; 
         const panel = Property.panel();
        
@@ -628,3 +628,26 @@ export class SizeProperty extends Property {
     }
 }
 
+export class BuildWallsProperty extends Property {
+    
+    static icon = assets.textures.ui.icons.wall;
+    buildUiButton(){
+        const template = this.template;
+        const moveButton = UI.SetUpItemButton({
+            parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
+            width:30,height:30,
+            textureAsset:this.constructor.icon,
+            mouseDown:function(){
+                realmEditor.toggle('buildWalls'); // BeginDraggingEditedObject();
+                realmEditor.mode.setData(template.entity.getPosition());
+            } 
+        });
+        return moveButton;
+    }
+
+}
+
+export class CastleWallFormedMeshData extends Property {
+    // Doesn't need any interaction ui setup;
+    // Simply a container for the meshdata which is saved/loaded by the template CaslteWallFormed
+}

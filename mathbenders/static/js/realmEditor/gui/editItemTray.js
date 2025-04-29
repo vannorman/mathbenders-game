@@ -108,9 +108,10 @@ export default class EditItemTray {
             // reparent ui to container's parent and position it over all siblings from parent
             let pare = this.buttonContainers[buttonIndex];
             let p1 = pare.getLocalPosition();
-            pare.parent.addChild(property.ui);
-            property.ui.setLocalPosition(p1);
-
+            if (property.ui){
+                pare.parent.addChild(property.ui);
+                property.ui.setLocalPosition(p1);
+            }
             const uiBtn = property.buildUiButton();
             uiBtn.element.on('mousedown',function(){
                 $this.currentProperties.forEach(x=>{x.hideUi();});

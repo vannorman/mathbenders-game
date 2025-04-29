@@ -100,9 +100,7 @@ class PlayerCamera{
         pc.app.scene.skyboxIntensity = 0.7;
         
      
-        Camera.main.entity.reparent(pivot);
- 
-        Camera.main.entity.reparent(pivot);
+        pivot.addChild(Camera.main.entity);
         Camera.main.entity.addComponent('audiolistener');
         Camera.main.entity.translate(0, 1, 9);
         Camera.main.entity.lookAt(0, 2, 0);

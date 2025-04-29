@@ -45,13 +45,13 @@ export default class UndoRedo  {
         // Hacky and simple way to capture states
         // Every mouse up and mouse down, UNLESS we're on the UNDO/REDO buttons.
         pc.app.mouse.on(pc.EVENT_MOUSEDOWN, function(){
-            if ($this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
-                $this.CaptureAndRegisterState()
+            if (this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+                //this.CaptureAndRegisterState()
             }
         }, this);
         pc.app.mouse.on(pc.EVENT_MOUSEUP, function(){
-            if ($this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
-                $this.CaptureAndRegisterState()
+            if (this.enabled && !Mouse.isMouseOverEntity(this.#undoBtn) && !Mouse.isMouseOverEntity(this.#redoBtn)){
+                // this.CaptureAndRegisterState()
             }
         }, this);
         

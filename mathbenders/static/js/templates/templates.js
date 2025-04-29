@@ -2,7 +2,7 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
+import {PropertyMap,Property,CastleWallFormedMeshData,BuildWallsProperty,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
 import HeldItem from './gadgets/heldItem.js';
@@ -16,7 +16,7 @@ class NumberHoop extends Template {
             name : "NumberHoop",
             property : FractionProperty, 
             onChangeFn : (template,value) => {  template.fraction=value; },
-            getCurValFn : (template) => { return template.fraction },
+            getCurValFn : (template) => { console.log("getcurfrachoop"); console.trace(); stackTrace();  return template.fraction },
          }),
 
     ]
@@ -243,8 +243,25 @@ class CastleTurret extends Template {
 class CastleWall extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.wall;
+    static propertiesMap = [
+         new PropertyMap({  
+            name : "CastleWall",
+            property : BuildWallsProperty,
+            // valueType : pc.Vec3,
+            onChangeFn : (template,value) => {  template.startConnectingWalls(value); },
+            getCurValFn : (template) => {  },
+//            min:0.5,
+//            max:100,
+         }),
+    ];
 
-    setup(args={}){ 
+    startConnectingWalls(value){
+        // Should we handle it here or in realmeditor?
+    }
+     
+
+    constructor(args={}){ 
+        super(args);
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -259,6 +276,59 @@ class CastleWall extends Template {
         
         this.entity.addChild(col);
         render.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
+        this.updateColliderMap();
+    }
+}
+
+class CastleWallFormed extends Template {
+    static isStaticCollider = true;
+    // static _icon = assets.textures.ui.icons.wall;
+
+    static propertiesMap = [
+         new PropertyMap({  
+            name : "CastleWallFormed",
+            property : CastleWallFormedMeshData,
+            // valueType : pc.Vec3,
+            onChangeFn : (template,value) => {  template.setMeshData(value); },
+            onInitFn : (template, value) => { template.setMeshData(value); },
+            getCurValFn : (template) => { return template.meshData },
+            min:0.5,
+            max:100,
+         }),
+    ];
+
+    
+    constructor(args={}){
+        super(args);
+        
+        const asset = assets.models.castle_wall;
+        const render = asset.resource.instantiateRenderEntity();
+        const clone = render.cloneWithMesh();
+        render.destroy();
+
+        // Utils.createMeshFromDataAndApply({mesh:this.mesh, })
+
+        let mat = ApplyTextureAssetToEntity({entity:clone,textureAsset:assets.textures.stone}); 
+        mat.diffuseMapTiling=new pc.Vec2(3,3); 
+        mat.update();
+ 
+        this.entity.addChild(clone);
+
+        
+
+        const col = new pc.Entity("castlewall collider");
+        col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        col.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(3,3.5,0.5)});
+        col.setLocalPosition(0,0,0);
+       
+        this.entity.addChild(col);
+        clone.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
+        this.updateColliderMap();
+        // console.log("Find previous wall and connect them");
+    }
+
+    formToTerrain(){
+        Utils.adjustMeshToGround({entity:this.entity});
     }
 }
 
@@ -590,250 +660,6 @@ class SwordPickup extends GadgetPickup {
 }
 
 
-// Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
-class Spikey extends NumberSphereRaw {
-    static _icon = assets.textures.ui.icons.spikey;
-    timer = 0; 
-    static combinationHierarchy = 3;
-    //growlFn=(pos)=>{console.log("growl:"+pos);};
-    originPoint=pc.Vec3.ZERO;
-    movementRange=5;
-    currentDirection=pc.Vec3.ZERO;
-    static propertiesMap = [
-         new PropertyMap({  
-            name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : FractionProperty, 
-            onChangeFn : (template,value) => { template.setFraction(value); }, 
-            onInitFn : (template,value) => { template.fraction = value; },
-            getCurValFn : (template) => { return template.getFraction(); }, 
-         }),
-    ]
-     setup(args={}){
-        super.setup(args);
-    }
-    constructor(args={}){
-        super(args);
-        let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
-        this.entity.addChild(spikeyClothes);
-        spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
-        this.originPoint = this.entity.getPosition();
-
-        const $this=this;
-        $this.growlFn=(pos)=>{
-            AudioManager.play({
-                source:PickRandomFromObject(assets.sounds.spikeySounds),
-                position:pos,
-                positional:true
-            });
-        }
-
-        pc.app.on('update',this.update,this);
-        this.script.type = NumberInfo.Type.Creature;
-    }
-
-    get randomInterval(){
-        const i = Math.random() * 3 + 2; // Random interval between 2-5 seconds
-        return i;
-
-    }
-
-    static { Game.f = 10 };
-    update(dt){
-        this.timer -= dt;
-        // If the timer reaches zero, change direction and reset timer
-        if (this.timer <= 0) {
-            console.log("im alive:"+this.uuid.substr(0,5));
-            this.timer = this.randomInterval * 5;
-            if (isNaN(this.entity.getPosition().x)){ console.log("N"); return;}
-            this.growlFn(this.entity.getPosition());
-            this.currentDirection = new pc.Vec3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
-        }
-
-        // Give it a chance to redirect efforts toward player, if player is close enough
-        var distToPlayer = Player.entity.getPosition().sub(this.entity.getPosition()).length();
-        if (distToPlayer < 10){
-            this.currentDirection = Player.entity.getPosition().sub(this.entity.getPosition()).normalize();
-        }
-
-        // Calculate distance from origin point
-        var distance = this.entity.getPosition().sub(this.originPoint).length();
-        // If creature is too far from origin, move towards it
-        if (distance > this.movementRange) {
-            this.currentDirection = this.originPoint.clone().sub(this.entity.getPosition()).normalize();
-        }
-
-
-        // Apply force in the current direction of movement
-
-        var force = Game.f * 30 * dt;// (10*dt); // You can adjust the force value
-        const force3d = this.currentDirection.clone().normalize().mulScalar(force);
-        this.entity.rigidbody.applyForce(force3d);
-        Utils3.debugForce({entity:this.entity,force:force3d});
-    }
-
-    entityWasDestroyed(){
-    //    console.log("This was destroyed:"+this.uuid);
-        super.entityWasDestroyed();
-        pc.app.off('update',this.update,this);
-    }
-
-
-
-}
-
-
-class SpikeyGroup extends Template {
-    fraction;
-    static _icon = assets.textures.ui.icons.spikey;
-    range=5;
-    setup(args={}){}
-    static propertiesMap = [
-         new PropertyMap({  
-            name : "SpikeyGroupQuantity",
-            property : QuantityProperty,
-            onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
-            onInitFn : (template,value) => { template.quantity = value; },
-            getCurValFn : (template) => { return template.quantity },
-            min:1,
-            max:7,
-         }),
-    ];
-
-    Rebuild(){
-        this.DestroyGroup();
-        this.CreateGroup();
-    }
-
-    DestroyGroup(){
-        this.spikeys.forEach(x=>{x.entity.destroy();})
-    }
-
-    gatherLooseRigidbodies(){
-        this.spikeys.forEach(x=>{
-            x.entity.moveTo(this.randomSpikeyPos);
-            if (x.entity.rigidbody){
-                x.entity.rigidbody.linearVelocity=pc.Vec3.ZERO;
-                x.entity.rigidbody.angularVelocity=pc.Vec3.ZERO;
-
-            }
-        });
-        // if they fell away, reset them to be close to the center of the group
-    }
-    onBeginDragByEditor(){
-        
-        super.onBeginDragByEditor();
-        this.freezeRigidbodies(); 
-        this.gatherLooseRigidbodies();
-    }
-    onEndDragByEditor(){
-        super.onEndDragByEditor();
-        this.unfreezeRigidbodies(); 
-    }
-
-    CreateGroup(){
-        this.spikeys=[];
-        for (let i=0;i<this.quantity;i++){
-            let p = this.randomSpikeyPos;
-            const args = {
-                position : p,
-                properties : {
-                    Spikey : this.fraction
-                }
-            } 
-            const s = new Spikey(args);
-            s.entity.on('destroy',function(){ this.spikeyDestroyed(s.entity); },this);
-            this.entity.addChild(s.entity);
-            this.spikeys.push(s);
-            //s.moveTo(p); // addchild changes local pos?
-        } 
-    }
-
-    spikeyDestroyed(entity){
-        console.log("dest 1:"+this.spikeys.length);
-        this.spikeys = this.spikeys.filter(x=>{return x.entity.getGuid()!==entity.getGuid()});
-        console.log("dest 2:"+this.spikeys.length);
-    }
-
-    get randomSpikeyPos(){
-        let p = this.entity.getPosition().clone().add(new pc.Vec3(0,10,0));
-        p.add(pc.Vec3.onUnitSphere().clone().flat().mulScalar(this.range));
-        return p;
-    }
-
-    freezeRigidbodies(){
-        this.spikeys.forEach(x=>{
-            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_STATIC;
-        });
-    }
-    
-    unfreezeRigidbodies(){
-        this.gatherLooseRigidbodies();
-        this.spikeys.forEach(x=>{
-            x.entity.rigidbody.type = pc.RIGIDBODY_TYPE_DYNAMIC;
-            x.originPoint = x.entity.getPosition();
-        });
-    }
-
-    constructor(args){
-        super(args);
-        // @Eytan; awkward competition for who sets properties when and from where.
-        // When dragging a new item instantiated from editor, it has no properties and relies on defaults.
-        // When reloading a level from saved data, it inflates each one with properties and must let those values override defaults.
-        this.quantity = this.quantity ?? 2; 
-
-        this.fraction = this.fraction ?? new Fraction(-2,1);
-        this.CreateGroup();
-        let frac = this.fraction;
-        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition(),properties:{NumberSphereGfxOnly:frac}});
-        this.entity.addChild(visibleSpikey.entity);
-        let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
-        visibleSpikey.entity.addChild(spikeyClothes);
-        let s = 3;
-        visibleSpikey.entity.setLocalScale(s,s,s);
-        visibleSpikey.entity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(s/2,s/2,s/2)});
-        visibleSpikey.entity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_STATIC});
-        visibleSpikey.entity.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,3,0)));
-        this.visibleSpikey=visibleSpikey;
-
-        pc.app.on('update',this.update,this);
-    }
-
-    entityWasDestroyed(){
-        super.entityWasDestroyed();
-        this.spikeys.forEach(x=>{x.entity.destroy()});
-        this.spikeys=[];
-        pc.app.off('update',this.update);
-    }
-
-    tick=0;
-    update(dt){
-        this.tick++;
-        if (this.tick > 105){
-            this.tick=0;
-            this.spikeys.forEach(x=>{
-                if (pc.Vec3.distance(x.entity.getPosition(),this.entity.getPosition()) > this.range * 10){
-                    x.entity.moveTo(this.randomSpikeyPos);
-                    x.entity.rigidbody.linearVelocity=pc.Vec3.ZERO;
-                    x.entity.rigidbody.angularVelocity=pc.Vec3.ZERO;
-
-                }
-            });
-        }
-    }
-    
-    onGameStateChange(state){
-        super.onGameStateChange(state);
-        switch(state){
-        case GameState.RealmBuilder: this.visibleSpikey.entity.enabled=true; break;
-        case GameState.Playing: this.visibleSpikey.entity.enabled=false; this.gatherLooseRigidbodies(); break;
-        default:break;
-        }
-
-    }
-
-}
-
-
 
 window.templateNameMap = {
     "Template" : Template,
@@ -847,14 +673,14 @@ window.templateNameMap = {
     "PlayerPortal" : PlayerPortal,
     "CastleTurret" : CastleTurret,
     "CastleWall" : CastleWall,
+    "CastleWallFormed" : CastleWallFormed,
     "ConcretePad" : ConcretePad,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,
     "SwordPickup" : SwordPickup,
     "Tree1" : Tree1,
     "Group" : Group,
-    "Spikey" : Spikey,
-    "SpikeyGroup" : SpikeyGroup,
+    // "Spikey" : Spikey,
 }
 
 // Export all templates to global scope for use in rest of app

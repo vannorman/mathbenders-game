@@ -112,6 +112,7 @@ var ScriptManager = {
 //          "/static/js/charlie/placedItem.js", 
          "/static/js/templates/properties.js", 
          "/static/js/templates/templates.js", 
+         "/static/js/templates/creatures/spikey.js", 
           "/static/js/realmEditor/realmEditor.js", 
 
           "/static/js/player/inventory/base.js",

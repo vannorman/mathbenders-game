@@ -7,6 +7,7 @@ import {
     NormalRealmBuilderMode,
     OrbitRealmBuilderMode,
     SelectRealmBuilderMode,
+    BuildWallsMode,
 } from "./modes/index.js";
 
 import {
@@ -17,6 +18,8 @@ import {
     Terrain,
     UndoRedo
 } from  "./index.js";
+
+// import { Template, etc. }
 
 class RealmEditor {
 
@@ -55,7 +58,8 @@ class RealmEditor {
             ['mapScreen', new MapScreenRealmBuilderMode({realmEditor: this})],
             ['normal', new NormalRealmBuilderMode({realmEditor: this})],
             ['select', new SelectRealmBuilderMode({realmEditor: this})],
-            ['orbit', new OrbitRealmBuilderMode({realmEditor: this})]
+            ['orbit', new OrbitRealmBuilderMode({realmEditor: this})],
+            ['buildWalls', new BuildWallsMode({realmEditor: this})]
         ]);
 
         this.toggle('normal');

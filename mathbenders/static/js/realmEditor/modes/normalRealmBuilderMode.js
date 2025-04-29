@@ -31,7 +31,7 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
     update(dt){
         if (this.mouseHeld){
             this.timer += dt;
-            const handPanHoldThreshold = 0.16;
+            const handPanHoldThreshold = 0.1;
             if (this.timer > handPanHoldThreshold && this.realmEditor.gui.isMouseOverMap){
                 this.realmEditor.toggle('handpan');
             }

@@ -70,7 +70,7 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
         let up = realmEditor.camera.entity.up.flat();
         let mov = new pc.Vec3();
         let speed=2.4;
-        if (mp[0] < 0.05) mov.add(right.clone().mulScalar(-speed));
+        if (false && mp[0] < 0.05) mov.add(right.clone().mulScalar(-speed));
         else if (mp[0] > 0.95) mov.add(right.clone().mulScalar(speed));
         if (mp[1] < 0.05) mov.add(up.clone().mulScalar(-speed));
         else if (mp[1] > 0.95) mov.add(up.clone().mulScalar(speed));

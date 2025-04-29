@@ -23,7 +23,6 @@ export class Group extends Template {
         const {entities}=args;
         this.entities = entities;
 
-        console.log("set w ents:"+this.entities);
         let pos = Utils.getCenterOfEntities(this.entities);
         this.entity.moveTo(pos);
         this.entities.forEach(x=>{
@@ -52,7 +51,6 @@ export class Group extends Template {
         return { 
             copies:copies, 
             postCopyFn:(entities)=>{
-                console.log(`Copying group`);
                 let group = new Group({entities:entities});
                 realmEditor.editItem({entity:group.entity,pop:true});
             }

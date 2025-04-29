@@ -12,16 +12,17 @@ export default class HandPanRealmBuilderMode extends RealmBuilderMode {
     onMouseMove(e) {
         
         super.onMouseMove(e);
+        const moveSpeedX = 1.3;
+        const moveSpeedY = 2.3;
         let right = this.realmEditor.camera.entity.right.flat();
         let up = this.realmEditor.camera.entity.up.flat();
-        let dt = .004;
         let xSpeed = new pc.Vec3().distance(this.realmEditor.camera.entity.getPosition().sub(this.realmEditor.camera.pivot.getPosition())) / 1000;
         let ySpeed = new pc.Vec3().distance(this.realmEditor.camera.entity.getPosition().sub(this.realmEditor.camera.pivot.getPosition())) / 1000;
 
         // console.log("mousepan:"+e.dx.toFixed(3)+","+e.dy.toFixed(3)+",spd;"+xSpeed.toFixed(3)+","+ySpeed.toFixed(3))
         const mov = new pc.Vec3().add2(
-                    right.mulScalar(-e.dx * xSpeed),
-                    up.mulScalar(e.dy * ySpeed)
+                    right.mulScalar(-e.dx * xSpeed * moveSpeedX),
+                    up.mulScalar(e.dy * ySpeed * moveSpeedY)
                 )
         if (this.realmEditor.camera.cameraComponent.projection == 1){
             // Orthographic projection, we currently don't do this way

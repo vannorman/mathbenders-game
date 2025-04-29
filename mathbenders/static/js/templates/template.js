@@ -68,7 +68,9 @@ export default class Template {
             // circular / ordering error
             this.setProperties(properties);
         }
-        this.updateColliderMap(); // All templates need to have their colliders registered. I don't want to do this in each indivdually.
+        // All templates need to have their colliders registered. I don't want to do this in each indivdually.
+        // But, now some templates have individual colliders created *after* constructor here, so this must be called in each of them
+        this.updateColliderMap(); 
         this.entity._templateInstance = this; // partial, incomplete ref
         GameManager.subscribe(this,this.onGameStateChange);
         this.entity.on('destroy',this.entityWasDestroyed,this);
@@ -101,7 +103,7 @@ export default class Template {
             this.colliders.set(collisionComponent,collisionComponent.enabled);
             const r = collisionComponent.entity.rigidbody;
             if (r && this.constructor.isStaticCollider){
-//                console.log("static:"+this.entity.name);
+                // console.log("static:"+this.entity.name);
                 // static colliders do not collide each other; set rigidbody group and mask accordingly
                 r.group = Constants.CollisionLayers.FixedObjects;
                 r.mask = pc.BODYMASK_ALL & ~r.group;

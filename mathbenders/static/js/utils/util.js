@@ -442,7 +442,8 @@ Utils = {
             scale = 1 
         } = options;
         let entity = new pc.Entity("DebugText");
-        parent.addChild(entity);
+        if (parent) parent.addChild(entity);
+        else pc.app.root.addChild(entity);
         entity.setLocalPosition(localPos);
         entity.setLocalEulerAngles(rotation);
         entity.setLocalScale(new pc.Vec3(1,1,1).mulScalar(scale));
@@ -482,8 +483,8 @@ Utils = {
     },
     adjustMeshToGround(options) {
         // performanceHelp
-        const {entity=null, collisions=true,boxColliderDim=new pc.Vec3(1,2.5,1)} = options;
-        // Note boxColliderDim is halfExtents, not fullExtents
+        const {entity=null, offset=new pc.Vec3(-2.75,-1,0.75)} = options;
+        // offset is for the CastleWall prefabN
 
         // Before anything, lower mesh as close to ground as it can get before bending.
         const p = entity.getPosition();
@@ -498,52 +499,136 @@ Utils = {
         const vertexCount = vertices.length / 3;
 
         let minLocalPosition = 999;
+        let positions = []; // easily keep track of each vec3 by an index
         for (let i = 0; i < vertexCount; i++) {
             const x = vertices[i * 3];
             const y = vertices[i * 3 + 1];
             const z = vertices[i * 3 + 2];
-            if (y < minLocalPosition) minLocalPosition = y;
+            positions[i] = [x,y,z]; 
         }
 
-        var colliderPositions = [];
-
-
-        for (let i = 0; i < vertexCount; i++) {
-            const x = vertices[i * 3];
-            const y = vertices[i * 3 + 1];
-            const z = vertices[i * 3 + 2];
-            const startPos = entity.localToWorldPos(new pc.Vec3(x, y, z));
-            const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
-
-            const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
-
-            if (result) {
-              const hitDistance = pc.Vec3.distance(result.point,startPos);
-              let localHeight = y - minLocalPosition;
-                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance + localHeight,0));
-                
-                // Add collision if needed
-                if (collisions && false ){ // this is way too slow
-                    if (colliderPositions.filter(x => pc.Vec3.distance(x, droppedPos) < Math.sqrt(boxColliderDim.x**2+boxColliderDim.z**2)).length == 0){
-                        // If no other existing collider position was within range, create a collider here
-                        const col = new pc.Entity();
-                        col.setPosition(droppedPos.clone().add(pc.Vec3.UP * boxColliderDim.y));
-                        col.addComponent('collision',{type:'box',halfExtents:boxColliderDim});
-                        col.addComponent('rigidbody',{type:'static'});
-                        col.name = "WallCollider";
-                        colliderPositions.push(droppedPos);
-                        pc.app.root.addChild(col);
-                    }
-                }
-
-
-                let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                vertices[i * 3 + 1] = localDroppedPos.y;
+        // each Catalog will define a unique vert/point in the mesh, and keep track of the twins by way of index
+        class Catalog {
+            twins=[]; // the index of the twin inside positions;
+            position;
+            index;
+            constructor(args={}){
+                const { index, position, } = args;
+                this.index=index;
+                this.position=position;
             }
         }
 
+        let catalogs = [];
+        // Look at all verts and each unique vert, along with its twins, into the catalog
+        for (let i = 0; i < vertexCount; i++) {
+            const x = vertices[i * 3];
+            const y = vertices[i * 3 + 1];
+            const z = vertices[i * 3 + 2];
+            
+
+            // Here we have a v3 xyz and what we want to know is, have we seen this vector3 before?
+            // If not catalog it.
+            let saved = catalogs.filter(c =>{
+                let p = c.position;
+                return p[0] == x && p[1] == y && p[2] == z;
+            });
+            if (saved.length == 1){
+                // We saw this position before; add it to the twins.
+                saved[0].twins.push(i);
+            } else {
+                // New position, save it.
+                let c = new Catalog({index:i,position:[x,y,z]})
+                catalogs.push(c);
+            }
+        }
+
+        console.log(catalogs);
+    
+        // For each saved catalog, raycast down to get the new y position for that unique point
+                       
+        catalogs.forEach(c=>{
+            const i = c.index;
+            const x = c.position[0];
+            const y = c.position[1];
+            const z = c.position[2];
+            if (y < minLocalPosition) minLocalPosition = y;
+            const startPos = entity.localToWorldPos(new pc.Vec3(x, y, z)).add(offset);
+            const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
+            
+            const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
+
+            if (result) {
+                const hitDistance = pc.Vec3.distance(result.point,startPos);
+                let localHeight = y - minLocalPosition;
+                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance + localHeight,0));
+                
+                let localDroppedPos = entity.worldToLocalPos(droppedPos);
+                const c1 = c.position[1];
+                c.position[1] = localDroppedPos.y;
+            }
+        });
+
+        // We manually checked which vertexes should be paired, 
+        // So tht when moving them down to the terrain,
+        // The mesh looks better if these pairs are of the same ending height
+        // each pair refers to two indexes of vert inside the "positions" variable
+        const pairs = [[3,109],[2,108],[288,156],[106,159],
+                        [8,120],[11,126],[44,161],[41,164],
+                        [17,129],[20,135],[54,171],[51,174],
+                        [25,138],[28,144],[49,166],[46,169],
+                        [34,147],[37,153]];
+
+        pairs.forEach(pair=>{
+            let cat1 = catalogs.filter(c => {return c.index == pair[0]})[0];
+            let cat2 = catalogs.filter(c => {return c.index == pair[1]})[0];
+            let maxY = Math.max(cat1.position[1],cat2.position[1]);
+            cat1.position[1] = cat2.position[1] = maxY;
+            // Now, push these new "y" values to the saved "positions" array
+            positions[pair[0]][1] = maxY;
+            positions[pair[1]][1] = maxY;
+
+            // Finally push the new "y" values to all the twins as well
+            cat1.twins.forEach(index=>{
+                positions[index][1] = maxY;
+            });
+            cat2.twins.forEach(index=>{
+                positions[index][1] = maxY;
+            });
+
+        });
+
+        // Now that we have a modified "positions" array where each y value has been lowered and twins have been matched,
+        // flatten that array so we can inflate the mesh with it
+        const adjustedVerts = positions.flat();
+
+        // Finally, modify the original (and flat)  array of vertices with the new y values
+        
+
+        for (let i = 0; i < vertexCount; i++) {
+            continue;
+            const x = vertices[i * 3];
+            const y = vertices[i * 3 + 1];
+            const z = vertices[i * 3 + 2];
+ 
+            const startPos = entity.localToWorldPos(new pc.Vec3(x, y, z)).add(offset);
+            const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
+            
+            const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
+
+            if (result) {
+                const hitDistance = pc.Vec3.distance(result.point,startPos);
+                let localHeight = y - minLocalPosition;
+                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance + localHeight,0));
+                
+                let localDroppedPos = entity.worldToLocalPos(droppedPos);
+                vertices[i * 3 + 1] = localDroppedPos.y;
+            }
+
+        }
+
         mesh.vertexBuffer.unlock();
-        mesh.setPositions(vertices);
+        mesh.setPositions(adjustedVerts);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
     },
 
@@ -787,7 +872,7 @@ var Utils3 = {
         const a = entity.getPosition().clone();
         const b = a.clone().add(force);
         const mid = new pc.Vec3().add2(a,b).mulScalar(0.5);
-        Utils3.debugSphere({position:b})
+        Utils3.debugSphere({position:b,scale:0.1,timeout:timeout})
         const cube = new pc.Entity();
         cube.addComponent('render',{type:'box'});
         cube.setLocalScale(new pc.Vec3(0.05,0.05,force.length()));
