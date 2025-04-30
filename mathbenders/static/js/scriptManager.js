@@ -54,6 +54,7 @@ var ScriptManager = {
          "/static/js/assetRegistry.js", 
         "/static/js/constants.js",
         "/static/js/utils/util.js",
+        "/static/js/utils/ammoDebugDrawer.js",
          "/static/js/shaders/groundFogShader.js",
          "/static/js/cameras.js", 
          "/static/js/playerController.js", 

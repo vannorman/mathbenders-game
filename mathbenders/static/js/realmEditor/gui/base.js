@@ -437,6 +437,7 @@ export default class GUI {
                     { ItemTemplate:ConcretePad} ,
                     { ItemTemplate:BigConcretePad} ,
                     { ItemTemplate:Tree1} ,
+                    { ItemTemplate:CastleGate} ,
             ],}));
         
         // Save icon

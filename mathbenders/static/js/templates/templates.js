@@ -210,11 +210,12 @@ class CastleTurret extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.turret1;
 
-    setup(args={}){
+    constructor(args={}){
+        super(args);
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
-        let pillarCollision = Utils.addMeshCollider(pillarRender,pillarAsset,pc.RIGIDBODY_TYPE_KINEMATIC); // TODO performance: move to a box collider.
+        let pillarCollision = Utils.addMeshCollider({entity:pillarRender,meshAsset:pillarAsset.resource.renders[0]});
 
         pillarRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         ApplyTextureAssetToEntity({entity:pillarRender,textureAsset:assets.textures.stone90}); 
@@ -222,7 +223,7 @@ class CastleTurret extends Template {
         // Castle Top
         const topAsset = assets.models.castle_top;
         const topRender = topAsset.resource.instantiateRenderEntity();
-        let topCollision = Utils.addMeshCollider(topRender,topAsset,pc.RIGIDBODY_TYPE_STATIC); // todo performance change to box collider
+        let topCollision = Utils.addMeshCollider({entity:topRender,meshAsset:topAsset.resource.renders[0]});
 
         topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         ApplyTextureAssetToEntity({entity:topRender,textureAsset:assets.textures.stone90}); 
@@ -234,6 +235,8 @@ class CastleTurret extends Template {
         
         pillarRender.setLocalEulerAngles(-90,0,0);
         pillarRender.setLocalPosition(new pc.Vec3(0,0.0,0));
+
+        this.updateColliderMap();
     }
 
 }
@@ -681,6 +684,60 @@ class SwordPickup extends GadgetPickup {
     }
 }
 
+class CastleGate extends Template {
+    static _icon = assets.textures.ui.icons.castleDoor;
+
+    constructor(args={}){
+        super(args);
+
+        
+        const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];
+        ApplyTextureAssetToEntity({entity:gate,textureAsset:assets.textures.wood}); 
+        const doorCol = new pc.Entity();
+        doorCol.setLocalScale(0.5,2.5,3.5);
+        doorCol.setLocalPosition(0,0,1.5)
+        doorCol.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.5,3.25,3.75)});
+        doorCol.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        gate.addChild(doorCol);
+        gate.setLocalScale(2,2,2);
+
+        const doorwayAsset = assets.models.castle_doorway;
+        const doorway = doorwayAsset.resource.instantiateRenderEntity().children[0];
+        doorway.setLocalScale(2,2,2);
+        ApplyTextureAssetToEntity({entity:doorway,textureAsset:assets.textures.stone90}); 
+        Utils.addMeshCollider({entity:doorway,meshAsset:doorway.render.asset});
+
+        const cover = new pc.Entity();
+        cover.addComponent('render',{type:'box'});
+        const scale = new pc.Vec3(4.5,1,7.9);
+        cover.addComponent('collision',{type:'box',halfExtents:scale.clone().mulScalar(0.5)});
+        cover.addComponent('rigidbody',{type:'kinematic'});
+        cover.setLocalScale(scale);
+
+        ApplyTextureAssetToEntity({entity:cover,textureAsset:assets.textures.stone90});
+
+
+        this.entity.addChild(gate);
+        this.entity.addChild(doorway);
+        this.entity.addChild(cover);
+    
+        doorway.setLocalEulerAngles(-90,0,0); 
+        gate.setLocalEulerAngles(-90,0,0); 
+
+        doorway.setLocalPosition(0,0,0);
+        gate.setLocalPosition(0,0,0);
+        cover.setLocalPosition(0,8,0);
+
+
+
+        this.gate=gate;
+        this.doorway=doorway;
+        this.cover=cover;
+        this.updateColliderMap();
+    }
+
+}
+
 
 
 window.templateNameMap = {
@@ -696,6 +753,7 @@ window.templateNameMap = {
     "CastleTurret" : CastleTurret,
     "CastleWall" : CastleWall,
     "CastleWallFormed" : CastleWallFormed,
+    "CastleGate" : CastleGate,
     "ConcretePad" : ConcretePad,
     "BigConcretePad" : BigConcretePad,
     "MultiblasterPickup" : MultiblasterPickup,

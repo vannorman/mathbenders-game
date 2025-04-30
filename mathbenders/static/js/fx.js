@@ -10,8 +10,8 @@ Fx = {
             lifetime: 0.2,
             rate: .001,
             rate2: .001,
-            emitterExtents: new pc.Vec3(1, 1, 1),
-            // scaleGraph: scaleCurve,
+            emitterExtents: new pc.Vec3(size, size, size), // where will particle spawn from
+            scaleGraph: scaleCurve,
             colorMap: assets.textures.fuzzk.resource,
             loop:false,
         });
