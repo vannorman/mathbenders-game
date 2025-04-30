@@ -255,8 +255,13 @@ def game():
     # supabase_key = env.get("SUPABASE_API_KEY")
     # user_name, user_id, logged_in = get_user_from_auth_session(request)
     callback = SUPABASE_GAME_CALLBACK
-
-    return render_template('game.html', **locals())
+    print(str(session.items()))
+    print(request.cookies);
+    # ⚠️   INSECURE !! ⚠️   # 
+    if not 'user_id' in request.cookies:
+        return render_template('loginPage.html')
+    else:
+        return render_template('game.html', **locals())
 
 @app.route("/contract")
 def contract():

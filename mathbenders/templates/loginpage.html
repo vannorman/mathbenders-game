@@ -23,6 +23,7 @@
         <h1>Welcome Guest</h1>
         <p><a href="/login?provider=facebook&callback={{callback}}">Login with Facebook</a></p>
         <p><a href="/login?provider=google&callback={{callback}}">Login with Google</a></p>
+        <!-- https://github.com/orgs/supabase/discussions/20353 Google redirect won't work properly locally -->
         <input type="text" id="tempLevelJson"></input><button onclick="javascript:sessionStorage.setItem('tempLevelJson', document.getElementById('tempLevelJson').value);
 ">save</button>
 </div>
