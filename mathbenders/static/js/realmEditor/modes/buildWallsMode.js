@@ -77,9 +77,9 @@ export default class BuildWallsMode extends RealmBuilderMode {
                 position:p,
                 rotation:rot,
             });      
-            wall.entity.setLocalScale(distBetweenCenters/6,1,1);
+            const xScale = distBetweenCenters/6;
             // console.log("scalex:"+distBetweenCenters/6);
-            wall.formToTerrain();
+            wall.formToTerrain({xScale:xScale});
         });
         this.#lastPosition =  nowPos;
 

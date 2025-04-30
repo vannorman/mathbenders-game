@@ -583,18 +583,20 @@ Utils = {
             const startPos = entity.localToWorldPos(new pc.Vec3(x, 0, z))
             const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
             
-            const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
-
-            if (result) {
-                const hitDistance = pc.Vec3.distance(result.point,startPos);
-                // let localHeight = y - minLocalPosition;
-                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
-                
-                let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                let offset = 1;
-                vertices[i * 3 + 1] -= hitDistance + offset;
-            }
-
+            const results = pc.app.systems.rigidbody.raycastAll(startPos, endPos);
+            results.forEach(result=>{
+                if (result.entity.tags._list.includes(Constants.Tags.Terrain)) {
+                    const hitDistance = pc.Vec3.distance(result.point,startPos);
+                    // let localHeight = y - minLocalPosition;
+                    let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
+                    
+                    let localDroppedPos = entity.worldToLocalPos(droppedPos);
+                    let offset = 1;
+                    vertices[i * 3 + 1] -= hitDistance + offset;
+                }
+            });
+        
+           
         }
         pairs.forEach(pair=>{
             let a = pair[0];
@@ -610,6 +612,7 @@ Utils = {
         // mesh.vertexBuffer.unlock();
         mesh.setPositions(vertices);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
+        return vertices;
     },
 
     DestroyObjectsWithTagByRadius(options){

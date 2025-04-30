@@ -289,15 +289,18 @@ class CastleWallFormed extends Template {
             name : "CastleWallFormed",
             property : CastleWallFormedMeshData,
             // valueType : pc.Vec3,
-            onChangeFn : (template,value) => {  template.setMeshData(value); },
-            onInitFn : (template, value) => { template.setMeshData(value); },
+            onChangeFn : (template,value) => {  },//template.setMeshData(value); },
+            onInitFn : (template, value) => { console.log("init w val:"+value.length); template.meshData=value; },
             getCurValFn : (template) => { return template.meshData },
             min:0.5,
             max:100,
          }),
     ];
 
-    
+    setMeshData(value){
+        console.log("this meshdata");
+       this.meshData = value; 
+    }
     constructor(args={}){
         super(args);
         
@@ -324,13 +327,28 @@ class CastleWallFormed extends Template {
        
         this.entity.addChild(col);
         clone.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
-        this.updateColliderMap();
+        if (this.meshData){
+            this.updateWallMesh(this.meshData);
+        }
         // console.log("Find previous wall and connect them");
+        this.updateColliderMap();
     }
 
-    formToTerrain(){
-        this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
-        Utils.adjustMeshToGround({entity:this.wall});
+    updateWallMesh(meshData){
+        const {xScale,verts} = meshData;
+        let mesh = this.wall.render.meshInstances[0].mesh;
+        mesh.setPositions(verts);
+        mesh.update(pc.PRIMITIVE_TRIANGLES);
+        this.wall.setLocalScale(xScale,1,1);
+
+    }
+
+    formToTerrain(args={}){
+        const {xScale}=args;
+        //this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
+        const verts = Utils.adjustMeshToGround({entity:this.wall}); 
+        this.wall.setLocalScale(xScale,1,1);
+        this.meshData = { verts: verts, xScale:xScale };
     }
 }
 
