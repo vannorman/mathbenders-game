@@ -120,17 +120,16 @@ export default class EditorCamera {
     translate(parameters = {}) {
         const {
             targetPivotPosition,
-            targetZoomFactor = 35,
+            targetZoomFactor = this.targetZoomFactor,
             shouldLerp = true,
             shouldSnapToDefaultRotation = false
         } = parameters;
-        // console.log('move to:'+targetPivotPosition);
+        this.targetPivotPosition = targetPivotPosition.clone(); 
+        this.targetZoomFactor = targetZoomFactor;
         if (shouldSnapToDefaultRotation) {
             // then do so
         }
         if (shouldLerp) {
-            this.targetPivotPosition = targetPivotPosition.clone(); // if not clone, changing the vec3 ref will update targetpivotpos as well. it's a pointer, not a value
-            this.targetZoomFactor = targetZoomFactor;
             this.toggle('lerping');
         } else {
             this.pivot.moveTo(targetPivotPosition);

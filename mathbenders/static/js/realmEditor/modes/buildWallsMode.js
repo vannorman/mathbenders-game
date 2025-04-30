@@ -23,6 +23,7 @@ export default class BuildWallsMode extends RealmBuilderMode {
 
 
     buildGui(){ 
+        const $this=this;
         this.#closeBtn = UI.SetUpItemButton({
             parentEl:realmEditor.gui.mapPanel,
             width:70,height:70,
@@ -30,10 +31,14 @@ export default class BuildWallsMode extends RealmBuilderMode {
             text:"Finished",
             anchor:[.5,.9,.5,.9],
             colorOn:pc.Color.YELLOW,
-            mouseDown:function(){ realmEditor.toggle('normal'); console.log("HAND PANl"); },
+            mouseDown:function(){ $this.exit(); },
             cursor:'pointer',
         });
 
+    }
+
+    exit(){
+        realmEditor.toggle('normal')
     }
 
     onExit(){
@@ -47,7 +52,12 @@ export default class BuildWallsMode extends RealmBuilderMode {
     }
 
     onMouseDown(e) { 
+        if (!realmEditor.gui.isMouseOverMap || !realmEditor.gui.isMouseOverTerrain) {
+            this.exit();
+            return;
+        }
         let nowPos = realmEditor.gui.worldPointUnderCursor;
+        
         const snapThreshold = 3;
         this.#pointsClicked.forEach(prevPos=>{
             // While clicking, we may be trying to "Join" the wall with another wall. If so, snap
@@ -107,7 +117,6 @@ export default class BuildWallsMode extends RealmBuilderMode {
 
     onMouseUp(e) {
         super.onMouseUp(e);
-        // this.realmEditor.toggle('normal');
     }
 
 }

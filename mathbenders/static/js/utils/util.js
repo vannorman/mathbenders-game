@@ -521,7 +521,6 @@ Utils = {
             const y = vertices[i * 3 + 1];
             const z = vertices[i * 3 + 2];
             
-
             // Here we have a v3 xyz and what we want to know is, have we seen this vector3 before?
             // If not catalog it.
             let saved = catalogs.filter(c =>{
@@ -529,10 +528,8 @@ Utils = {
                 return p[0] == x && p[1] == y && p[2] == z;
             });
             if (saved.length == 1){
-                // We saw this position before; add it to the twins.
                 saved[0].twins.push(i);
             } else {
-                // New position, save it.
                 let c = new Catalog({index:i,position:[x,y,z]})
                 catalogs.push(c);
             }
@@ -550,31 +547,13 @@ Utils = {
                         [25,138],[28,144],[49,166],[46,169],
                         [34,147],[37,153]];
 
-/*        pairs.forEach(pair=>{
-            let cat1 = catalogs.filter(c => {return c.index == pair[0]})[0];
-            let cat2 = catalogs.filter(c => {return c.index == pair[1]})[0];
-            let maxY = Math.max(cat1.position[1],cat2.position[1]);
-            cat1.position[1] = cat2.position[1] = maxY;
-            // Now, push these new "y" values to the saved "positions" array
-            positions[pair[0]][1] = maxY;
-            positions[pair[1]][1] = maxY;
-
-            // Finally push the new "y" values to all the twins as well
-            cat1.twins.forEach(index=>{
-                positions[index][1] = maxY;
-            });
-            cat2.twins.forEach(index=>{
-                positions[index][1] = maxY;
-            });
-
-        });
-*/
         // Now that we have a modified "positions" array where each y value has been lowered and twins have been matched,
         // flatten that array so we can inflate the mesh with it
 
         // Finally, modify the original (and flat)  array of vertices with the new y values
 
         let lastHitDist = -20;
+        let lowYs = [];
         for (let i = 0; i < vertexCount; i++) {
             const x = vertices[i * 3];
             const y = vertices[i * 3 + 1];
@@ -584,29 +563,56 @@ Utils = {
             const startPos = entity.localToWorldPos(new pc.Vec3(x, heightDelta, z))
             const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
             
-            const results = pc.app.systems.rigidbody.raycastAll(startPos, endPos);
-            try { 
-                const result = results.filter(x=>{return x.entity.tags._list.includes(Constants.Tags.Terrain);})[0]
+            let results = pc.app.systems.rigidbody.raycastAll(startPos, endPos);
+            let offset = 1; // helps it meet the terrain exactly
+            try {
+                results = results.filter(x=>{return x.entity.tags._list.includes(Constants.Tags.Terrain);});
+                let result = null;
+                let max = -Infinity;
+                results.forEach(r=>{
+                    if (r.point.y > max) {
+                        result=r;
+                        max=r.point.y;
+                    }
+                })
                 const hitDistance = pc.Vec3.distance(result.point,startPos) - heightDelta;
                 // let localHeight = y - minLocalPosition;
                 let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
                 
                 let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                let offset = 1; // helps it meet the terrain exactly
 
                 if (y < 1.0) { //1.0 happens to be the lower threshold for the bottom of the wall 
+                    // console.log("y:"+y);
+                    let p = result.point;
+                    lowYs.push([p.x,p.y,p.z]);
                                 //( local model maybe has a pivot below the model by 1 unit?)
-                    offset = 3; // for the bottom of the mesh, stretch it down towards the terrain more
+                    offset = 8; // for the bottom of the mesh, stretch it down towards the terrain more
+                } else {
+                    // console.log("y2: 2");
                 }
                 vertices[i * 3 + 1] -= hitDistance + offset;
 
                 lastHitDist = hitDistance; // only in case the next raycast busts and doesn't land. It happens a lot 
             } catch {
+                console.log("Fail ");
                 vertices[i * 3 + 1] -= lastHitDist + offset;
+
             }
-        
            
         }
+        let midpoint = slope = new pc.Vec3(0,0,0);
+        // We've saved all the "bottom" y positions in lowYs so let's get the slope from that
+        let h  = lowYs.reduce((max,t)=>t[1]>max[1]?t:max);
+        let l = lowYs.reduce((min,t)=>t[1]<min[1]?t:min);
+        slope = new pc.Vec3(h[0],h[1],h[2]).sub(new pc.Vec3(l[0],l[1],l[2]));
+
+        midpoint = new pc.Vec3(0,0,0); 
+        lowYs.forEach(x=>{
+            const d = new pc.Vec3(x[0],x[1],x[2]);
+            midpoint.add(d);
+        });
+        midpoint.mulScalar(1/lowYs.length);
+
         pairs.forEach(pair=>{
             let a = pair[0];
             let b = pair[1];
@@ -621,7 +627,7 @@ Utils = {
         // mesh.vertexBuffer.unlock();
 //        mesh.setPositions(vertices);
 //        mesh.update(pc.PRIMITIVE_TRIANGLES);
-        return vertices;
+        return {verts:vertices,slope:slope,midpoint:midpoint};
     },
 
     DestroyObjectsWithTagByRadius(options){

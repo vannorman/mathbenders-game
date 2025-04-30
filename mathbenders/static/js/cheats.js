@@ -290,9 +290,10 @@ $(document).on("keydown", function (e) {
     }
      if (ee == 'G'){
 
-        let cw = new CastleWallFormed({position:Player.droppedPosition}); 
-        cw.formToTerrain();
-        pc.app.root.getComponentsInChildren('cameraWallHandler')[0].enabled=false;
+//        let cw = new CastleWallFormed({position:Player.droppedPosition}); 
+//        cw.formToTerrain();
+//        pc.app.root.getComponentsInChildren('cameraWallHandler')[0].enabled=false;
+            let p = new CastleTurret({position:Player.droppedPosition});
 
         
     }

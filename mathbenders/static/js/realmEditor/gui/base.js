@@ -97,6 +97,14 @@ export default class GUI {
         return worldPointUnderCursor;
     }
 
+    get isMouseOverTerrain() {
+        let dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.xMap,Mouse.y);
+        let start = this.realmEditor.camera.entity.getPosition();
+        let end = start.clone().add(dir.mulScalar(500));
+        let results = pc.app.systems.rigidbody.raycastAll(start,end);
+        results = results.filter(x=>{return x.entity.tags._list.includes(Constants.Tags.Terrain)});
+        return results.length > 0;
+    }
 
     get editableItemUnderCursor () {
         // was:  UpdateWorldPointUnderCursor(){

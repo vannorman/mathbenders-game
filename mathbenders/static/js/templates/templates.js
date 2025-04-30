@@ -215,7 +215,8 @@ class CastleTurret extends Template {
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
-        let pillarCollision = Utils.addMeshCollider({entity:pillarRender,meshAsset:pillarAsset.resource.renders[0]});
+        pillarRender.addComponent('collision',{type:'cylinder',radius:2,height:8,axis:2});
+//        let pillarCollision = Utils.addMeshCollider({entity:pillarRender,meshAsset:pillarAsset.resource.renders[0]});
 
         pillarRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         ApplyTextureAssetToEntity({entity:pillarRender,textureAsset:assets.textures.stone90}); 
@@ -234,7 +235,8 @@ class CastleTurret extends Template {
         topRender.setLocalPosition(new pc.Vec3(0,3.4,0));
         
         pillarRender.setLocalEulerAngles(-90,0,0);
-        pillarRender.setLocalPosition(new pc.Vec3(0,0.0,0));
+        pillarRender.setLocalScale(1,1,2);
+        pillarRender.setLocalPosition(new pc.Vec3(0,-4,0));
 
         this.updateColliderMap();
     }
@@ -326,9 +328,12 @@ class CastleWallFormed extends Template {
 
         const col = new pc.Entity("castlewall collider");
         col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
-        col.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(3,3.5,0.5)});
+        col.addComponent('render',{type:'box'});
+        const scale = new pc.Vec3(1,1.75,1);
+        col.setLocalScale(scale);
+        col.addComponent('collision',{type:'box',halfExtents:scale.mulScalar(0.5)});
         col.setLocalPosition(0,0,0);
-       
+        this.col=col; 
         this.entity.addChild(col);
         clone.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
         if (this.meshData){
@@ -338,21 +343,26 @@ class CastleWallFormed extends Template {
         this.updateColliderMap();
     }
 
-    updateWallMesh(args){
-        const {xScale,verts}=args;
+    updateWallMesh(meshData){
+        const {xScale,verts,midpoint,slope}=meshData;
         let mesh = this.wall.render.meshInstances[0].mesh;
         mesh.setPositions(verts);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
-//        this.wall.setLocalScale(xScale,1,1);
         this.wall.setLocalScale(xScale,1,1);
 
+         this.col.moveTo(midpoint);
+         this.col.rotation = Quaternion.LookRotation(slope);
+        this.col.setLocalScale(xScale*8,8,0.5);
+        this.col.collision.halfExtents = this.col.getLocalScale().mulScalar(0.5);
+        
     }
 
     formToTerrain(args={}){
-        const {xScale}=args;
+        const {xScale=1}=args;
         //this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
-        const verts = Utils.adjustMeshToGround({entity:this.wall}); 
-        this.meshData = { verts: verts, xScale:xScale };
+        const result = Utils.adjustMeshToGround({entity:this.wall}); 
+        const {verts,slope,midpoint} = result;
+       this.meshData = { verts: verts, xScale:xScale, midpoint:midpoint, slope:slope };
         this.updateWallMesh(this.meshData);
     }
 }
@@ -414,6 +424,10 @@ class ConcretePad extends Template {
 class BigConcretePad extends ConcretePad { 
     static _icon = assets.textures.ui.builder.concretePadBig;
     static defaultScale = new pc.Vec3(50,20,50);
+    constructor(args={}){
+        super(args);
+        this.pad.tags._list.push(Constants.Tags.Terrain);
+    }
 }
 
 
