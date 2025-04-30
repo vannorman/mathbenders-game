@@ -289,17 +289,11 @@ $(document).on("keydown", function (e) {
         
     }
      if (ee == 'G'){
-        const options = {
-            position : Player.droppedPosition,
-            numberInfo : {
-                fraction : {
-                    numerator:2,
-                    denominator:1
-                },
 
-            }
-        }
-        Game.Instantiate.NumberCube(options);
+        let cw = new CastleWallFormed({position:Player.droppedPosition}); 
+        cw.formToTerrain();
+        pc.app.root.getComponentsInChildren('cameraWallHandler')[0].enabled=false;
+
         
     }
     if (ee == 'Z'){

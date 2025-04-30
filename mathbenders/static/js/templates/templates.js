@@ -313,6 +313,7 @@ class CastleWallFormed extends Template {
         mat.update();
  
         this.entity.addChild(clone);
+        this.wall = clone;
 
         
 
@@ -328,7 +329,8 @@ class CastleWallFormed extends Template {
     }
 
     formToTerrain(){
-        Utils.adjustMeshToGround({entity:this.entity});
+        this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
+        Utils.adjustMeshToGround({entity:this.wall});
     }
 }
 

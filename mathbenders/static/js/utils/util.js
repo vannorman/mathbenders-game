@@ -483,22 +483,18 @@ Utils = {
     },
     adjustMeshToGround(options) {
         // performanceHelp
-        const {entity=null, offset=new pc.Vec3(-2.75,-1,0.75)} = options;
+        const {entity} = options;
         // offset is for the CastleWall prefabN
 
         // Before anything, lower mesh as close to ground as it can get before bending.
         const p = entity.getPosition();
         const buffer = 2;
-        const groundDist = Utils.getDistToGround(entity);
-        entity.translate(0,-groundDist-buffer,0);
-
-        const mesh = entity.getComponentsInChildren('render')[0].meshInstances[0].mesh;
-        mesh.vertexBuffer.lock(); // Get the vertex positions from the mesh data
+        const mesh = entity.render.meshInstances[0].mesh;
+        // mesh.vertexBuffer.lock(); // Get the vertex positions from the mesh data
         const vertices = [];
         mesh.getPositions(vertices);
         const vertexCount = vertices.length / 3;
 
-        let minLocalPosition = 999;
         let positions = []; // easily keep track of each vec3 by an index
         for (let i = 0; i < vertexCount; i++) {
             const x = vertices[i * 3];
@@ -543,33 +539,9 @@ Utils = {
             }
         }
 
-        console.log(catalogs);
-    
         // For each saved catalog, raycast down to get the new y position for that unique point
                        
-        catalogs.forEach(c=>{
-            const i = c.index;
-            const x = c.position[0];
-            const y = c.position[1];
-            const z = c.position[2];
-            if (y < minLocalPosition) minLocalPosition = y;
-            const startPos = entity.localToWorldPos(new pc.Vec3(x, y, z)).add(offset);
-            const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
-            
-            const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
-
-            if (result) {
-                const hitDistance = pc.Vec3.distance(result.point,startPos);
-                let localHeight = y - minLocalPosition;
-                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance + localHeight,0));
-                
-                let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                const c1 = c.position[1];
-                c.position[1] = localDroppedPos.y;
-            }
-        });
-
-        // We manually checked which vertexes should be paired, 
+         // We manually checked which vertexes should be paired, 
         // So tht when moving them down to the terrain,
         // The mesh looks better if these pairs are of the same ending height
         // each pair refers to two indexes of vert inside the "positions" variable
@@ -579,7 +551,7 @@ Utils = {
                         [25,138],[28,144],[49,166],[46,169],
                         [34,147],[37,153]];
 
-        pairs.forEach(pair=>{
+/*        pairs.forEach(pair=>{
             let cat1 = catalogs.filter(c => {return c.index == pair[0]})[0];
             let cat2 = catalogs.filter(c => {return c.index == pair[1]})[0];
             let maxY = Math.max(cat1.position[1],cat2.position[1]);
@@ -597,38 +569,46 @@ Utils = {
             });
 
         });
-
+*/
         // Now that we have a modified "positions" array where each y value has been lowered and twins have been matched,
         // flatten that array so we can inflate the mesh with it
-        const adjustedVerts = positions.flat();
 
         // Finally, modify the original (and flat)  array of vertices with the new y values
-        
 
         for (let i = 0; i < vertexCount; i++) {
-            continue;
             const x = vertices[i * 3];
             const y = vertices[i * 3 + 1];
             const z = vertices[i * 3 + 2];
  
-            const startPos = entity.localToWorldPos(new pc.Vec3(x, y, z)).add(offset);
+            const startPos = entity.localToWorldPos(new pc.Vec3(x, 0, z))
             const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
             
             const result = pc.app.systems.rigidbody.raycastFirst(startPos, endPos);
 
             if (result) {
                 const hitDistance = pc.Vec3.distance(result.point,startPos);
-                let localHeight = y - minLocalPosition;
-                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance + localHeight,0));
+                // let localHeight = y - minLocalPosition;
+                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
                 
                 let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                vertices[i * 3 + 1] = localDroppedPos.y;
+                let offset = 1;
+                vertices[i * 3 + 1] -= hitDistance + offset;
             }
 
         }
+        pairs.forEach(pair=>{
+            let a = pair[0];
+            let b = pair[1];
+//            console.log("Checking :"+a+","+b);
+//            console.log(vertices[a*3+1]+","+vertices[b*3+1]);
+            const max = Math.max(vertices[a*3+1],vertices[b*3+1]);
+            vertices[a * 3 + 1] = vertices[b * 3 + 1] = max;
+            catalogs.filter(c=>{return c.index==a})[0].twins.forEach(t=>{vertices[t*3+1]=max});
+            catalogs.filter(c=>{return c.index==b})[0].twins.forEach(t=>{vertices[t*3+1]=max});
+        })
 
-        mesh.vertexBuffer.unlock();
-        mesh.setPositions(adjustedVerts);
+        // mesh.vertexBuffer.unlock();
+        mesh.setPositions(vertices);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
     },
 
