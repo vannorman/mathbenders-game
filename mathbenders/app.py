@@ -259,7 +259,7 @@ def game():
     print(request.cookies);
     # ⚠️   INSECURE !! ⚠️   # 
     if not 'user_id' in request.cookies:
-        return render_template('loginPage.html')
+        return render_template('loginpage.html')
     else:
         return render_template('game.html', **locals())
 
