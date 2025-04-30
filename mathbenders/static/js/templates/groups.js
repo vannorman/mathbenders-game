@@ -33,12 +33,15 @@ export class Group extends Template {
     }
 
     duplicate(){
-        let copies = []; 
+        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20); // copy "north" from Camera view
+
         let templatesToCopy = [];
         this.entity.children.forEach(x=>{
             if (x._templateInstance) templatesToCopy.push(x._templateInstance)
         });
+        let copies = []; 
         templatesToCopy.forEach(x=>{
+            
             let copy = {
                 data : x.getInstanceData(),
                 position : x.entity.getPosition(),
@@ -47,14 +50,21 @@ export class Group extends Template {
             copies.push(copy);
         });
 
-        const $this = this;
-        return { 
-            copies:copies, 
-            postCopyFn:(entities)=>{
-                let group = new Group({entities:entities});
-                realmEditor.editItem({entity:group.entity,pop:true});
-            }
-        };
+        let copiedEntities = [];
+        copies.forEach(copy => {
+            let p = copy.data.position.clone().add(copyDelta);
+            p = Utils.getGroundPosFromPos(p);
+            let c = realmEditor.InstantiateTemplate({
+                ItemTemplate:copy.Template,
+                position:p,
+                rotation:copy.data.rotation,
+                properties:copy.data.properties,
+            });
+            copiedEntities.push(c.entity);
+       });
+
+        let group = new Group({entities:copiedEntities});
+        realmEditor.editItem({entity:group.entity,pop:true});
     }
 
     // need to detect unselect.

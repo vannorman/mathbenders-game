@@ -2,7 +2,7 @@ import Template from './template.js';
 import { Gadget } from './gadgets/base.js';
 import { Sword } from './gadgets/sword.js';
 import { Multiblaster } from './gadgets/multiblaster.js';
-import {PropertyMap,Property,CastleWallFormedMeshData,BuildWallsProperty,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
+import {PropertyMap,Property,GenericDataProperty,BuildWallsProperty,BuildWallsTurretsProperty,CopyProperty,QuantityProperty,GroupProperty,MoveProperty,SizeProperty,FractionProperty,ScaleProperty,BasicProperties} from './properties.js';
 import {Tree1} from './trees.js';
 import {Group} from './groups.js';
 import HeldItem from './gadgets/heldItem.js';
@@ -244,14 +244,15 @@ class CastleWall extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.wall;
     static propertiesMap = [
+        // This is awkward because these are NOT properties for this template.
+        // Rather, this is the best method for adding *additional editing options* to the UI for this template.
+        // It might be better to divorce the UI the user sees (what is populated in editItemTray) vs what properties are there, 
+        // And link or map them separately.
          new PropertyMap({  
-            name : "CastleWall",
             property : BuildWallsProperty,
-            // valueType : pc.Vec3,
-            onChangeFn : (template,value) => {  template.startConnectingWalls(value); },
-            getCurValFn : (template) => {  },
-//            min:0.5,
-//            max:100,
+         }),
+         new PropertyMap({  
+            property : BuildWallsTurretsProperty,
          }),
     ];
 
@@ -287,10 +288,10 @@ class CastleWallFormed extends Template {
     static propertiesMap = [
          new PropertyMap({  
             name : "CastleWallFormed",
-            property : CastleWallFormedMeshData,
+            property : GenericDataProperty,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  },//template.setMeshData(value); },
-            onInitFn : (template, value) => { console.log("init w val:"+value.length); template.meshData=value; },
+            onInitFn : (template, value) => { template.meshData=value; },
             getCurValFn : (template) => { return template.meshData },
             min:0.5,
             max:100,
@@ -334,11 +335,12 @@ class CastleWallFormed extends Template {
         this.updateColliderMap();
     }
 
-    updateWallMesh(meshData){
-        const {xScale,verts} = meshData;
+    updateWallMesh(args){
+        const {xScale,verts}=args;
         let mesh = this.wall.render.meshInstances[0].mesh;
         mesh.setPositions(verts);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
+//        this.wall.setLocalScale(xScale,1,1);
         this.wall.setLocalScale(xScale,1,1);
 
     }
@@ -347,8 +349,8 @@ class CastleWallFormed extends Template {
         const {xScale}=args;
         //this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
         const verts = Utils.adjustMeshToGround({entity:this.wall}); 
-        this.wall.setLocalScale(xScale,1,1);
         this.meshData = { verts: verts, xScale:xScale };
+        this.updateWallMesh(this.meshData);
     }
 }
 

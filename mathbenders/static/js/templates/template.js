@@ -88,13 +88,22 @@ export default class Template {
     }
 
     duplicate() {
-        let copies = []; 
         let copy = { // copy or duplicate template should be its own class.
             data : this.getInstanceData(),
             Template : this.constructor,
         }
-        copies.push(copy);
-        return { copies:copies};
+
+        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20); // copy "north" from Camera view
+        let p = copy.data.position.clone().add(copyDelta);
+        p = Utils.getGroundPosFromPos(p);
+        let c = realmEditor.InstantiateTemplate({
+            ItemTemplate:copy.Template,
+            position:p,
+            rotation:copy.data.rotation,
+            properties:copy.data.properties,
+        });
+        realmEditor.editItem({entity:c.entity});
+ 
     }
 
     updateColliderMap(){
@@ -162,7 +171,7 @@ export default class Template {
         // and that we overwrite this in Gadget get properties() {return this.ammo....}
         const props = {};
         this.constructor.propertiesMap.forEach(x=>{
-           props[x.name] = x.getCurValFn(this) 
+           if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
         });
         return props;
     }

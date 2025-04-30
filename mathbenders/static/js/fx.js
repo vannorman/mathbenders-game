@@ -1,5 +1,31 @@
 Fx = {
-    Explosion(options={}){
+    Poof(options={}){
+        const {scale=1,size=1,position=Player.entity.getPosition(),positionalAudio=false}=options;
+        let particles = new pc.Entity("Poof");
+        pc.app.root.addChild(particles);
+        particles.moveTo(position);
+        const scaleCurve = new pc.Curve([scale, scale*2.1]);
+        particles.addComponent("particlesystem", {
+            numParticles: 1,
+            lifetime: 0.2,
+            rate: .001,
+            rate2: .001,
+            emitterExtents: new pc.Vec3(1, 1, 1),
+            // scaleGraph: scaleCurve,
+            colorMap: assets.textures.fuzzk.resource,
+            loop:false,
+        });
+        AudioManager.play({
+            source:PickRandomFromObject(assets.sounds.poofs),
+            position:position,
+            positional:positionalAudio,
+            pitch:Math.random()/2+0.5,
+            volume:0.8,
+
+        })
+
+    },
+     Explosion(options={}){
         const {position=Game.player.getPosition(),startScale=1,endScale=5,duration=2}=options;
         const ent = new pc.Entity();
         ent.addComponent('render', { type: 'sphere'  });

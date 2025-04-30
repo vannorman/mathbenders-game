@@ -575,26 +575,36 @@ Utils = {
 
         // Finally, modify the original (and flat)  array of vertices with the new y values
 
+        let lastHitDist = -20;
         for (let i = 0; i < vertexCount; i++) {
             const x = vertices[i * 3];
             const y = vertices[i * 3 + 1];
             const z = vertices[i * 3 + 2];
- 
-            const startPos = entity.localToWorldPos(new pc.Vec3(x, 0, z))
+
+            const heightDelta = 25;
+            const startPos = entity.localToWorldPos(new pc.Vec3(x, heightDelta, z))
             const endPos = startPos.clone().add(pc.Vec3.DOWN.clone().mulScalar(100));
             
             const results = pc.app.systems.rigidbody.raycastAll(startPos, endPos);
-            results.forEach(result=>{
-                if (result.entity.tags._list.includes(Constants.Tags.Terrain)) {
-                    const hitDistance = pc.Vec3.distance(result.point,startPos);
-                    // let localHeight = y - minLocalPosition;
-                    let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
-                    
-                    let localDroppedPos = entity.worldToLocalPos(droppedPos);
-                    let offset = 1;
-                    vertices[i * 3 + 1] -= hitDistance + offset;
+            try { 
+                const result = results.filter(x=>{return x.entity.tags._list.includes(Constants.Tags.Terrain);})[0]
+                const hitDistance = pc.Vec3.distance(result.point,startPos) - heightDelta;
+                // let localHeight = y - minLocalPosition;
+                let droppedPos = startPos.clone().add(new pc.Vec3(0,-hitDistance,0));
+                
+                let localDroppedPos = entity.worldToLocalPos(droppedPos);
+                let offset = 1; // helps it meet the terrain exactly
+
+                if (y < 1.0) { //1.0 happens to be the lower threshold for the bottom of the wall 
+                                //( local model maybe has a pivot below the model by 1 unit?)
+                    offset = 3; // for the bottom of the mesh, stretch it down towards the terrain more
                 }
-            });
+                vertices[i * 3 + 1] -= hitDistance + offset;
+
+                lastHitDist = hitDistance; // only in case the next raycast busts and doesn't land. It happens a lot 
+            } catch {
+                vertices[i * 3 + 1] -= lastHitDist + offset;
+            }
         
            
         }
@@ -610,8 +620,8 @@ Utils = {
         })
 
         // mesh.vertexBuffer.unlock();
-        mesh.setPositions(vertices);
-        mesh.update(pc.PRIMITIVE_TRIANGLES);
+//        mesh.setPositions(vertices);
+//        mesh.update(pc.PRIMITIVE_TRIANGLES);
         return vertices;
     },
 

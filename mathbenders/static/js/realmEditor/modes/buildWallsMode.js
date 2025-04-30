@@ -4,23 +4,31 @@ export default class BuildWallsMode extends RealmBuilderMode {
 
     #closeBtn;
     #lastPosition;
+    #turrets;
+    #pointsClicked=[];
     onEnter () {
         this.realmEditor.gui.setHandPanCursor();
         this.buildGui(); 
+        this.#pointsClicked=[];
 
     }
 
-    setData(lastPosition){
-        this.#lastPosition = lastPosition;
+    setData(args={}){
+        const {originalEntity,turrets}=args;
+        this.#lastPosition = originalEntity.getPosition();
+        this.#turrets = turrets;
+        originalEntity.destroy();
+        if (this.#turrets) realmEditor.InstantiateTemplate({ItemTemplate:CastleTurret,position:this.#lastPosition})
     }
 
 
     buildGui(){ 
         this.#closeBtn = UI.SetUpItemButton({
-            parentEl:this.mapPanel,
-            width:30,height:30,textureAsset:assets.textures.ui.icons.wall,
+            parentEl:realmEditor.gui.mapPanel,
+            width:70,height:70,
+            textureAsset:assets.textures.ui.icons.wall,
             text:"Finished",
-            anchor:[.85,.85,.85,.85],
+            anchor:[.5,.9,.5,.9],
             colorOn:pc.Color.YELLOW,
             mouseDown:function(){ realmEditor.toggle('normal'); console.log("HAND PANl"); },
             cursor:'pointer',
@@ -40,11 +48,17 @@ export default class BuildWallsMode extends RealmBuilderMode {
 
     onMouseDown(e) { 
         let nowPos = realmEditor.gui.worldPointUnderCursor;
+        const snapThreshold = 3;
+        this.#pointsClicked.forEach(prevPos=>{
+            // While clicking, we may be trying to "Join" the wall with another wall. If so, snap
+            if (nowPos.distance(prevPos) < snapThreshold) nowPos = prevPos;
+        });
+        this.#pointsClicked.push(nowPos);
         // create interval positions between this.#lastPosition and p
         // create a template for CastleWallFormed at each interval, scaled to match
         // rotate it to be along the line
         // drop it to the terrain
-
+        if (Mouse.isMouseOverEntity(this.#closeBtn)) return;
         function fenceSegmentCenters(a, b, maxDist) {
             const distance = a.distance(b);
             const segments = Math.ceil(distance / maxDist);
@@ -83,6 +97,11 @@ export default class BuildWallsMode extends RealmBuilderMode {
         });
         this.#lastPosition =  nowPos;
 
+        // Add turret?
+        if (this.#turrets){
+            realmEditor.InstantiateTemplate({ItemTemplate:CastleTurret,position:this.#lastPosition})
+
+        }
 
     }
 

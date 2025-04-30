@@ -278,6 +278,8 @@ const UI = {
             colorOn,
             colorOff,
             text="",
+            textAnchor=[0.5,0.5,0.5,0.5],
+            textColor=pc.Color.BLUE,
             hoverValidationFn=null,
             useSelectedState=false,
         }=options;
@@ -296,17 +298,17 @@ const UI = {
             ent.element.color=colorOff;
 
             }
-        if (text) {
+        if (text && text != "") {
              const textA = new pc.Entity('Text'); // text
              textA.addComponent('element', {
                 type: 'text',
                 text: text,
-                anchor:[0.5,0.5,0.5,0.5],
+                anchor:textAnchor,
                 pivot:[0.5,0.5],
                 margin:[0,0,0,0],
                 fontAsset: assets.fonts.montserrat, // Replace with your font asset id
                 fontSize : 12,
-                color:pc.Color.BLACK,
+                color:textColor,
             });
             ent.addChild(textA); 
         }

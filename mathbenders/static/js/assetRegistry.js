@@ -85,7 +85,10 @@ const assets = {
         selectItem : new pc.Asset('selectItem',"audio",{url:"/static/assets/sounds/select.mp3"}),
         placeItem : new pc.Asset('placeItem',"audio",{url:"/static/assets/sounds/placeItem.mp3"}),
         thud : new pc.Asset('thud',"audio",{url:"/static/assets/sounds/thud.mp3"}),
-        spikeySounds : {
+        poofs : {
+            poof1 : new pc.Asset('growl1',"audio",{url:"/static/assets/sounds/poof1.mp3"}),
+        },
+         spikeySounds : {
             spikeyGrowl1 : new pc.Asset('growl1',"audio",{url:"/static/assets/sounds/spikeyGrowl1.mp3"}),
             spikeyGrowl2 : new pc.Asset('growl2',"audio",{url:"/static/assets/sounds/spikeyGrowl2.mp3"}),
             spikeyGrowl3 : new pc.Asset('growl3',"audio",{url:"/static/assets/sounds/spikeyGrowl3.mp3"}),
@@ -151,6 +154,8 @@ const assets = {
                 turret1 : new pc.Asset("turret1 ", "texture", {url : "/static/assets/textures/ui/iconTurret1.png" }),
                 hand : new pc.Asset("iconHand", "texture", {url : "/static/assets/textures/ui/iconHand.png" }),
                 wall : new pc.Asset("iconWall", "texture", {url : "/static/assets/textures/ui/iconWall.png" }),
+                wallBuilder : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconWallBuilder.png" }),
+                wallBuilderTurret : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconWallBuilderTurret.png" }),
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
             },
             builder : {

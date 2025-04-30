@@ -283,42 +283,53 @@ export class ScaleProperty extends Property {
 
 }
 
+export class DeleteProperty extends Property {
+
+    buildUiButton({parentEl:parentEl}){
+        const $this = this; 
+        const copyBtn = UI.SetUpItemButton({
+            parentEl:parentEl,
+            width:30,height:30,textureAsset:assets.textures.ui.trash,
+            anchor:[0.66,0.5,0.66,0.5],
+            mouseDown:function(){
+                Fx.Poof({position:$this.template.entity.getPosition(),positionalAudio:false,scale:50,})
+                $this.template.entity.destroy();
+                realmEditor.toggle('normal');
+            },//duplicateTemplate();}, //.CopyEditedObject();},
+            text:"Delete",
+            textColor:pc.Color.YELLOW,
+            textAnchor:[0.5,-.3,.5,-.3],
+        });
+        return copyBtn;
+    }
+
+    duplicateTemplate(){
+        // Shouldn't this exist on the template?
+        let duplicate = this.template.duplicate(); //itemTemplate.duplicate();
+       
+    }
+}
+
 export class CopyProperty extends Property {
-    static icon = assets.textures.ui.builder.moveItem;
 
     buildUiButton({parentEl:parentEl}){
         const $this = this; 
         const copyBtn = UI.SetUpItemButton({
             parentEl:parentEl,
             width:30,height:30,textureAsset:assets.textures.ui.builder.copy,
-            mouseDown:function(){$this.duplicateTemplate();}, //.CopyEditedObject();},
+            anchor:[0.33,0.5,0.33,0.5],
+            mouseDown:function(){$this.template.duplicate();},//duplicateTemplate();}, //.CopyEditedObject();},
             text:"Copy",
-            textAnchor:[0.5,1.5,0.5,1.5],
+            textColor:pc.Color.YELLOW,
+            textAnchor:[0.5,-.3,.5,-.3],
         });
         return copyBtn;
     }
 
     duplicateTemplate(){
+        // Shouldn't this exist on the template?
         let duplicate = this.template.duplicate(); //itemTemplate.duplicate();
-        const copyDelta = realmEditor.camera.entity.forward.flat().normalize().mulScalar(20); // copy "north" from Camera view
-        let copiedEntities = [];
-        duplicate.copies.forEach(copy => {
-            let p = copy.data.position.clone().add(copyDelta);
-            p = Utils.getGroundPosFromPos(p);
-            let c = realmEditor.InstantiateTemplate({
-                ItemTemplate:copy.Template,
-                position:p,
-                rotation:copy.data.rotation,
-                properties:copy.data.properties,
-            });
-            copiedEntities.push(c.entity);
-       });
-        if (duplicate.postCopyFn) {
-            duplicate.postCopyFn(copiedEntities);
-        } else {
-            realmEditor.editItem({entity:copiedEntities[0]});
-        }
-        
+       
     }
 }
 
@@ -466,18 +477,21 @@ export class BasicProperties extends Property {
         MoveIcons({amt:5,size:1.2});
         MoveIcons({amt:0.5,size:0.7});
 
-        // enable copy
-        let copyBtnContainer = new pc.Entity();
-        copyBtnContainer.addComponent('element',{
+        let bottomRight = new pc.Entity();
+        bottomRight .addComponent('element',{
             type: 'image',
             color:pc.Color.GRAY,
             anchor:[0.75,0,1,1],
             margin:[0,0,0,0],
         })
+        container.addChild(bottomRight); 
 
         const copyProperty = new CopyProperty({template:this.template});
-        const copyBtn = copyProperty.buildUiButton({parentEl:copyBtnContainer});
-        container.addChild(copyBtnContainer); 
+        const copyBtn = copyProperty.buildUiButton({parentEl:bottomRight});
+
+        const deleteProperty = new DeleteProperty({template:this.template});
+        const deleteBtn = deleteProperty.buildUiButton({parentEl:bottomRight});
+
 
         // Enable move up and down.
         let moveUpDownContainer = new pc.Entity();
@@ -628,26 +642,47 @@ export class SizeProperty extends Property {
     }
 }
 
-export class BuildWallsProperty extends Property {
+export class BuildWallsTurretsProperty extends Property {
     
-    static icon = assets.textures.ui.icons.wall;
+    static icon = assets.textures.ui.icons.wallBuilderTurret;
     buildUiButton(){
         const template = this.template;
-        const moveButton = UI.SetUpItemButton({
+        const buildWallsButton = UI.SetUpItemButton({
             parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
             width:30,height:30,
             textureAsset:this.constructor.icon,
             mouseDown:function(){
                 realmEditor.toggle('buildWalls'); // BeginDraggingEditedObject();
-                realmEditor.mode.setData(template.entity.getPosition());
+                realmEditor.mode.setData({originalEntity:template.entity,turrets:true});
             } 
         });
-        return moveButton;
+        return buildWallsButton;
     }
 
 }
 
-export class CastleWallFormedMeshData extends Property {
+export class BuildWallsProperty extends Property {
+    
+    static icon = assets.textures.ui.icons.wallBuilder;
+    buildUiButton(){
+        const template = this.template;
+        const buildWallsButton = UI.SetUpItemButton({
+            parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
+            width:30,height:30,
+            textureAsset:this.constructor.icon,
+            mouseDown:function(){
+                realmEditor.toggle('buildWalls'); // BeginDraggingEditedObject();
+                realmEditor.mode.setData({originalEntity:template.entity,turrets:false});
+            } 
+        });
+        return buildWallsButton;
+    }
+
+}
+
+export class GenericDataProperty extends Property {
     // Doesn't need any interaction ui setup;
-    // Simply a container for the meshdata which is saved/loaded by the template CaslteWallFormed
+    // Its existence is an artifact of how we define, iterate, and inflate templates by "properties"
+    // This placeholder enables the saving and loading of arbitrary data inside any template.
+    // For example, it is Simply a container for the meshdata which is saved/loaded by the template CaslteWallFormed
 }
