@@ -1,73 +1,64 @@
 import Template from './template.js';
-import HeldItem from './heldItem.js';
-import Sword from './sword.js';
-import Multiblaster from './multiblaster.js';
+import { HeldItem } from './gadgets/heldItem.js';
+import { Sword } from './gadgets/sword.js';
+import { Multiblaster } from './gadgets/multiblaster.js';
+import { Gadget } from './gadgets/gadget.js';
 
-export class Gadget extends Template {
-    static _icon; //= assets.textures.ui.trash;
-    static pickupSound = assets.sounds.getGadget;
-    static texture = assets.textures.gadget;
-    static model;
-    static get isGadget(){ return true; } // lol but ..
-   
-     ammo=[];
-    ammoGfx=[];
+export  {Sword}   from './gadgets/sword.js';
+export  {Multiblaster } from './gadgets/multiblaster.js';
+export {HeldItem } from './gadgets/heldItem.js';
 
-    #mouseHeld;
+class GadgetPickup extends Template {}
+export class MultiblasterPickup extends GadgetPickup {
+    static _icon = assets.textures.ui.icons.multiblaster;
+    static isStaticCollider = true;
 
-    constructor(){
-        super();
-        this.entity = new pc.Entity("Gadget "+this.constructor.name);
-        // pc.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
+    static onCollect(){
+        return Multiblaster;
     }
 
-   onPickup(){
-        AudioManager.play({source:assets.sounds.getGadget});
-   }
+    setup(args={}){
 
-   onSelect(){  
-        // Hmm this never gets called currently. Inventory has its own "Select"?
-        console.log('SUP select');
-   }
+        // graphics
+        this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
+        const blaster = assets.models.gadgets.multiblaster.resource.instantiateRenderEntity();
+        ApplyTextureAssetToEntity({entity:blaster,textureAsset:assets.textures.gadget});
+        this.entity.addChild(blaster);
+        blaster.setLocalEulerAngles(0,-90,-90);
+        blaster.setLocalPosition(pc.Vec3.UP);
 
-    static createHeldItem(){
+        // pickup item 
+        this.entity.addComponent('collision');
+        this.entity.addComponent('rigidbody',{type:'kinematic'});
+
+    }
+}
+
+
+export class SwordPickup extends GadgetPickup {
+    static _icon = assets.textures.ui.icons.sword;
+    static isStaticCollider = true;
+
+    static onCollect(){
+        return Sword;
     }
 
-    destroyHeldItemGfx(){
-        this.heldItemGfx.destroy();
+    setup(args={}){
+
+        // graphics
+
+        this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
+        const sword = assets.models.gadgets.sword.resource.instantiateRenderEntity();
+        ApplyTextureAssetToEntity({entity:sword,textureAsset:assets.textures.gadget});
+        this.entity.addChild(sword);
+        sword.setLocalEulerAngles(90,0,90);
+        sword.setLocalPosition(pc.Vec3.UP);
+
+        // pickup item 
+        this.entity.addComponent('collision');
+        this.entity.addComponent('rigidbody',{type:'kinematic'});
+
     }
-
-    updateAmmoGfx(){}
-
-    clearAmmoGfx(){
-        this.ammoGfx.forEach(x=>x.entity.destroy());
-    }
- 
-    collectAmmo(args={}){}
- 
-    onMouseDown(){}
- 
-    onMouseUp(){}
- 
-    fire(){}
- 
-    update(){}
-
-    get properties(){
-        return {
-            ammo : this.ammo,
-        }
-    } 
-    popFxAmmo(){ }
-
-    set properties(value){
-        // console.log(value);
-        const properties = value;
-        if (properties.ammo) {
-            this.ammo = properties.ammo;
-        }
-    }
-
 }
 
 

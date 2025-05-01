@@ -1,10 +1,9 @@
 import Template from '../template.js';
-import {NumberSphereRaw} from  '../templates.js';
 import {PropertyMap,FractionProperty,QuantityProperty} from '../properties.js';
-
+import {NumberSphereRaw } from '../numbers.js';
 
 // Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
-class Spikey extends NumberSphereRaw {
+export class Spikey extends NumberSphereRaw {
     static _icon = assets.textures.ui.icons.spikey;
     timer = 0; 
     static combinationHierarchy = 3;
@@ -95,7 +94,7 @@ class Spikey extends NumberSphereRaw {
 }
 
 
-class SpikeyGroup extends Template {
+export class SpikeyGroup extends Template {
     fraction;
     static _icon = assets.textures.ui.icons.spikey;
     range=5;
@@ -244,5 +243,3 @@ class SpikeyGroup extends Template {
 
 }
 
-window["SpikeyGroup"] = SpikeyGroup;
-templateNameMap["SpikeyGroup"] = SpikeyGroup;

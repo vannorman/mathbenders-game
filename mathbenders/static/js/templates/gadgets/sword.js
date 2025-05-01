@@ -1,5 +1,5 @@
-import Gadget from './base.js';
-import HeldItem from './heldItem.js';
+import Gadget from './gadget.js';
+import { HeldItem } from './heldItem.js';
 
 export default class Sword extends Gadget {
     static _icon = assets.textures.ui.icons.sword;

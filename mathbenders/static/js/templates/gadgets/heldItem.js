@@ -1,4 +1,4 @@
-export default class HeldItem {
+export class HeldItem {
     constructor(args={}){
         const {
             entity,

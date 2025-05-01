@@ -51,6 +51,9 @@ const assets = {
         castle_wall: new pc.Asset("CastleWall", "container", { url: "/static/assets/models/structures/castles/castleWall.glb",    }),
         castle_top: new pc.Asset("castle_top", "container", { url: "/static/assets/models/structures/castles/castleTop.glb",    }),
         castle_pillar: new pc.Asset("castle_pillar", "container", { url: "/static/assets/models/structures/castles/castlePillar.glb",    }),
+        ramp: new pc.Asset("", "container", { url: "/static/assets/models/structures/castles/ramp.glb",    }),
+//        stairs1: new pc.Asset("castle_pillar", "container", { url: "/static/assets/models/structures/castles/stairs1.glb",    }),
+//        stairs2: new pc.Asset("castle_pillar", "container", { url: "/static/assets/models/structures/castles/stairs1.glb",    }),
         castle_gate : new pc.Asset("", "container", { url: "/static/assets/models/structures/castles/castleGate.glb",    }),
         half_door : new pc.Asset("", "container", { url: "/static/assets/models/structures/halfDoor.glb",    }),
         castle_doorway : new pc.Asset("", "container", { url: "/static/assets/models/structures/castles/castleDoorway.glb",    }),
@@ -162,6 +165,8 @@ const assets = {
                 numberWall : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
                 castleGate : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/castleGate.png" }),
                 castleDoor : new pc.Asset("iconNumberWall", "texture", {url : "/static/assets/textures/ui/castleDoor.png" }),
+                stairs1 : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/stairs1.png" }),
+                stairs1 : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/stairs2.png" }),
             },
             builder : {
                 arrow : new pc.Asset("","texture",{ url:"/static/assets/textures/ui/down-arrow.png"}),

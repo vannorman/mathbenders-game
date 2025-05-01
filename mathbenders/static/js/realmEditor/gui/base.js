@@ -420,6 +420,7 @@ export default class GUI {
                     //{ templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
                     { ItemTemplate : PlayerStart },
                     { ItemTemplate : PlayerPortal },
+                    { ItemTemplate:Tree1} ,
                     //{ templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
@@ -444,8 +445,8 @@ export default class GUI {
                     { ItemTemplate:CastleWall } ,
                     { ItemTemplate:ConcretePad} ,
                     { ItemTemplate:BigConcretePad} ,
-                    { ItemTemplate:Tree1} ,
                     { ItemTemplate:CastleGate} ,
+                    { ItemTemplate:Ramp} ,
             ],}));
         
         // Save icon

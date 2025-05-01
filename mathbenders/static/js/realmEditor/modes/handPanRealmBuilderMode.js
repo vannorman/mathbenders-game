@@ -28,7 +28,8 @@ export default class HandPanRealmBuilderMode extends RealmBuilderMode {
             // Orthographic projection, we currently don't do this way
 //                Camera.sky.entity.translate(mov);
         } else if (this.realmEditor.camera.cameraComponent.projection == 0){
-            this.realmEditor.camera.pivot.translate(mov);
+            const pos = this.realmEditor.camera.pivot.getPosition().clone().add(mov);
+            this.realmEditor.camera.translate({targetPivotPosition:pos,shouldLerpPivot:false});
         }
         if (!this.realmEditor.gui.isMouseOverMap || !Mouse.isPressed){
             console.log('breakpan');

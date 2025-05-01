@@ -1,5 +1,5 @@
-import Gadget from './base.js';
-import HeldItem from './heldItem.js';
+import Gadget from './gadget.js';
+import { HeldItem } from './heldItem.js';
 
 export default class Multiblaster extends Gadget {
     

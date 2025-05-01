@@ -5,7 +5,7 @@ export default class EditorCamera {
     #mode;
     #modes;
     targetPivotPosition;
-    targetZoomFactor;
+    targetZoomFactor=35;
     degreesRotated;
     targetPivot; // for rotation, it's easier and more straightforward to have a dummy entity snap to rotation then lerp to that rotation
     get currentZoom(){ return this.entity.getLocalPosition().length(); }
@@ -120,21 +120,29 @@ export default class EditorCamera {
     translate(parameters = {}) {
         const {
             targetPivotPosition,
-            targetZoomFactor = this.targetZoomFactor,
-            shouldLerp = true,
-            shouldSnapToDefaultRotation = false
+            targetZoomFactor,
+            scrollDelta,
+            shouldLerpPivot = true,
+            shouldLerpZoom = true,
         } = parameters;
-        this.targetPivotPosition = targetPivotPosition.clone(); 
-        this.targetZoomFactor = targetZoomFactor;
-        if (shouldSnapToDefaultRotation) {
-            // then do so
+        if (targetPivotPosition)  this.targetPivotPosition = targetPivotPosition.clone();
+        if (targetZoomFactor) this.targetZoomFactor = targetZoomFactor;
+        else if (scrollDelta){
+            this.targetZoomFactor -= scrollDelta;
+            if (!shouldLerpZoom){
+                this.entity.setLocalPosition( new pc.Vec3(1,1.414,1).normalize().mulScalar(this.targetZoomFactor));
+            }
+        }else {
+            // Not scrolling and no zoom factor was set, so simply keep the existing target zoom as the existing height
+            this.targetZoomFactor = this.entity.getLocalPosition().length();
         }
-        if (shouldLerp) {
+        if (shouldLerpPivot) {
             this.toggle('lerping');
         } else {
+            
             this.pivot.moveTo(targetPivotPosition);
-
         }
+
     }
 
     toggle(mode) {
@@ -176,7 +184,7 @@ class Lerping extends Mode {
        
         // Lerp  zoom.
         const lerpZoomSpeed = 10;
-        const targetLocalCamPos = new pc.Vec3(1,1.414,1).mulScalar(camera.targetZoomFactor);
+        const targetLocalCamPos = new pc.Vec3(1,1.414,1).normalize().mulScalar(camera.targetZoomFactor);
         const lerpZoomPos = new pc.Vec3().lerp(camera.entity.getLocalPosition(),targetLocalCamPos,lerpZoomSpeed*dt);
 
         // Finished both?

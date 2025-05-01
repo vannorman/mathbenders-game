@@ -17,6 +17,10 @@ export default class Template {
     colliders = new Map();
     uuid;
 
+    static {
+
+    }
+
     entity; // stores scale, position, and rotation;
 
     static get isGadget(){ return false;  }

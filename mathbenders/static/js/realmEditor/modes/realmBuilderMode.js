@@ -15,27 +15,14 @@ export default class RealmBuilderMode {
     onMouseScroll(e){
         let r = realmEditor.camera.entity.right.mulScalar(0.22);
         this.cameraIsLerping = false;
-        if (realmEditor.camera.cameraComponent.projection == 1){
-//            if (e.wheelDelta > 0){
-//                if (Camera.sky.orthoHeight < 100) {
-//                    Camera.sky.orthoHeight++;
-//                    Camera.sky.entity.translate(-r.x,-r.y,-r.z);
-//                }
-//            } else {
-//                if (Camera.sky.orthoHeight > 10) {
-//                    Camera.sky.orthoHeight--;
-//                    Camera.sky.entity.translate(r.x,r.y,r.z);
-//                }
-//            }
-        } else if (realmEditor.camera.cameraComponent.projection == 0) {
-            const fwd = e.wheelDelta < 0 ? 1 : -1; // scroll up or down?
-            const heightFactor = realmEditor.camera.entity.getLocalPosition().length(); // closer to ground? scroll slower
-            const factor = 0.05;
-            const dir = realmEditor.camera.entity.forward;
-            const m = dir.mulScalar(fwd * heightFactor * factor)
-            realmEditor.camera.entity.translate(m); 
-        }
-
+        //        if (realmEditor.camera.cameraComponent.projection == 0) {
+        const fwd = e.wheelDelta < 0 ? 1 : -1; // scroll up or down?
+        const heightFactor = realmEditor.camera.entity.getLocalPosition().length(); // closer to ground? scroll slower
+        const factor = 0.05;
+//        const dir = realmEditor.camera.entity.forward;
+        const scrollDelta = fwd * heightFactor * factor
+//        const m = dir.mulScalar(
+        realmEditor.camera.translate({scrollDelta:scrollDelta,shouldLerpZoom:false});
     }
 
 

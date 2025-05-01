@@ -173,9 +173,11 @@ class OutlineCamera {
 
 Object.defineProperty(Camera, "skyCamAspectRatio", {
     get: function skyCamAspectRatio() {
-        const leftMargin = 80;
-        const logoPanelWidth = 80; 
-        return (pc.app.graphicsDevice.width-leftMargin-logoPanelWidth)/pc.app.graphicsDevice.height;
-        // code
+        if (typeof realmEditor !== 'undefined'){
+            const mpe = realmEditor.gui.mapPanel.element;
+            return mpe.width / mpe.height;
+        } else {
+            return 1.12;
+        }
     }
 });

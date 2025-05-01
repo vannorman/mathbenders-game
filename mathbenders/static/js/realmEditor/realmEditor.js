@@ -141,13 +141,13 @@ class RealmEditor {
             let to = from.clone().add(new pc.Vec3(0,-200,0));
             let result = pc.app.systems.rigidbody.raycastFirst(from, to);
 
-            let randomTemplateKey = Object.keys(templateNameMap)[Math.floor(Math.random()*Object.keys(templateNameMap).length)];
+            let randomTemplateKey = Object.keys(TemplateNameMap)[Math.floor(Math.random()*Object.keys(TemplateNameMap).length)];
             if (result) {
                 const pos = result.point;
-                console.log("rtk:"+randomTemplateKey);
+                // console.log("rtk:"+randomTemplateKey);
                 let obj = this.InstantiateTemplate({
                     level:level,
-                    ItemTemplate:templateNameMap[randomTemplateKey],
+                    ItemTemplate:TemplateNameMap[randomTemplateKey],
                     position:pos,
                     rotation:new pc.Vec3(0,Math.random()*180,0),
                 });
@@ -316,10 +316,10 @@ class RealmEditor {
             let index=0;
             console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
-                console.log(x);
+                // console.log(x);
                     let obj = this.InstantiateTemplate({
                         level:thisLevel,
-                        ItemTemplate:templateNameMap[x.templateName],
+                        ItemTemplate:TemplateNameMap[x.templateName],
                         uuid:x.uuid,
                         properties:x.properties,
                         position:x.position.add(thisLevel.terrain.centroid),

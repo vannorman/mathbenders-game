@@ -1,5 +1,5 @@
 import Template from '../template.js';
-import HeldItem from './heldItem.js';
+import { HeldItem } from './heldItem.js';
 
 export default class Gadget extends Template {
     static _icon; //= assets.textures.ui.trash;
