@@ -415,14 +415,22 @@ export class BasicProperties extends Property {
                 anchor:anchor,
                 mouseDown:function(){   $this.template.entity.rotate(amt);    }
             });
+            if (amt < 0){
+                rotateLeft.setLocalEulerAngles(0,0,90);
+            }else {
+                rotateLeft.setLocalEulerAngles(0,0,-90);
+
+            }
         }
        
         
-        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:5,anchor:[.39,.45,.39,.45],size:18});
-        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:45,anchor:[0.4,.65,0.4,.65],size:30});
 
-        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.6,.65,.6,.65],size:30});
-        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.61,.45,.61,.45],size:18});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-5,anchor:[.39,.45,.39,.45],size:18});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow2,amt:-45,anchor:[.4,.65,.4,.65],size:30});
+        
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:45,anchor:[0.6,.65,0.6,.65],size:30});
+        Rotate({texture:assets.textures.ui.builder.curved_arrow,amt:5,anchor:[.61,.45,.61,.45],size:18});
+       /////// ////// ////// ////// ////// ////// ////// ////// ////// ////// ////// ////// ////// ///// 
 
         // Enable nudge move left right up down for selected item 
         const moveIconsParent = new pc.Entity();

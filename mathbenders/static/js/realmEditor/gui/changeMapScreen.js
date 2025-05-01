@@ -59,23 +59,20 @@ export default class ChangeMapScreen {
             tempCam.addComponent('camera',{
                 layers: [pc.LAYERID_SKYBOX, pc.LAYERID_DEPTH,  pc.LAYERID_WORLD ],
                 priority:0,
-                clearColorBuffer:true,
-                clearDepthBuffer:true,
-                farClip:15000,
-                aspectRatio:realmEditor.camera.skyCamAspectRatio,
-                aspectRatioMode:1
+                aspectRatio:1,//realmEditor.camera.skyCamAspectRatio,
+                gammaCorrection:1,
             });
 
-            const tempCamPivot = new pc.Entity();
-            const pivotOffset = pc.Vec3.ZERO;
-            tempCamPivot.setPosition(level.terrain.entity.getPosition().add(pivotOffset));
-            pc.app.root.addChild(tempCamPivot);
-            tempCamPivot.addChild(tempCam);
-            tempCam.setLocalEulerAngles(realmEditor.camera.defaultSettings.rotation);
-            let camOffset = tempCam.forward.mulScalar(level.terrain.scale * -2.1);
-            tempCam.setLocalPosition(camOffset);
+            pc.app.root.addChild(tempCam);
+            tempCam.setLocalEulerAngles(realmEditor.camera.entity.getLocalEulerAngles());
+            const camDist = 500;
+            const camPos = level.terrain.entity.getPosition().clone().
+                add(realmEditor.camera.entity.forward.clone().mulScalar(-1).
+                mulScalar(camDist));
 
-            const tempCamPivotPosition = tempCamPivot.getPosition().clone();
+            tempCam.moveTo(camPos);
+
+            const tempCamPivotPosition = tempCam.getPosition().clone();
             const icon = UI.SetUpItemButton({
                 parentEl:this.layout,
                 width:60,height:60,
@@ -109,25 +106,44 @@ export default class ChangeMapScreen {
 
             this.mapIcons.push(icon);
 
-            var texture = new pc.Texture(pc.app.graphicsDevice, {
-                width: 512,
-                height: 512,
+            const texture = new pc.Texture(pc.app.graphicsDevice, {
+                width: 64,
+                height: 64,
                 format: pc.PIXELFORMAT_R8_G8_B8_A8,
-                autoMipmap: true
+                encoding: pc.TEXTUREENCODING_LINEAR,
+                mipmaps: true,
+                aspectRatio:1,
+                addressU: pc.ADDRESS_CLAMP_TO_EDGE,
+                addressV: pc.ADDRESS_CLAMP_TO_EDGE
+            });
+            const renderTarget = new pc.RenderTarget({
+                name: 'RT',
+                colorBuffer: texture,
+                depth: true,
+                flipY: !pc.app.graphicsDevice.isWebGPU,
+                samples: 2
             });
 
-            // Create a render target
-            var renderTarget = new pc.RenderTarget({ colorBuffer: texture, flipY: true, depth: true });
+            //tempCam.camera.renderTarget = renderTarget;
+            Game.t=tempCam;
+            Game.rt = renderTarget;
+            Game.i = icon;
+            Game.tex = texture;
             tempCam.camera.renderTarget = renderTarget;
 
-            // Render once to the texture then scrap the camera
-           pc.app.once('postrender', function () {
-                icon.element.texture = texture;
-                tempCam.destroy();
-                tempCamPivot.destroy();
-            }.bind(pc)); 
+            icon.element.texture=texture;
+            setTimeout(function(){tempCam.destroy();},1) 
 
-            // TODO: Memory leak? Is render texture / render target need to be released?
+//            // Render once to the texture then scrap the camera
+//           pc.app.once('frameend', ()=> {
+//                pc.app.renderNextFrame = true;
+//                pc.app.once('frameend', ()=> {
+//                    icon.element.texture = texture;
+//                    tempCam.destroy();
+//                    tempCamPivot.destroy();
+//                });
+//            });
+
         });
 
         // Create New Terrain button
