@@ -1,6 +1,7 @@
 
 
 export default class Terrain {
+    static spacing = 2000;
     
 
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
@@ -123,7 +124,6 @@ export default class Terrain {
     // When placing terrains, they all exist in the same "scene" and so must be spaced away from each other.
     // To manage placement of new, deletion of old, and reshuffling of terrain positions
     // we use "centroids", a static list of vec3 defining a 3d grid where at most one terrain fits on each vec3.
-    static spacing = 1000;
     static centroids = [];
     static {
         const dim = 4;

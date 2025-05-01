@@ -316,6 +316,7 @@ class RealmEditor {
             let index=0;
             console.log("%c Load Json ","color:yellow;font-weight:bold;");
             levelJson.templateInstances.forEach(x=>{
+                console.log(x);
                     let obj = this.InstantiateTemplate({
                         level:thisLevel,
                         ItemTemplate:templateNameMap[x.templateName],

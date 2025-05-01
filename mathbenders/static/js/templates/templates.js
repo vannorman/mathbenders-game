@@ -215,7 +215,7 @@ class CastleTurret extends Template {
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
-        pillarRender.addComponent('collision',{type:'cylinder',radius:2,height:8,axis:2});
+        pillarRender.addComponent('collision',{type:'cylinder',radius:2,height:16,axis:2});
 //        let pillarCollision = Utils.addMeshCollider({entity:pillarRender,meshAsset:pillarAsset.resource.renders[0]});
 
         pillarRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
@@ -354,6 +354,7 @@ class CastleWallFormed extends Template {
          this.col.rotation = Quaternion.LookRotation(slope);
         this.col.setLocalScale(xScale*8,8,0.5);
         this.col.collision.halfExtents = this.col.getLocalScale().mulScalar(0.5);
+        this.updateColliderMap();
         
     }
 

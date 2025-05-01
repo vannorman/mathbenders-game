@@ -280,7 +280,7 @@ NumberInfo.GetCombinationHierarchyResult = function(ni1,ni2){
             }
         default: console.log("NOCOMB");break;
     }
-    console.error("ERRROR: No combination "+ni1.getGuid()+","+ni2.getGuid());
+    console.error("ERRROR: No combination, "+ni1.type+","+ni2.type+" ,"+ni1.entity.getGuid()+","+ni2.entity.getGuid());
     return null;
 }
 

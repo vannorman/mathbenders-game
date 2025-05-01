@@ -55,7 +55,7 @@ class Spikey extends NumberSphereRaw {
         this.timer -= dt;
         // If the timer reaches zero, change direction and reset timer
         if (this.timer <= 0) {
-            console.log("im alive:"+this.uuid.substr(0,5));
+            //console.log("im alive:"+this.uuid.substr(0,5));
             this.timer = this.randomInterval * 5;
             if (isNaN(this.entity.getPosition().x)){ console.log("N"); return;}
             this.growlFn(this.entity.getPosition());
@@ -162,9 +162,7 @@ class SpikeyGroup extends Template {
     }
 
     spikeyDestroyed(entity){
-        console.log("dest 1:"+this.spikeys.length);
         this.spikeys = this.spikeys.filter(x=>{return x.entity.getGuid()!==entity.getGuid()});
-        console.log("dest 2:"+this.spikeys.length);
     }
 
     get randomSpikeyPos(){
@@ -247,4 +245,4 @@ class SpikeyGroup extends Template {
 }
 
 window["SpikeyGroup"] = SpikeyGroup;
-
+templateNameMap["SpikeyGroup"] = SpikeyGroup;
