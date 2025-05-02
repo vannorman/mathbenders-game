@@ -171,12 +171,7 @@ export default class Template {
         // awkward that this is irrelevant for gadgets being held in inventory
         // and that we overwrite this in Gadget get properties() {return this.ammo....}
         const props = {};
-        if (this.constructor.propertiesMap){
-            this.constructor.propertiesMap.forEach(x=>{
-               if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
-            });
-            return props;
-        } else if (this.constructor.properties){
+        if (this.constructor.properties){
             
             this.constructor.properties.forEach(x=>{
                if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
@@ -197,20 +192,6 @@ export default class Template {
             rotation : this.entity.getEulerAngles().trunc(),
             properties : this.properties,
         }
-    }
-
-    setProperties(properties) {
-        if (typeof properties == "undefined" || properties == {}){
-            return;
-            //console.log(properties);
-        }
-        this.constructor.propertiesMap.forEach(x=>{
-            if (typeof properties[x.name] !== 'undefined'){
-                const val = properties[x.name];
-                x.onInitFn(this,val);
-            } else{
-            }
-        })
     }
 
     setProperties2(properties) {

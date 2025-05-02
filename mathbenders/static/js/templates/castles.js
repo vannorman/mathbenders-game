@@ -195,7 +195,8 @@ export class CastleWallFormed extends Template {
 
         const col = new pc.Entity("castlewall collider");
         col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
-        col.addComponent('render',{type:'box'});
+        // if debug colliders
+        // col.addComponent('render',{type:'box'});
         const scale = new pc.Vec3(1,1.75,1);
         col.setLocalScale(scale);
         col.addComponent('collision',{type:'box',halfExtents:scale.mulScalar(0.5)});

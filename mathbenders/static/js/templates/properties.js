@@ -1,17 +1,3 @@
-export class PropertyMap {
-    constructor(args){
-        const  {template,name,property,onInitFn,onChangeFn,getCurValFn,min=1,max=10} = args;
-        this.template = template;
-        this.name = name;
-        this.property = property;
-        this.onChangeFn = onChangeFn;
-        this.onInitFn = onInitFn ?? onChangeFn;
-        this.getCurValFn = getCurValFn;
-        this.min = min;
-        this.max = max;
-    }
-
-}
 export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 

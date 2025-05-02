@@ -1,5 +1,5 @@
 import Template from '../template.js';
-import {PropertyMap,FractionModifier,Quantity} from '../properties.js';
+import * as P from '../properties.js';
 import {NumberSphereRaw } from '../numbers.js';
 
 // Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
@@ -11,10 +11,9 @@ export class Spikey extends NumberSphereRaw {
     originPoint=pc.Vec3.ZERO;
     movementRange=5;
     currentDirection=pc.Vec3.ZERO;
-    static propertiesMap = [
-         new PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : FractionModifier, 
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             onInitFn : (template,value) => { template.fraction = value; },
             getCurValFn : (template) => { return template.getFraction(); }, 
@@ -26,7 +25,7 @@ export class Spikey extends NumberSphereRaw {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         this.entity.addChild(spikeyClothes);
         spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
@@ -101,10 +100,9 @@ export class SpikeyGroup extends Template {
     static _icon = assets.textures.ui.icons.spikey;
     range=5;
     setup(args={}){}
-    static propertiesMap = [
-         new PropertyMap({  
+    static properties = [
+         new P.Quantity({  
             name : "SpikeyGroupQuantity",
-            property : Quantity,
             onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
             onInitFn : (template,value) => { template.quantity = value; },
             getCurValFn : (template) => { return template.quantity },
@@ -189,7 +187,7 @@ export class SpikeyGroup extends Template {
     constructor(args){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         // @Eytan; awkward competition for who sets properties when and from where.
         // When dragging a new item instantiated from editor, it has no properties and relies on defaults.
         // When reloading a level from saved data, it inflates each one with properties and must let those values override defaults.

@@ -1,12 +1,11 @@
 import Template from './template.js';
-import * as Property from './properties.js';
+import * as P from './properties.js';
 
 export class NumberWall extends Template {
     static _icon = assets.textures.ui.icons.numberWall;
-    static propertiesMap = [
-         new Property.PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : "Fraction1",
-            property : Property.FractionModifier, 
             onInitFn : (template,value) => { template.fraction1 = value },
             onChangeFn : (template,value) => { template.setFraction1(value); }, 
             getCurValFn : (template) => { return template.fraction1; }, 
@@ -14,27 +13,24 @@ export class NumberWall extends Template {
             max : new Fraction(5,1),
          }),
 
-         new Property.PropertyMap({  
+         new P.FractionModifier({  
             name : "Fraction2",
-            property : Property.FractionModifier, 
             onInitFn : (template,value) => { template.fraction2 = value },
             onChangeFn : (template,value) => { template.setFraction2(value); }, 
             getCurValFn : (template) => { return template.fraction2; }, 
             min : new Fraction(-5,1),
             max : new Fraction(5,1),
          }),
-         new Property.PropertyMap({  
+         new P.Size({  
             name : "Size",
-            property : Property.Size, 
             min : 1,
             max : 10,
             onInitFn : (template,value) => { template.size = value },
             onChangeFn : (template,value) => { template.setSize(value); },
             getCurValFn : (template) => { return template.size; }
          }),
-         new Property.PropertyMap({  
+         new P.GenericData({  
             name : "WallState",
-            property : Property.GenericData, 
             // onChangeFn : null,
             onInitFn : (template,value) => {console.log("Generic init:"+JSON.stringify(value))},
             getCurValFn : (template) => { return template.currentState; }
@@ -61,7 +57,7 @@ export class NumberWall extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
 
         // Initialize script
         this.entity.addComponent('script'); 
@@ -101,10 +97,9 @@ export class NumberCube extends Template {
     static isNumber = true;
     static isThrowable=false; // delete and have a map of throwable items?
 
-    static propertiesMap = [
-         new Property.PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : "NumberCubeFraction", // if this changes, data will break 
-            property : Property.FractionModifier, 
             onInitFn : (template,value) => { template.setFraction(value);},// = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
@@ -115,7 +110,7 @@ export class NumberCube extends Template {
         // args['rigidbodyType'] = pc.RIGIDBODY_TYPE_KINEMATIC;
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         // cube.tags.add(Constants.Tags.PlayerCanPickUp);
         this.entity.addComponent("render",{ type : "box" });
         // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
@@ -162,10 +157,9 @@ export class NumberCube extends Template {
 }
 
 export class NumberSphereGfxOnly extends Template {
-    static propertiesMap = [
-         new Property.PropertyMap({  
-            name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : Property.FractionModifier, 
+    static properties = [
+         new P.FractionModifier({  
+            name : "NumberSphereGfxOnly",
             onInitFn : (template,value) => {template.fraction = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
@@ -176,7 +170,7 @@ export class NumberSphereGfxOnly extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         this.entity.addComponent("render",{ type : "sphere" });
         const s = this.entity.getLocalScale.x;
         this.entity.addComponent('script');
@@ -201,11 +195,10 @@ export class NumberSphereRaw extends Template {
     static combinationHierarchy = 1;
     static isNumber = true;
 //    fraction=new Fraction(1,3);
-    static propertiesMap = [
-         new Property.PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : "NumberSphere", // if this changes, data will break // Should be Fraction1?
-            property : Property.FractionModifier, 
-            onInitFn : (template,value) => { console.log("init:"+value); template.fraction = value; },
+            onInitFn : (template,value) => { template.fraction = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction;},
          }),
@@ -216,8 +209,8 @@ export class NumberSphereRaw extends Template {
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args); 
         const {properties}=args;
-        this.setProperties(properties);
-        console.log("this prop was set:"+JSON.stringify(properties));
+        this.setProperties2(properties);
+        // console.log("this prop was set:"+JSON.stringify(properties));
         this.entity.addComponent("render",{ type : "sphere" });
         const s = this.entity.getLocalScale.x;
         this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});

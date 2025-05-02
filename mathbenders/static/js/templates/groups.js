@@ -1,8 +1,5 @@
 import Template from './template.js';
-// import {PropertyMap,ScaleProperty} from './properties.js';
 export class Group extends Template {
-   
-
     // A temporary container which allows the editing, copying, moving etc of a group of items.
 
     static _icon = assets.textures.ui.icons.trees;
@@ -11,7 +8,7 @@ export class Group extends Template {
     constructor(args={}){
         super(args);
         const {properties} = args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
 
         const $e = this.entity;
         this.entity.on('destroy',function(){

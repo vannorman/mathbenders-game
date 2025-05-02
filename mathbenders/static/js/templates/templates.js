@@ -5,7 +5,7 @@ window.TemplateNameMap = {};
 window.PropertiesMap = {};
 
 Object.values(Templates).forEach((Template)=>{
- //   console.log(Template.name);
+//    console.log(Template.name);
     window[Template.name]=Template;
     window.TemplateNameMap[Template.name]=Template;
 });

@@ -3,25 +3,22 @@ import * as P from './properties.js';
 
 export class NumberHoop extends Template {
     static isStaticCollider = true;
-    static propertiesMap = [
-         new P.PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : "NumberHoop",
-            property : P.FractionModifier, 
             onChangeFn : (template,value) => {  console.log("setfr"); template.setFraction(value); },
             getCurValFn : (template) => { console.log("getcurfrachoop"); return template.fraction },
             min : new Fraction(1,1),
             max : new Fraction(10,1)
-
          }),
-
-    ]
+    ];
   
     static _icon = assets.textures.ui.icons.hoop;
 
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         const scale = 1.5;
         this.renderEntity = assets.numberHoop.resource.instantiateRenderEntity();
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
@@ -59,10 +56,9 @@ export class NumberFaucet extends Template {
     static isStaticCollider = true;
 
     static _icon = assets.textures.ui.icons.faucet;
-    static propertiesMap = [
-         new P.PropertyMap({  
+    static properties = [
+         new P.FractionModifier({  
             name : "Fraction",
-            property : P.FractionModifier, 
             onInitFn : (template,value) => {  template.fraction=value; },
             onChangeFn : (template,value) => {  template.setFraction(value); },
             getCurValFn : (template) => { return template.fraction },
@@ -73,7 +69,7 @@ export class NumberFaucet extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         const scale = 2;
     
         this.renderEntity = assets.models.faucet.resource.instantiateRenderEntity();

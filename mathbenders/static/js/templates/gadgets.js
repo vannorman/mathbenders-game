@@ -8,7 +8,7 @@ export  {Sword}   from './gadgets/sword.js';
 export  {Multiblaster } from './gadgets/multiblaster.js';
 export {HeldItem } from './gadgets/heldItem.js';
 
-class GadgetPickup extends Template {}
+export class GadgetPickup extends Template {}
 export class MultiblasterPickup extends GadgetPickup {
     static _icon = assets.textures.ui.icons.multiblaster;
     static isStaticCollider = true;
