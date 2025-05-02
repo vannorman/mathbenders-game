@@ -16,7 +16,7 @@ export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
     constructor(args){
-        const {name,template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
+        const {name,template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10,delta=1}=args;
         this.name=name ?? this.constructor.name;
         this.template = template;
         this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
@@ -26,6 +26,7 @@ export class Property {
         this.valueType=valueType; // vec3, string, array?
         this.min = min;
         this.max = max;
+        this.delta = delta;
         // What of setting Scale .. a type that isn't easily serializable/deserializable on json to and fro?
     }
 
@@ -198,8 +199,6 @@ export class Group extends Property {
 
 export class Scale extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
-    deltaScale=0.5; 
-    preciison=1;
     buildUi(){
         // TODO: Combine this with Size UI (they're the same almost);
         const $this = this;
@@ -237,7 +236,7 @@ export class Scale extends Property {
             return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
         }
         
-        const deltaScale = this.deltaScale; // 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
+        const deltaScale = this.delta; // 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
 
         for(let i=0;i<colDim;i++){
             for(let j=0;j<rowDim;j++){
@@ -282,10 +281,10 @@ export class Scale extends Property {
         panel.addChild(elementGrid.group);
         
         const size = this.getCurValFn(this.template);
-        console.log("get cur val fn:");
-        console.log(this.getCurValFn);
-        console.log("on:"+this.template.name);
-        console.log("size:"+size);
+//        console.log("get cur val fn:");
+//        console.log(this.getCurValFn);
+//        console.log("on:"+this.template.name);
+//        console.log("size:"+size);
         setSizeText(size);
 
         this.ui=panel;

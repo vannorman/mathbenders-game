@@ -174,7 +174,6 @@ export default class Template {
             });
             return props;
         } else if (this.constructor.properties){
-            console.log(this.constructor);
             
             this.constructor.properties.forEach(x=>{
                if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
@@ -182,8 +181,7 @@ export default class Template {
             });
             return props;
         } else {
-            console.log("none.");
-            console.log(this.constructor);
+//            console.log("none.rpops");
         }
     }
 

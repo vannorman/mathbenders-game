@@ -44,31 +44,52 @@ export class Ramp extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.stairs1;
 
-    static propertiesMap = [
+    static properties = [
          new P.Scale({  
             name : "Scale",
-            property : P.Scale,
             // valueType : pc.Vec3,
-            onChangeFn : (template,value) => {  template.scale = value; },
+            onInitFn : (template,value) => {  template.scale = value; },
+            onChangeFn : (template,value) => {  template.setScale(value); },
             getCurValFn : (template) => { return template.scale },
-            min:0.1,
-            max:3,
+            min:1,
+            max:10,
+            delta:.05,
          }),
     ];
 
-    get scale(){ 
-        const s = this.ramp.getLocalScale().mulScalar(10); 
+    getScale(){ 
+        const s = this.ramp.getLocalScale(); 
         console.log(s);
         return s; 
     }
-    set scale(value) {
+    setScale(value) {
         console.log("V:"+value.trunc()); 
+        this.scale=value;
         this.ramp.setLocalScale(value); 
         this.updateTextureTiling();
+        this.updateRampCollider();
+    }
+
+    updateRampCollider(){
+        console.log("removing");
+        this.rampC.enabled=false;
+        Ammo.destroy(this.rampC.collision.shape);
+        this.rampC.collision.shape = null;
+
+        for (const mesh of this.rampC.collision.render.meshes) {
+            delete pc.app.systems.collision._triMeshCache[mesh.id];
+        }
+            //this.rampC.removeComponent('collision');
+            //this.rampC.removeComponent('rigidbody');
+
+
+        // this.rampC.collision.mesh = rampC.render.asset;
+        this.rampC.enabled=true;
+
     }
 
     updateTextureTiling(){
-        const mat = this.ramp.render.meshInstances[0].material;
+        const mat = this.rampC.render.meshInstances[0].material;
         const x = this.ramp.getLocalScale().x / 3;
         const y = this.ramp.getLocalScale().z / 3;
         mat.diffuseMapTiling = new pc.Vec2(x,y);
@@ -77,24 +98,30 @@ export class Ramp extends Template {
 
 
 
-    rampScale = new pc.Vec3(0.3,0.3,0.3);
+    scale = new pc.Vec3(2,1,1);
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+
+        this.setProperties2(properties);
         // Castle Pillar
-        const rampP = assets.models.ramp.resource.instantiateRenderEntity();
-        const ramp = rampP.children[0];
-        
+        const rampM = assets.models.ramp.resource.instantiateRenderEntity();
+        const rampC = rampM.children[0];
+        const ramp = new pc.Entity();
+        ramp.addChild(rampC);
+        rampM.destroy();
         this.entity.addChild(ramp);
-        ramp.setLocalScale(this.rampScale);
-        ramp.setLocalEulerAngles(-90,0,0);
-        rampP.destroy();
-        ramp.addComponent('collision',{type:'mesh',renderAsset:ramp.render.asset});
-        ramp.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        rampC.setLocalScale(.3,.3,.3);
+        rampC.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        rampC.addComponent('collision',{type:'mesh',renderAsset:rampC.render.asset});
+
+        rampC.setLocalEulerAngles(-90,0,0);
+        
         ApplyTextureAssetToEntity({entity:ramp,textureAsset:assets.textures.stone90}); 
         
         this.ramp=ramp;
+        this.rampC=rampC;
+        this.setScale(this.scale);
 
         this.updateColliderMap();
     }
@@ -238,15 +265,17 @@ export class ConcretePad extends Template {
             name : "Scale",
             property : P.Scale,
             // valueType : pc.Vec3,
-            onChangeFn : (template,value) => {  template.scale = value; },
+            onInitFn : (template,value) => {  template.scale = value; },
+            onChangeFn : (template,value) => {  template.setScale(value); },
             getCurValFn : (template) => { return template.scale },
             min:0.5,
             max:100,
          }),
     ];
 
-    get scale(){ return this.pad.getLocalScale(); }
-    set scale(value) { 
+    scale = new pc.Vec3(1,1,1);
+    setScale(value) { 
+        this.scale=value;
         this.pad.setLocalScale(value); 
         this.updateHalfExtents(); 
         this.updateTextureTiling();
@@ -259,14 +288,13 @@ export class ConcretePad extends Template {
         mat.diffuseMapTiling = new pc.Vec2(x,y);
         mat.update();
 
-
     }
 
     updateHalfExtents(){
         this.pad.collision.halfExtents = this.pad.getLocalScale().clone().mulScalar(0.5);
     }
 
-    static defaultScale = new pc.Vec3(10,10,10);
+    scale = new pc.Vec3(10,10,10);
     constructor(args={}){
         super(args);
         const {properties}=args;
@@ -277,23 +305,22 @@ export class ConcretePad extends Template {
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
         pad.addComponent("collision", { type: "box"});
         let mat = ApplyTextureAssetToEntity({entity:pad,textureAsset:assets.textures.terrain.concrete1});
-        mat.diffuseMapTiling=new pc.Vec2(3,3); 
-        mat.update();
-
         this.pad = pad;
-        this.scale = this.constructor.defaultScale; // new pc.Vec3(10,10,10); //this.defaultScale;
-        this.entity.addChild(pad);
+        this.setScale(this.scale);
 
+        this.entity.addChild(pad);
+        this.updateColliderMap();
     }
 
 }
 
 export class BigConcretePad extends ConcretePad { 
     static _icon = assets.textures.ui.builder.concretePadBig;
-    static defaultScale = new pc.Vec3(50,20,50);
+    scale = new pc.Vec3(50,20,50);
     constructor(args={}){
         super(args);
         const {properties}=args;
+        this.setScale(this.scale);
         this.setProperties(properties);
         this.pad.tags._list.push(Constants.Tags.Terrain);
     }

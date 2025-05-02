@@ -286,3 +286,4 @@ window.welcomeMessageFn = setInterval(function(){
 },10000);
 realmEditor.buildRandomLevels();
 Player.entity.moveTo(GetDefaultTerrainStartPos());
+

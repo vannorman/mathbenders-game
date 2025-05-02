@@ -463,4 +463,6 @@ var rotateMode = false;
 const mo = new pc.Vec3(0,0,0);
 var moveMode = false;
 
-
+const r = {
+    get o(){ return realmEditor.currentLevel.templateInstances[0]; }
+}

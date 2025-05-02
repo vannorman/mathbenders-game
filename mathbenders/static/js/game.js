@@ -50,172 +50,32 @@ var Game = {
                 shadowBias:0.5,
                 shadowResolution:2048,
             });
-            
             light.setLocalEulerAngles(45, 30, 0);
             pc.app.root.addChild(light);
             Game._sun = light;
         }
         return Game._sun;
-        
     },
-    get sunDir() {
-        return Game.sun.up;
-    },
+    get sunDir() { return Game.sun.up; },
     
    LoadGame(){
-
-        //await CreateTemplates();
         pc.app.systems.rigidbody.gravity.set(0, -25, 0); // -20 seems to work better than default -9.8 
-
-        // Create core objects
         window.Mouse = new MouseClass();
-
-        // let fpsMeter = new DebugFps();
+        let fpsMeter = new DebugFps();
         let uiCam = new UiCamera();
         this.uiCam = uiCam;
+        // let debug = new pc.Entity();
+        // debug.addComponent('script'); debug.script.create('debugPhysics'); this.debug = debug.script.debugPhysics;
 
     },
-
     printLoadTime(color,message){
         var loadTime = Date.now() - Game.startTime; 
         console.log("%c LOADED: "+loadTime+" "+message,"color:"+color);
         //window.performance.timing.domContentLoadedEventEnd- window.performance.timing.navigationStart;
-
     },
     startTime : Date.now(),
-      
 }
 
-
-
-async function CreateTemplates(){
-
-    // TODO Eytan - confusing logic split here bewteen Prefabs and the Templatize funciton, with lots of conditionals for type of asset and features
-
-    Game.templatize = function(options={}){
-
-        const { 
-            hasEmptyParent=false, 
-            emptyParentOffset=pc.Vec3.ZERO, 
-            primitiveType, 
-            scale3=pc.Vec3.ONE, 
-            asset, 
-            scale=1, 
-            extraFn=null, 
-            icon 
-        } = options; // bundling primitve and non-primitive options for brevity
-
-        const isPrimitive = options.isPrimitive == undefined ? false : options.isPrimitive;
-        let templateName = "None Yet";
-        try {templateName = options.templateName == undefined ? asset.name : options.templateName;}
-        catch {templateName = "fail"}
-//        console.log("loading:"+templateName);
-
-        if (icon != undefined) {
-            Game.templateIcons[templateName] = icon;
-        }
-        
-        // Primitive options: primitiveType, scale3, name (builds from primitive)
-        // non-primitives: asset, scale, extraFn (requires a glb asset)
-        if (isPrimitive){
-            const entity = new pc.Entity(templateName);
-            if (primitiveType != undefined) entity.addComponent("render", {  type: primitiveType });  // undefined primitive type returns an empty object.
-            entity.setLocalScale(scale3);
-            entity.addComponent('script');
-            pc.app.root.addChild(entity); 
-            myTemplates[templateName] = entity;
-            myTemplates[templateName].enabled = false;
-        } else {
-            myTemplates[templateName] = asset.resource.instantiateRenderEntity();
-            myTemplates[templateName].addComponent('script');
-            myTemplates[templateName].setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
-            myTemplates[templateName].enabled = false;
-        }
-
-        if (hasEmptyParent){
-            const emptyParent = new pc.Entity();
-            pc.app.root.addChild(emptyParent);
-            myTemplates[templateName].enabled = true;
-            emptyParent.addChild(myTemplates[templateName]);
-            myTemplates[templateName].setLocalPosition(emptyParentOffset);
-            myTemplates[templateName] = emptyParent;
-            emptyParent.addComponent('script');
-            emptyParent.enabled = false;
-        }
-
-
-        
-        Game.Instantiate[templateName] = function(options={}){
-            const {
-                rigidbodyType,
-                rigidbodyVelocity=pc.Vec3.ZERO,
-                position=pc.Vec3.ZERO,
-                rotation=pc.Vec3.ZERO,
-                //scale=pc.Vec3.ONE, // note, we don't set scale when instantiating .. scale is preset by the prefab and may not equal one.
-                gfxOnly=false,
-                noCollision=false,
-                enabled=true
-            } = options;
-            const clone = myTemplates[templateName].clone();
-            clone.name = templateName;
-            pc.app.root.addChild(clone);
-            clone.moveTo(position,rotation);
-            if (typeof extraFn === 'function') {
-                extraFn(clone,asset,options); // note that primitives will be sent an undefined 2nd arg for asset here. 
-            }
-
-            // Special case to check for NumberInfo, dislike; would rather GetProps and SetProps regardless of type
-            if (options.numberInfo && clone.script?.numberInfo){
-                // TODO: with new flow is NumberInfo options captured by objectProperties.getProperties?
-                clone.script.numberInfo.setProperties(options);
-            }
-            if (gfxOnly){
-                Utils.stripObjToGfxOnly(clone);
-            }
-            if (noCollision){
-                clone.removeComponent('collision');
-            }
-            if (clone.rigidbody && rigidbodyType == pc.RIGIDBODY_TYPE_DYNAMIC){
-                clone.rigidbody.linearVelocity = rigidbodyVelocity;
-                // console.log('vel:'+rigidbodyVelocity);
-            }
-            clone.enabled = enabled;
-//            console.log('inst:'+templateName);
-
-            // Save object properties for when we deal with object later, e.g. in Inventory.
-            const properties = {templateName : templateName}
-            clone.script.create('objectProperties', {attributes:{ objectProperties:properties,  }}) // shouldn't this already b in the template?
-            //Game.c=clone;
-            return clone;
-
-        }
-
-        // There's a fundamental difference between game.assetCreate for setup / procedural, vs game.assetCreate for network actions.
-        // One (startup / procedural creation) will already be present on all machines, and you don't want to duplicate it.
-        // the other (creation at runtime) needs to be tracked during the Network
-
-        // Futhermore, consider the case of a button that creates or destroys or modifies a game object.
-        // Should that creation/modification action itself be networked? Or simply the creation/modification events that result?
-        // Could get game into conflicting state where one client thinks x happened, but another client thinks y.
-
-        // One way to do this is to have button bound directly to networked creation events.
-
-    }
-
-    Game.addMeshCollider = function(clone,asset,rbType){
-        //console.log("a:"+clone.name+", asset:"+asset);
-//        let colEnt = clone.findComponent('render').entity; // assumes only one render per asset
-//        colEnt.addComponent('collision' ,{type:'mesh',renderAsset:asset.resource.renders[0]}); 
-//        colEnt.addComponent( 'rigidbody',{type:rbType});
-//        clone.addComponent('rigidbody',{type:rbType}); // won't add twice to same obj
-//        return colEnt.collision;
-    }
-
-//    Prefabs.TemplatizePrefabs(); 
-}
-
-
-(()=>{ 
     const assetListLoader = new pc.AssetListLoader(
         Utils2.getFlatObjectValues(assets),
         pc.app.assets
@@ -224,7 +84,5 @@ async function CreateTemplates(){
     assetListLoader.load(() => { 
         Game.printLoadTime('red',"game.js assets done");
         Game.LoadGame(); 
-
     }); 
     $('#loading').hide();
-})()
