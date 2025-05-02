@@ -20,11 +20,13 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
     onMouseUp(e) {
         this.mouseHeld=false;
         this.timer=0;
-        const itemToEdit = this.realmEditor.gui.editableItemUnderCursor;
-        
-        if (itemToEdit != null){
-            realmEditor.editItem({entity:this.realmEditor.gui.editableItemUnderCursor});
-        }
+        if (realmEditor.gui.isMouseOverMap){
+            const itemToEdit = this.realmEditor.gui.editableItemUnderCursor;
+            
+            if (itemToEdit != null){
+                realmEditor.editItem({entity:this.realmEditor.gui.editableItemUnderCursor});
+            }
+       }
         super.onMouseUp(e);
     }
 

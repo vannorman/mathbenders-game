@@ -357,23 +357,11 @@ $(document).on("keydown", function (e) {
         cb.moveTo(p);
     }
     if (ee == 'R'){
-        let max = 10;
-        let spread = 6;
-        for(let i=-max/2;i<max/2;i++){
-            for (let j=-max/2;j<max;j++){
-                const options = {
-                    position : Player.droppedPosition.clone().add(new pc.Vec3(i*spread,0,j*spread)),
-                    numberInfo : {
-                        fraction : {
-                            numerator:2,
-                            denominator:1
-                        },
-                    }
-                } 
-                Game.Instantiate.NumberSphere(options);
-                     
-            }
-        }
+        realmEditor.RealmData.Levels.forEach(lev=>{
+            lev.templateInstances.forEach(t=>{
+                if (t.wall) t.wall.enabled = !t.wall.enabled;
+            });
+        });
     }
     if (ee == 'V'){
         const p = Player.droppedPosition.clone().add(pc.Vec3.UP);

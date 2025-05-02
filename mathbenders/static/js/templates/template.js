@@ -115,6 +115,7 @@ export default class Template {
                 r.group = Constants.CollisionLayers.FixedObjects;
                 r.mask = pc.BODYMASK_ALL & ~r.group;
                 const $this = this;
+                /*
                 const debugCollisions = false;
                 if (debugCollisions) {
                     collisionComponent.on('collisionstart',
@@ -139,6 +140,8 @@ export default class Template {
                             clearInterval(window[intervalFn]);
                         });
                     }
+                    */
+
                 }
         });
     }

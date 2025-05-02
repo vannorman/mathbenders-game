@@ -583,8 +583,9 @@ Utils = {
 
                 if (y < 1.0) { //1.0 happens to be the lower threshold for the bottom of the wall 
                     // console.log("y:"+y);
-                    let p = result.point;
-                    lowYs.push([p.x,p.y,p.z]);
+                    // let p = result.point;
+                    let adjustedY = y - hitDistance - offset;
+                    lowYs.push([x,adjustedY,z]);
                                 //( local model maybe has a pivot below the model by 1 unit?)
                     offset = 8; // for the bottom of the mesh, stretch it down towards the terrain more
                 } else {

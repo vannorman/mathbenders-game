@@ -96,21 +96,8 @@ export default class EditorCamera {
 
     }
 
-    // Use to switch between camera modes
-    switchTo(modeName) {
-        this.#mode?.onExit(this);
-        this.#mode = this.#modes.get(modeName);
-        this.#mode.onEnter(this);
-    }
-
-    zoom(amount) {
-        const dir = this.entity.back;
-        this.entity.moveTo(this.pivot.getPosition().add(dir.mulScalar(amount)));
-    }
-
     rotate(degToRotate) {
         if (this.#mode.name === 'rotating') return;
-
         this.targetPivot.rotate(-degToRotate);
         this.toggle('rotating');
         this.#mode.directionMoving = degToRotate > 0 ? -1 : 1;
@@ -146,9 +133,9 @@ export default class EditorCamera {
     }
 
     toggle(mode) {
+
         // If the 'mode' does not exist, return
         if (!this.#modes.has(mode)) return;
-
         // Exit the current mode (if there is one)
         // Point to the mode to use
         // Enter the new current mode
@@ -196,7 +183,7 @@ class Lerping extends Mode {
         
         if (finishedLerpPos && finishedLerpZoomPos) {
             // Lerp finished
-            camera.switchTo('normal');
+            camera.toggle('normal');
             camera.pivot.moveTo(camera.targetPivotPosition)
             camera.entity.setLocalPosition(targetLocalCamPos); // awkward camera(instance).camera(component).entity
         } else {
@@ -205,23 +192,6 @@ class Lerping extends Mode {
             camera.entity.setLocalPosition(lerpZoomPos);
         }
 
-        /*
-        const lerpSpeed = 10.0;
-        const lerpPosition = new pc.Vec3().lerp(camera.pivot.getPosition(), camera.targetPivot, lerpSpeed * dt);
-        const currentZoom = this.entity.getLocalPosition().length();
-        const zoomLerpSpeed = 500;
-        const zoomLerpedPosition = Math.lerp(currentZoom, camera.#targetZoomFactor,zoomLerpSpeed * dt);
-        const d = pc.Vec3.distance(lerpPosition, camera.targetPivot);
-        const z = Math.abs(camera.targetZoomFactor - currentZoom);
-        if (d < .2 && z < 0.2) {
-            camera.pivot.moveTo(camera.targetPivot)
-            this.entity.setLocalPosition(this.entity.forward.mulScalar(-camera.targetZoomFactor));
-            camera.switchTo('idling');
-        } else {
-            camera.pivot.moveTo(lerpPosition);
-            this.entity.setLocalPosition(this.entity.forward.mulScalar(-zoomLerpedPosition));
-        }
-        */
     }
 }
 

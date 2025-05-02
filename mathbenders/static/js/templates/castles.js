@@ -5,6 +5,7 @@ export class CastleTurret extends Template {
     static _icon = assets.textures.ui.icons.turret1;
     static properties = [
         new P.Scale(),
+        new P.BuildWallsTurrets(),
     ];
     scale=new pc.Vec3(1,1,1);
     setScale(value){
@@ -130,13 +131,7 @@ export class CastleWall extends Template {
     static _icon = assets.textures.ui.icons.wall;
     static properties = [
          new P.BuildWalls(),
-         new P.BuildWallsTurrets(),
     ];
-
-    startConnectingWalls(value){
-        // Should we handle it here or in realmeditor?
-    }
-     
 
     constructor(args={}){ 
         super(args);
@@ -176,6 +171,7 @@ export class CastleWallFormed extends Template {
         console.log("this meshdata");
        this.meshData = value; 
     }
+    offset = new pc.Vec3(-2.75,-1,0.75);
     constructor(args={}){
         super(args);
         const {properties}=args;
@@ -206,7 +202,7 @@ export class CastleWallFormed extends Template {
         col.setLocalPosition(0,0,0);
         this.col=col; 
         this.entity.addChild(col);
-        clone.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
+        clone.setLocalPosition(this.offset);
         if (this.meshData){
             this.updateWallMesh(this.meshData);
         }
@@ -220,10 +216,9 @@ export class CastleWallFormed extends Template {
         mesh.setPositions(verts);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
         this.wall.setLocalScale(xScale,1,1);
-
-         this.col.moveTo(midpoint);
-         this.col.rotation = Quaternion.LookRotation(slope);
-        this.col.setLocalScale(xScale*8,8,0.5);
+        this.col.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,midpoint.y,0)));//midpoint));
+        this.col.rotation = Quaternion.LookRotation(slope);
+        this.col.setLocalScale(xScale*11,10,0.5);
         this.col.collision.halfExtents = this.col.getLocalScale().mulScalar(0.5);
         this.updateColliderMap();
         
@@ -234,6 +229,7 @@ export class CastleWallFormed extends Template {
         //this.entity.moveTo(this.entity.getPosition().add(new pc.Vec3(0,10,0)));
         const result = Utils.adjustMeshToGround({entity:this.wall}); 
         const {verts,slope,midpoint} = result;
+
        this.meshData = { verts: verts, xScale:xScale, midpoint:midpoint, slope:slope };
         this.updateWallMesh(this.meshData);
     }
@@ -242,16 +238,15 @@ export class CastleWallFormed extends Template {
 export class ConcretePad extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.concretePad;
-    static propertiesMap = [
-         new P.PropertyMap({  
+    static properties = [
+         new P.Scale({
             name : "Scale",
-            property : P.Scale,
-            // valueType : pc.Vec3,
             onInitFn : (template,value) => {  template.scale = value; },
             onChangeFn : (template,value) => {  template.setScale(value); },
             getCurValFn : (template) => { return template.scale },
             min:0.5,
             max:100,
+            delta:1,
          }),
     ];
 
@@ -271,7 +266,7 @@ export class ConcretePad extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
 
         const pad = new pc.Entity("concrete pad");
         pad.addComponent("render", {  type: "box" }); 
@@ -289,12 +284,24 @@ export class ConcretePad extends Template {
 
 export class BigConcretePad extends ConcretePad { 
     static _icon = assets.textures.ui.builder.concretePadBig;
+    static properties = [
+         new P.Scale({
+            name : "Scale",
+            onInitFn : (template,value) => {  template.scale = value; },
+            onChangeFn : (template,value) => {  template.setScale(value); },
+            getCurValFn : (template) => { return template.scale },
+            min:0.5,
+            max:100,
+            delta:5,
+         }),
+    ];
+
     scale = new pc.Vec3(50,20,50);
     constructor(args={}){
         super(args);
         const {properties}=args;
+        this.setProperties2(properties);
         this.setScale(this.scale);
-        this.setProperties(properties);
         this.pad.tags._list.push(Constants.Tags.Terrain);
     }
 }

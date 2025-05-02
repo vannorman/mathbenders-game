@@ -88,10 +88,10 @@ export default class GUI {
             worldPointUnderCursor = raycastResult.point;
             this.#lastCameraDistance = pc.Vec3.distance(worldPointUnderCursor,this.realmEditor.camera.entity.getPosition());
         } else {
-            let wc = new pc.Vec3()
-            this.realmEditor.camera.cameraComponent.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
-            const dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.xMap,Mouse.y);
-            worldPointUnderCursor = wc.add(dir.mulScalar(this.#lastCameraDistance));
+//            let wc = new pc.Vec3()
+//            this.realmEditor.camera.cameraComponent.screenToWorld(Mouse.x,pc.app.graphicsDevice.height-Mouse.y,0,wc);
+//            const dir = this.realmEditor.camera.cameraComponent.screenPointToWorldDir(Mouse.xMap,Mouse.y);
+//            worldPointUnderCursor = wc.add(dir.mulScalar(this.#lastCameraDistance));
         }
 
         return worldPointUnderCursor;

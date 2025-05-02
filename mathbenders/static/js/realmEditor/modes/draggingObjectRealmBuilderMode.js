@@ -111,7 +111,7 @@ class PreInstantiationDragMode extends InstantiationDraggingMode {
         realmEditor.gui.setNormalCursor();
     }
     onMouseMove(e){
-        if (realmEditor.gui.isMouseOverMap){
+        if (realmEditor.gui.isMouseOverMap && realmEditor.gui.worldPointUnderCursor){
             this.instantiateItem();
        }
     }
@@ -153,7 +153,13 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
         if (realmEditor.gui.isMouseOverMap){
             if (this.#instantiatedItem){
                 const p = realmEditor.gui.worldPointUnderCursor;
-                this.#instantiatedItem.entity.moveTo(p);
+                if (p){
+                    // console.log(p);
+                    this.#instantiatedItem.entity.moveTo(p);
+                } else {
+                    this.dragger.toggle('pre');
+
+                }
             } else {
                 console.log("but this shouldn't BE!!");
             }
