@@ -92,45 +92,7 @@ export default class EditItemTray {
 
         const $this = this;
         var buttonIndex = 1; // 0 is taken (by Move)
-        if (ItemTemplate.propertiesMap){
-            ItemTemplate.propertiesMap.forEach(x => {
-                const property = new x.property({
-                    template:entity._templateInstance, 
-                    onChangeFn:x.onChangeFn,
-                    getCurValFn:x.getCurValFn,
-                    buttonIndex:buttonIndex,
-                    min:x.min,
-                    max:x.max,
-                });
-
-                property.buildUi();
-                property.hideUi();
-
-                // reparent ui to container's parent and position it over all siblings from parent
-                let pare = this.buttonContainers[buttonIndex];
-                let p1 = pare.getLocalPosition();
-                if (property.ui){
-                    pare.parent.addChild(property.ui);
-                    property.ui.setLocalPosition(p1);
-                }
-                const uiBtn = property.buildUiButton();
-                uiBtn.element.on('mousedown',function(){
-                    $this.currentProperties.forEach(x=>{x.hideUi();});
-                    property.showUi();
-                })
-                this.buttonContainers[buttonIndex].addChild(uiBtn);
-                this.currentProperties.push(property);
-                this.propertyBtns.push(uiBtn);
-
-                buttonIndex++;
-                if (buttonIndex == 3) {
-                    // 3 is taken (by Rotate)
-                    buttonIndex++;
-                }
-            });
-        }
-
-        if (ItemTemplate.properties){
+       if (ItemTemplate.properties){
             ItemTemplate.properties.forEach(property => {
                 property.template = entity._templateInstance; 
                 property.buildUi();
@@ -159,8 +121,5 @@ export default class EditItemTray {
                 }
             });
         }
-
-
     }
-
 }

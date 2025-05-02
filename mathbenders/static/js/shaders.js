@@ -345,7 +345,13 @@ var Shaders = {
                     vec2 uv = vPositionW.xz / 15.0;
                     color = vec4(waterColor, 1.0);
                     // color = texture2D(uTexture3, uv);
-                } else if (y < 10.0) { // Grass
+                } else if (y < 1.0) { // Blend
+                    vec2 uv = vPositionW.xz / 15.0;
+                    float t = y / 1.0;
+                    vec4 color1 = vec4(waterColor,1.0); //texture2D(uTexture2, uv);
+                    vec4 color2 = texture2D(uTexture1, uv);
+                    color = mix(color1, color2, t); // mix the colors based on vY
+                 } else if (y < 10.0) { // Grass
                     vec2 uv = vPositionW.xz / 15.0;
                     color = texture2D(uTexture1, uv);
                 } else if (y < 20.0) { // Blend

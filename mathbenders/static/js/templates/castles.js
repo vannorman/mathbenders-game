@@ -17,7 +17,7 @@ export class CastleTurret extends Template {
         s = this.head.getScale();
         scale = new pc.Vec2(s.x+s.y,s.z);
         this.updateTextureTiling({ent:this.head,scale:scale});
-        this.updateCollider({colEnt:this.head});
+        // this.updateCollider({colEnt:this.head});
     }
 
 
@@ -313,7 +313,7 @@ export class CastleGate extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
 
         
         const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];

@@ -179,21 +179,6 @@ export class Property {
     }
 }
 
-export class Group extends Property {
-    static icon = assets.textures.ui.trash;
-
-    buildUiButton(){
-        const groupButton = UI.SetUpItemButton({
-            parentEl:realmEditor.gui.editItemTray.buttonContainers[this.buttonIndex],
-            width:30,height:30,textureAsset:assets.textures.ui.builder.moveItem,
-            mouseDown:function(){
-                realmEditor.BeginDraggingEditedObject();
-                } 
-        });
-        return moveButton;
-    }
-}
-
 
 
 
@@ -225,8 +210,6 @@ export class Scale extends Property {
         var text1;
         var text2;
         const precision = this.precision;
-        console.log("p:"+precision);
-        console.log(this.getCurValFn);
         function setSizeText(size){
             text0.text = size.x.toFixed(precision);
             text1.text = size.y.toFixed(precision);

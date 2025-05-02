@@ -11,6 +11,7 @@ export default class Template {
 
     static _icon;
     static icon(properties={}) { return this._icon};
+    static properties=[];
     static isThrowable = false;
     static isStaticCollider = false;
     colliders = new Map();

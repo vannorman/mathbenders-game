@@ -449,6 +449,7 @@ class RealmEditor {
     }
     
     editItem(args={}){
+
         const {entity,pop=true} = args;
         if (entity){
             this.toggle('editingItem');

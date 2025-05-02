@@ -144,7 +144,7 @@ class OutlineCamera {
             layers: [outlineLayer.id],
             renderTarget: renderTarget,
             viewport:[0.5,0.5,1,1],
-            aspectRatio:Camera.skyCamAspectRatio,
+            aspectRatio:1.12, // Camera.skyCamAspectRatio,
             aspectRatioMode:1,
  
             // set the priority of outlineCamera to lower number than the priority of the main camera (which is at default 0)
