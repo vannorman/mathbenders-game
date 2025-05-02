@@ -15,8 +15,20 @@ export class PropertyMap {
 export class Property {
     static icon = assets.textures.ui.trash; // should always be overwritten.
 
-    constructor(args){
-        const {name,template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10,delta=1}=args;
+    constructor(args={}){
+        const {
+            name=this.constructor.name,
+            template=null,
+            onInitFn=null,
+            onChangeFn,
+            getCurValFn,
+            buttonIndex,
+            valueType,
+            min=1,
+            max=10,
+            delta=1,
+            precision=0
+        }=args;
         this.name=name ?? this.constructor.name;
         this.template = template;
         this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
@@ -27,6 +39,7 @@ export class Property {
         this.min = min;
         this.max = max;
         this.delta = delta;
+        this.precision = precision;
         // What of setting Scale .. a type that isn't easily serializable/deserializable on json to and fro?
     }
 
@@ -106,16 +119,17 @@ export class Property {
     }
 
 
-    static panel(){
+    static panel(args={}){
+        const{width=120,height=120,opacity=0.7}=args;
         const panel = new pc.Entity("panel");
         panel.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
             pivot: [0.5, 0.5],
             type: 'image',
             color:pc.Color.YELLOW,
-            opacity:1,
-            width:170,
-            height:170,
+            opacity:opacity,
+            width:width,
+            height:height,
             useInput:true,
         });
         panel.addComponent('script');
@@ -199,21 +213,34 @@ export class Group extends Property {
 
 export class Scale extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
+    constructor(args={}){
+        args.onInitFn ??= (template,value) => {  template.scale = value; },
+        args.onChangeFn ??= (template,value) => {  template.setScale(value); },
+        args.getCurValFn ??= (template) => { return template.scale },
+        args.min ??=1,
+        args.max ??=10,
+        args.delta ??=.2,
+        args.precision ??=1,
+        super(args);
+
+    }
     buildUi(){
         // TODO: Combine this with Size UI (they're the same almost);
         const $this = this;
-        const panel = Property.panel();
+        const panel = Property.panel();// {width:140,height:140});
 
 
         var y=0;
         const rowDim = 3;
         const colDim = 5;
-        const elementGrid = UI.createElementGrid({rowDim:rowDim, colDim:colDim, spacing:[10,40],defaultSize:[20,20]});
+        const elementGrid = UI.createElementGrid({rowDim:rowDim, colDim:colDim, spacing:[10,20],defaultSize:[14,14]});
 
         var text0;
         var text1;
         var text2;
         const precision = this.precision;
+        console.log("p:"+precision);
+        console.log(this.getCurValFn);
         function setSizeText(size){
             text0.text = size.x.toFixed(precision);
             text1.text = size.y.toFixed(precision);

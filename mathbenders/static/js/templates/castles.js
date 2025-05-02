@@ -3,11 +3,27 @@ import * as P from './properties.js';
 export class CastleTurret extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.turret1;
+    static properties = [
+        new P.Scale(),
+    ];
+    scale=new pc.Vec3(1,1,1);
+    setScale(value){
+        this.scale=value;
+        this.entity.setLocalScale(value); // is it okay to set the global parent entity scale or should we always have a parent of scale 1?
+        let s = this.pillar.getScale();
+        let scale = new pc.Vec2(s.x+s.y,s.z);
+        this.updateTextureTiling({ent:this.pillar,scale:scale});
+        s = this.head.getScale();
+        scale = new pc.Vec2(s.x+s.y,s.z);
+        this.updateTextureTiling({ent:this.head,scale:scale});
+        this.updateCollider({colEnt:this.head});
+    }
+
 
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
@@ -19,21 +35,25 @@ export class CastleTurret extends Template {
         
         // Castle Top
         const topAsset = assets.models.castle_top;
-        const topRender = topAsset.resource.instantiateRenderEntity();
-        let topCollision = Utils.addMeshCollider({entity:topRender,meshAsset:topAsset.resource.renders[0]});
+        const headRender = topAsset.resource.instantiateRenderEntity();
+        headRender.addComponent('collision',{type:'mesh',renderAsset:headRender.render.asset});
+        //let topCollision = Utils.addMeshCollider({entity:headRender,meshAsset:topAsset.resource.renders[0]});
 
-        topRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
-        ApplyTextureAssetToEntity({entity:topRender,textureAsset:assets.textures.stone90}); 
+        headRender.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        ApplyTextureAssetToEntity({entity:headRender,textureAsset:assets.textures.stone90}); 
         
-        this.entity.addChild(topRender);
+        this.entity.addChild(headRender);
         this.entity.addChild(pillarRender);
-        topRender.setLocalEulerAngles(-90,0,0);
-        topRender.setLocalPosition(new pc.Vec3(0,3.4,0));
+        this.pillar = pillarRender;
+        this.head = headRender;
+        headRender.setLocalEulerAngles(-90,0,0);
+        headRender.setLocalPosition(new pc.Vec3(0,3.4,0));
         
         pillarRender.setLocalEulerAngles(-90,0,0);
         pillarRender.setLocalScale(1,1,2);
         pillarRender.setLocalPosition(new pc.Vec3(0,-4,0));
 
+        this.setScale(this.scale);
         this.updateColliderMap();
     }
 
@@ -53,7 +73,8 @@ export class Ramp extends Template {
             getCurValFn : (template) => { return template.scale },
             min:1,
             max:10,
-            delta:.05,
+            delta:.2,
+            precision:2,
          }),
     ];
 
@@ -63,42 +84,16 @@ export class Ramp extends Template {
         return s; 
     }
     setScale(value) {
-        console.log("V:"+value.trunc()); 
         this.scale=value;
         this.ramp.setLocalScale(value); 
-        this.updateTextureTiling();
-        this.updateRampCollider();
-    }
-
-    updateRampCollider(){
-        console.log("removing");
-        this.rampC.enabled=false;
-        Ammo.destroy(this.rampC.collision.shape);
-        this.rampC.collision.shape = null;
-
-        for (const mesh of this.rampC.collision.render.meshes) {
-            delete pc.app.systems.collision._triMeshCache[mesh.id];
-        }
-            //this.rampC.removeComponent('collision');
-            //this.rampC.removeComponent('rigidbody');
-
-
-        // this.rampC.collision.mesh = rampC.render.asset;
-        this.rampC.enabled=true;
-
-    }
-
-    updateTextureTiling(){
-        const mat = this.rampC.render.meshInstances[0].material;
-        const x = this.ramp.getLocalScale().x / 3;
-        const y = this.ramp.getLocalScale().z / 3;
-        mat.diffuseMapTiling = new pc.Vec2(x,y);
-        mat.update();
+        this.updateTextureTiling({ent:this.rampC,scaleRef:this.ramp});
+        this.updateCollider({colEnt:this.rampC});
     }
 
 
 
-    scale = new pc.Vec3(2,1,1);
+
+    scale = new pc.Vec3(4,2,2);
     constructor(args={}){
         super(args);
         const {properties}=args;
@@ -111,7 +106,7 @@ export class Ramp extends Template {
         ramp.addChild(rampC);
         rampM.destroy();
         this.entity.addChild(ramp);
-        rampC.setLocalScale(.3,.3,.3);
+        rampC.setLocalScale(.05,.05,.05);
         rampC.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
         rampC.addComponent('collision',{type:'mesh',renderAsset:rampC.render.asset});
 
@@ -133,17 +128,9 @@ export class Ramp extends Template {
 export class CastleWall extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.wall;
-    static propertiesMap = [
-        // This is awkward because these are NOT properties for this template.
-        // Rather, this is the best method for adding *additional editing options* to the UI for this template.
-        // It might be better to divorce the UI the user sees (what is populated in editItemTray) vs what properties are there, 
-        // And link or map them separately.
-         new P.PropertyMap({  
-            property : P.BuildWalls,
-         }),
-         new P.PropertyMap({  
-            property : P.BuildWallsTurrets,
-         }),
+    static properties = [
+         new P.BuildWalls(),
+         new P.BuildWallsTurrets(),
     ];
 
     startConnectingWalls(value){
@@ -154,7 +141,7 @@ export class CastleWall extends Template {
     constructor(args={}){ 
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -177,16 +164,11 @@ export class CastleWallFormed extends Template {
     static isStaticCollider = true;
     // static _icon = assets.textures.ui.icons.wall;
 
-    static propertiesMap = [
-         new P.PropertyMap({  
+    static properties= [
+         new P.GenericData({
             name : "CastleWallFormed",
-            property : P.GenericData,
-            // valueType : pc.Vec3,
-            onChangeFn : (template,value) => {  },//template.setMeshData(value); },
             onInitFn : (template, value) => { template.meshData=value; },
             getCurValFn : (template) => { return template.meshData },
-            min:0.5,
-            max:100,
          }),
     ];
 
@@ -197,7 +179,7 @@ export class CastleWallFormed extends Template {
     constructor(args={}){
         super(args);
         const {properties}=args;
-        this.setProperties(properties);
+        this.setProperties2(properties);
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -278,16 +260,7 @@ export class ConcretePad extends Template {
         this.scale=value;
         this.pad.setLocalScale(value); 
         this.updateHalfExtents(); 
-        this.updateTextureTiling();
-    }
-
-    updateTextureTiling(){
-        const mat = this.pad.render.meshInstances[0].material;
-        const x = this.pad.getLocalScale().x / 3;
-        const y = this.pad.getLocalScale().z / 3;
-        mat.diffuseMapTiling = new pc.Vec2(x,y);
-        mat.update();
-
+        this.updateTextureTiling({ent:this.pad});
     }
 
     updateHalfExtents(){

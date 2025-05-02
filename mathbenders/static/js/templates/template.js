@@ -230,6 +230,28 @@ export default class Template {
         return null;
     }
 
+    updateCollider(args){
+        const{colEnt}=args;
+        colEnt.enabled=false;
+        Ammo.destroy(colEnt.collision.shape);
+        colEnt.collision.shape = null;
+        for (const mesh of colEnt.collision.render.meshes) {
+            delete pc.app.systems.collision._triMeshCache[mesh.id];
+        }
+        colEnt.enabled=true;
+    }
+
+    updateTextureTiling(args={}){
+        var {ent=null,scale=null,density=3}=args;
+        if (ent == null) ent = this.entity.getComponentsInChildren('render')[0].entity;
+        if (scale == null) scale = ent.getScale();
+        const mat = ent.render.meshInstances[0].material;
+        mat.diffuseMapTiling = scale.clone().mulScalar(1/density);
+        mat.update();
+    }
+
+
+
 }
 
 
