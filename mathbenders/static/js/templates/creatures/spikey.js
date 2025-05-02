@@ -1,5 +1,5 @@
 import Template from '../template.js';
-import {PropertyMap,FractionProperty,QuantityProperty} from '../properties.js';
+import {PropertyMap,FractionModifier,Quantity} from '../properties.js';
 import {NumberSphereRaw } from '../numbers.js';
 
 // Should be able to have these in a different file. don't understand proper hierarchy of class, extend,  etc.
@@ -14,7 +14,7 @@ export class Spikey extends NumberSphereRaw {
     static propertiesMap = [
          new PropertyMap({  
             name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : FractionProperty, 
+            property : FractionModifier, 
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             onInitFn : (template,value) => { template.fraction = value; },
             getCurValFn : (template) => { return template.getFraction(); }, 
@@ -25,6 +25,8 @@ export class Spikey extends NumberSphereRaw {
     }
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         this.entity.addChild(spikeyClothes);
         spikeyClothes.setLocalPosition(pc.Vec3.ZERO);
@@ -102,7 +104,7 @@ export class SpikeyGroup extends Template {
     static propertiesMap = [
          new PropertyMap({  
             name : "SpikeyGroupQuantity",
-            property : QuantityProperty,
+            property : Quantity,
             onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
             onInitFn : (template,value) => { template.quantity = value; },
             getCurValFn : (template) => { return template.quantity },
@@ -186,6 +188,8 @@ export class SpikeyGroup extends Template {
 
     constructor(args){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         // @Eytan; awkward competition for who sets properties when and from where.
         // When dragging a new item instantiated from editor, it has no properties and relies on defaults.
         // When reloading a level from saved data, it inflates each one with properties and must let those values override defaults.

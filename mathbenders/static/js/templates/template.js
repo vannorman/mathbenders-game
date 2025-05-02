@@ -11,7 +11,6 @@ export default class Template {
 
     static _icon;
     static icon(properties={}) { return this._icon};
-    static propertiesMap=[];
     static isThrowable = false;
     static isStaticCollider = false;
     colliders = new Map();
@@ -67,19 +66,14 @@ export default class Template {
 
          // this.entity.tags.add(Constants.Tags.BuilderItem); // why ..? Sure?
         this.setup(args);// All templates need to be "setup" BEFORE updateColliderMap is called. But, this leads to "this" confusion between superclass and subclass; SomeClass extends Template { setup() } cannot refer to the "this" of that local class.
-        if (properties) {
-            // Can't do this until other constructors have finished..
-            // circular / ordering error
-            this.setProperties(properties);
-        }
         // All templates need to have their colliders registered. I don't want to do this in each indivdually.
         // But, now some templates have individual colliders created *after* constructor here, so this must be called in each of them
         this.updateColliderMap(); 
         this.entity._templateInstance = this; // partial, incomplete ref
         GameManager.subscribe(this,this.onGameStateChange);
         this.entity.on('destroy',this.entityWasDestroyed,this);
-
     }
+
 
     entityWasDestroyed(){
         // console.log("%c destroyed "+this.name+":"+this.uuid.substr(0,5),"color:#f88")
@@ -174,10 +168,23 @@ export default class Template {
         // awkward that this is irrelevant for gadgets being held in inventory
         // and that we overwrite this in Gadget get properties() {return this.ammo....}
         const props = {};
-        this.constructor.propertiesMap.forEach(x=>{
-           if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
-        });
-        return props;
+        if (this.constructor.propertiesMap){
+            this.constructor.propertiesMap.forEach(x=>{
+               if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
+            });
+            return props;
+        } else if (this.constructor.properties){
+            console.log(this.constructor);
+            
+            this.constructor.properties.forEach(x=>{
+               if (x.getCurValFn) props[x.name] = x.getCurValFn(this) 
+            
+            });
+            return props;
+        } else {
+            console.log("none.");
+            console.log(this.constructor);
+        }
     }
 
     getInstanceData(args={}){
@@ -192,21 +199,32 @@ export default class Template {
     }
 
     setProperties(properties) {
-        if (properties != {}){
+        if (typeof properties == "undefined" || properties == {}){
+            return;
             //console.log(properties);
         }
         this.constructor.propertiesMap.forEach(x=>{
-            if (properties[x.name] !== undefined){
+            if (typeof properties[x.name] !== 'undefined'){
                 const val = properties[x.name];
-                // Are we "changing" or  "initting" here?
-                // We have two ways to "modify" a template in this way
-                // ONE, the template was instantiated and passed some properties[] and those need to be initialized, onInitFn()
-                // TWO, the template was already created, and needs to be modified, onChangeFn()
                 x.onInitFn(this,val);
             } else{
             }
         })
     }
+
+    setProperties2(properties) {
+        if (typeof properties == "undefined" || properties == {}){
+            return;
+            //console.log(properties);
+        }
+        this.constructor.properties.forEach(x=>{
+            if (typeof properties[x.name] !== 'undefined'){
+                const val = properties[x.name];
+                x.onInitFn(this,val);
+            }
+        });
+    }
+
 
 
     static createHeldItem(){

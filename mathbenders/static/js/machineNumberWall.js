@@ -7,7 +7,7 @@ MachineNumberWall.attributes.add('size', { type:'integer', array:true, default:[
 
 MachineNumberWall.prototype.initialize = function() {
     this.existingWallObjects=[];
-    this.onChangeFn = ()=>{console.log('def');}
+    console.log("frac1:"+this.fraction1);
 };
 
 
@@ -40,11 +40,10 @@ MachineNumberWall.prototype.rebuildWall = function(){
             rigidbodyType:pc.RIGIDBODY_TYPE_KINEMATIC,
             properties: {
                 position:pos,
-                "NumberCube": frac,
+                "NumberCubeFraction": frac,
             }
         }
-        console.log("Creating:");
-        console.log(args);
+        // console.log(args);
         let cube = new NumberCube(args);
         return cube.entity;//Game.Instantiate.NumberCubeFixed(args);
 

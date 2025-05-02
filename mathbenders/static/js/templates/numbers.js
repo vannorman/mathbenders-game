@@ -1,54 +1,88 @@
 import Template from './template.js';
-import * as P from './properties.js';
+import * as Property from './properties.js';
 
 export class NumberWall extends Template {
     static _icon = assets.textures.ui.icons.numberWall;
     static propertiesMap = [
-         new P.PropertyMap({  
+         new Property.PropertyMap({  
             name : "Fraction1",
-            property : P.FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction1 = value; }, 
+            property : Property.FractionModifier, 
+            onInitFn : (template,value) => { template.fraction1 = value },
+            onChangeFn : (template,value) => { template.setFraction1(value); }, 
             getCurValFn : (template) => { return template.fraction1; }, 
             min : new Fraction(-5,1),
             max : new Fraction(5,1),
          }),
 
-         new P.PropertyMap({  
+         new Property.PropertyMap({  
             name : "Fraction2",
-            property : P.FractionProperty, 
-            onChangeFn : (template,value) => { template.fraction2 = value; }, 
+            property : Property.FractionModifier, 
+            onInitFn : (template,value) => { template.fraction2 = value },
+            onChangeFn : (template,value) => { template.setFraction2(value); }, 
             getCurValFn : (template) => { return template.fraction2; }, 
             min : new Fraction(-5,1),
             max : new Fraction(5,1),
          }),
-         new P.PropertyMap({  
+         new Property.PropertyMap({  
             name : "Size",
-            property : P.SizeProperty, 
+            property : Property.Size, 
             min : 1,
             max : 10,
-            onChangeFn : (template,value) => { template.size = value; },
+            onInitFn : (template,value) => { template.size = value },
+            onChangeFn : (template,value) => { template.setSize(value); },
             getCurValFn : (template) => { return template.size; }
          }),
-    ]
+         new Property.PropertyMap({  
+            name : "WallState",
+            property : Property.GenericData, 
+            // onChangeFn : null,
+            onInitFn : (template,value) => {console.log("Generic init:"+JSON.stringify(value))},
+            getCurValFn : (template) => { return template.currentState; }
+         }),
+     ]
 
-    get fraction1() { return this.script.fraction1;}
-    get fraction2() { return this.script.fraction2;}
-    set fraction1(value) { this.script.setFraction1(value); }
-    set fraction2(value) { this.script.setFraction2(value); }
-    set size(value) { this.script.setSize(value); }
-    get size() { return this.script.size; }
+    fraction1 = new Fraction(1,1);
+    fraction2 = new Fraction(2,1);
+    setFraction1(value){
+        this.fraction1 = value;
+        this.script.setFraction1(value);
+    }
+    setFraction2(value){
+        this.fraction2 = value;
+        this.script.setFraction2(value);
+    }
 
+    size = [1,2,2];
+    setSize(value) { 
+        this.size = value;
+        this.script.setSize(value); 
+    }
 
-    setup(args={}){
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties(properties);
+
+        // Initialize script
         this.entity.addComponent('script'); 
-        this.entity.script.create('machineNumberWall');
-        // @Eytan, I have a PlacedItem problem here. PlacedItem 
+        this.entity.script.create('machineNumberWall',{attributes:{
+            fraction1:this.fraction1,
+            fraction2:this.fraction2,
+            size:this.size,
+
+            }});
         const $this = this;
         this.entity.script.machineNumberWall.onChangeFn = function(){$this.updateColliderMap(); }
+
+        
+        // Build the wall with correct properties.
         this.entity.script.machineNumberWall.rebuildWall();
-        this.script = this.entity.script.machineNumberWall;
     }
- 
+
+    get script(){
+        return this.entity.script.machineNumberWall;
+
+    }
 }
 
 export class NumberCube extends Template {
@@ -68,10 +102,10 @@ export class NumberCube extends Template {
     static isThrowable=false; // delete and have a map of throwable items?
 
     static propertiesMap = [
-         new P.PropertyMap({  
-            name : this.name, // if this changes, data will break 
-            property : P.FractionProperty, 
-            onInitFn : (template,value) => { template.fraction = value; },
+         new Property.PropertyMap({  
+            name : "NumberCubeFraction", // if this changes, data will break 
+            property : Property.FractionModifier, 
+            onInitFn : (template,value) => { template.setFraction(value);},// = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
          }),
@@ -80,6 +114,8 @@ export class NumberCube extends Template {
     constructor(args={}) {
         // args['rigidbodyType'] = pc.RIGIDBODY_TYPE_KINEMATIC;
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         // cube.tags.add(Constants.Tags.PlayerCanPickUp);
         this.entity.addComponent("render",{ type : "box" });
         // sphere.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_DYNAMIC, restitution: 0.5, linearDamping : .85 });
@@ -93,17 +129,9 @@ export class NumberCube extends Template {
             }});
 
         this.script.type = NumberInfo.Type.Cube;
-
     }
 
     
-    getFraction(){ 
-        if (this.script){
-            return this.script.fraction; 
-        } else {
-            return this.fraction;
-        }
-    }
     setFraction(value) { 
         if (this.script){
             this.script.setFraction(value);
@@ -135,17 +163,20 @@ export class NumberCube extends Template {
 
 export class NumberSphereGfxOnly extends Template {
     static propertiesMap = [
-         new P.PropertyMap({  
+         new Property.PropertyMap({  
             name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : P.FractionProperty, 
+            property : Property.FractionModifier, 
             onInitFn : (template,value) => {template.fraction = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
          }),
     ]
+    fraction = new Fraction(2,1);
 
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         this.entity.addComponent("render",{ type : "sphere" });
         const s = this.entity.getLocalScale.x;
         this.entity.addComponent('script');
@@ -153,21 +184,12 @@ export class NumberSphereGfxOnly extends Template {
         this.entity.script.create('numberInfo',{attributes:{
             destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
             fraction:this.fraction,
-            }});
+        }});
          
     }
-     setup(args={}){
-   }
 
     get script(){ return this.entity.script.numberInfo; }
     
-    getFraction(){ 
-        if (this.script){
-            return this.script.fraction; 
-        } else{
-            return this.fraction;
-        }
-    }
     setFraction(value) { 
         if( this.script) this.script.setFraction(value); 
         else this.fraction = value;
@@ -179,37 +201,34 @@ export class NumberSphereRaw extends Template {
     static combinationHierarchy = 1;
     static isNumber = true;
 //    fraction=new Fraction(1,3);
+    static propertiesMap = [
+         new Property.PropertyMap({  
+            name : "NumberSphere", // if this changes, data will break // Should be Fraction1?
+            property : Property.FractionModifier, 
+            onInitFn : (template,value) => { console.log("init:"+value); template.fraction = value; },
+            onChangeFn : (template,value) => { template.setFraction(value); }, 
+            getCurValFn : (template) => { return template.fraction;},
+         }),
+    ]
    
+    fraction=new Fraction(2,1);
     constructor(args={}) {
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args); 
+        const {properties}=args;
+        this.setProperties(properties);
+        console.log("this prop was set:"+JSON.stringify(properties));
         this.entity.addComponent("render",{ type : "sphere" });
         const s = this.entity.getLocalScale.x;
         this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(s/2, s/2, s/2)});
         this.entity.rigidbody.linearDamping = 0.5;
         this.entity.addComponent('script');
-        this.entity.script.create('numberInfo',{attributes:{
-            destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
-            fraction:this.fraction,
-            }});
-        if (this.fraction){
-            // null if add two and result is zero? What a mess
-            this.entity.script.numberInfo.setFraction(this.fraction); //ugh
-        }
+        this.entity.script.create('numberInfo',{attributes:{fraction:this.fraction}});
         // this.script = sphere.script.numberInfo;
-
     }
 
-    getFraction(){ 
-        // Is there ever a case the script hasn't been created yet? but we stil want the fraction?
-        if (this.script){
-            return this.script.fraction; 
-        } else {
-            console.log("Shouldn?");
-            return this.fraction;
-        }
-    }
     setFraction(value) { 
+        this.fraction=fraction;
         this.script.setFraction(value); 
     }
    
@@ -222,17 +241,9 @@ export class NumberSphereRaw extends Template {
 }
 
 export class NumberSphere extends NumberSphereRaw {
-    static propertiesMap = [
-         new P.PropertyMap({  
-            name : this.name, // if this changes, data will break // Should be Fraction1?
-            property : P.FractionProperty, 
-            onChangeFn : (template,value) => { template.setFraction(value); }, 
-            onInitFn : (template,value) => { template.fraction = value; },
-            getCurValFn : (template) => { return template.getFraction(); }, 
-         }),
-    ]
-     static _icon = assets.textures.ui.numberSpherePos;
+    static _icon = assets.textures.ui.numberSpherePos;
     static _icon_neg = assets.textures.ui.numberSphereNeg;
+
     static icon(properties){
         const pos = Object.values(properties).find(x=>x instanceof Fraction).numerator > 0;
         if (pos) return this._icon;
@@ -243,7 +254,9 @@ export class NumberSphere extends NumberSphereRaw {
     static isThrowable=true; // move to "Number.Type"  
    
     constructor(args={}) {
+
         super(args);
+
         this.entity.tags.add(Constants.Tags.PlayerCanPickUp);
         this.script.type = NumberInfo.Type.Sphere;
     }

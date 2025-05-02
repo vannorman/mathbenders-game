@@ -17,7 +17,7 @@ export class Property {
 
     constructor(args){
         const {name,template,onInitFn,onChangeFn,getCurValFn,buttonIndex,valueType,min=1,max=10}=args;
-        this.name=name;
+        this.name=name ?? this.constructor.name;
         this.template = template;
         this.onChangeFn2  = onChangeFn; // using onChangeFn2 so we can insert a check before executing.. awkward
         this.onInitFn = onInitFn ?? onChangeFn;
@@ -90,7 +90,9 @@ export class Property {
             let ret = v >= minV && v <= maxV;
             return ret
         } else {
- 
+            console.log("Could not validate:");
+            console.log(value);
+            Game.v = value;
             return false;
         }
      
@@ -176,7 +178,7 @@ export class Property {
     }
 }
 
-export class GroupProperty extends Property {
+export class Group extends Property {
     static icon = assets.textures.ui.trash;
 
     buildUiButton(){
@@ -194,11 +196,12 @@ export class GroupProperty extends Property {
 
 
 
-export class ScaleProperty extends Property {
+export class Scale extends Property {
     static icon = assets.textures.ui.builder.scaleItem;
-
+    deltaScale=0.5; 
+    preciison=1;
     buildUi(){
-        // TODO: Combine this with SizeProperty UI (they're the same almost);
+        // TODO: Combine this with Size UI (they're the same almost);
         const $this = this;
         const panel = Property.panel();
 
@@ -211,26 +214,30 @@ export class ScaleProperty extends Property {
         var text0;
         var text1;
         var text2;
-
+        const precision = this.precision;
         function setSizeText(size){
-            text0.text = size.x.toFixed(1);
-            text1.text = size.y.toFixed(1);
-            text2.text = size.z.toFixed(1);
+            text0.text = size.x.toFixed(precision);
+            text1.text = size.y.toFixed(precision);
+            text2.text = size.z.toFixed(precision);
         }
         
         function modScale(scale){
             let size = $this.getCurValFn($this.template).clone();
             let newSize = size.clone().add(scale);
-            $this.onChangeFn($this.template,newSize);
-            size = $this.getCurValFn($this.template).clone();
-            setSizeText(size);
+            if ($this.allowChange(newSize)){
+                $this.onChangeFn($this.template,newSize);
+                // size = $this.getCurValFn($this.template).clone();
+                setSizeText(newSize);
+            } else {
+                console.log('caint');
+            }
         }
 
         function text(el){
             return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
         }
         
-        const deltaScale = 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
+        const deltaScale = this.deltaScale; // 0.5; // should have a "big adjust" and "fine adjust" button so add 2 new buttons per entry here.
 
         for(let i=0;i<colDim;i++){
             for(let j=0;j<rowDim;j++){
@@ -275,6 +282,10 @@ export class ScaleProperty extends Property {
         panel.addChild(elementGrid.group);
         
         const size = this.getCurValFn(this.template);
+        console.log("get cur val fn:");
+        console.log(this.getCurValFn);
+        console.log("on:"+this.template.name);
+        console.log("size:"+size);
         setSizeText(size);
 
         this.ui=panel;
@@ -283,7 +294,7 @@ export class ScaleProperty extends Property {
 
 }
 
-export class DeleteProperty extends Property {
+export class Delete extends Property {
 
     buildUiButton({parentEl:parentEl}){
         const $this = this; 
@@ -310,7 +321,7 @@ export class DeleteProperty extends Property {
     }
 }
 
-export class CopyProperty extends Property {
+export class Copy extends Property {
 
     buildUiButton({parentEl:parentEl}){
         const $this = this; 
@@ -333,7 +344,7 @@ export class CopyProperty extends Property {
     }
 }
 
-export class MoveProperty extends Property {
+export class Move extends Property {
     static icon = assets.textures.ui.builder.moveItem;
 
     buildUiButton(){
@@ -349,7 +360,7 @@ export class MoveProperty extends Property {
     }
 }
 
-export class QuantityProperty extends Property {
+export class Quantity extends Property {
     static icon = assets.textures.ui.builder.quantity;
 
     buildUi(){
@@ -494,10 +505,10 @@ export class BasicProperties extends Property {
         })
         container.addChild(bottomRight); 
 
-        const copyProperty = new CopyProperty({template:this.template});
+        const copyProperty = new Copy({template:this.template});
         const copyBtn = copyProperty.buildUiButton({parentEl:bottomRight});
 
-        const deleteProperty = new DeleteProperty({template:this.template});
+        const deleteProperty = new Delete({template:this.template});
         const deleteBtn = deleteProperty.buildUiButton({parentEl:bottomRight});
 
 
@@ -533,11 +544,10 @@ export class BasicProperties extends Property {
     }
 }
 
-export class FractionProperty extends Property {
+export class FractionModifier extends Property {
     static icon = assets.textures.ui.icons.fraction; 
 
     buildUi(){
-        console.log("bui");
         const $this = this; 
         const panel = Property.panel();
        
@@ -555,8 +565,10 @@ export class FractionProperty extends Property {
             // Let's dig deep why not
             let curFrac = $this.getCurValFn($this.template);
             let newFrac = new Fraction(curFrac.numerator+1,curFrac.denominator);
-            $this.onChangeFn($this.template,newFrac);
-            setFracText(newFrac);
+            if ($this.allowChange(newFrac)){
+                $this.onChangeFn($this.template,newFrac);
+                setFracText(newFrac);
+            }
         });
 
         panel.addChild(upBtn);
@@ -565,7 +577,7 @@ export class FractionProperty extends Property {
     }
 }
 
-export class SizeProperty extends Property {
+export class Size extends Property {
     
     buildUi(){
         // TODO: Combine this with SizeProperty UI (they're the same almost);
@@ -650,7 +662,7 @@ export class SizeProperty extends Property {
     }
 }
 
-export class BuildWallsTurretsProperty extends Property {
+export class BuildWallsTurrets extends Property {
     
     static icon = assets.textures.ui.icons.wallBuilderTurret;
     buildUiButton(){
@@ -669,7 +681,7 @@ export class BuildWallsTurretsProperty extends Property {
 
 }
 
-export class BuildWallsProperty extends Property {
+export class BuildWalls extends Property {
     
     static icon = assets.textures.ui.icons.wallBuilder;
     buildUiButton(){
@@ -688,7 +700,7 @@ export class BuildWallsProperty extends Property {
 
 }
 
-export class GenericDataProperty extends Property {
+export class GenericData extends Property {
     // Doesn't need any interaction ui setup;
     // Its existence is an artifact of how we define, iterate, and inflate templates by "properties"
     // This placeholder enables the saving and loading of arbitrary data inside any template.

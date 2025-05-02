@@ -33,6 +33,8 @@ NumberInfo.prototype.initialize = function() {
             }
         }
     }})
+    
+    this.destroyFxFn = function(x) {Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter})},
 
     this.entity.collision?.on('collisionstart', this.onCollisionStart, this);
     if (this.fraction == null) {
@@ -349,6 +351,7 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
     if (options.properties[TemplateToClone.name].numerator == 0) {
         NumberInfo.destroyNumberFx({position:options.position,maxNumber:maxNumber});
     } else {
+        console.log("options:"+JSON.stringify(options));
         const result = new TemplateToClone(options);
         // @Eytan here we have (competing / awkward) a data issue where NumberSphere and NumberCube have different "keys" for Fraction 
         // (as defined by editablePropertiesMap)

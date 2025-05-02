@@ -10,6 +10,9 @@ export class Group extends Template {
     entities=[];
     constructor(args={}){
         super(args);
+        const {properties} = args;
+        this.setProperties(properties);
+
         const $e = this.entity;
         this.entity.on('destroy',function(){
             $e.children.forEach(x=>{
@@ -17,9 +20,6 @@ export class Group extends Template {
             });
         });
 
-    }
-
-    setup(args){
         const {entities}=args;
         this.entities = entities;
 

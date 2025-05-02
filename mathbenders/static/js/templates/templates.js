@@ -11,7 +11,7 @@ Object.values(Templates).forEach((Template)=>{
 });
 
 Object.values(Properties).forEach((Property)=>{
-//    console.log(Property.name);
+    // console.log(Property.name);
     window[Property.name]=Property;
     window.PropertiesMap[Property.name]=Property;
 });

@@ -6,16 +6,22 @@ export class NumberHoop extends Template {
     static propertiesMap = [
          new P.PropertyMap({  
             name : "NumberHoop",
-            property : P.FractionProperty, 
-            onChangeFn : (template,value) => {  template.fraction=value; },
-            getCurValFn : (template) => { console.log("getcurfrachoop"); console.trace(); stackTrace();  return template.fraction },
+            property : P.FractionModifier, 
+            onChangeFn : (template,value) => {  console.log("setfr"); template.setFraction(value); },
+            getCurValFn : (template) => { console.log("getcurfrachoop"); return template.fraction },
+            min : new Fraction(1,1),
+            max : new Fraction(10,1)
+
          }),
 
     ]
   
     static _icon = assets.textures.ui.icons.hoop;
 
-    setup(args={}){
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         const scale = 1.5;
         this.renderEntity = assets.numberHoop.resource.instantiateRenderEntity();
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
@@ -43,7 +49,10 @@ export class NumberHoop extends Template {
     }
 
     get fraction(){ return this.script.fraction; }
-    set fraction(value) { this.script.setFraction(value); }
+    setFraction(value) { 
+        console.log("val:"+value);
+        this.script.setFraction(value);
+    }
 }
 
 export class NumberFaucet extends Template {
@@ -53,14 +62,18 @@ export class NumberFaucet extends Template {
     static propertiesMap = [
          new P.PropertyMap({  
             name : "Fraction",
-            property : P.FractionProperty, 
-            onChangeFn : (template,value) => {  template.fraction=value; },
+            property : P.FractionModifier, 
+            onInitFn : (template,value) => {  template.fraction=value; },
+            onChangeFn : (template,value) => {  template.setFraction(value); },
             getCurValFn : (template) => { return template.fraction },
          }),
 
     ]
 
-    setup(args={}){
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         const scale = 2;
     
         this.renderEntity = assets.models.faucet.resource.instantiateRenderEntity();
@@ -70,7 +83,7 @@ export class NumberFaucet extends Template {
         this.entity.setLocalScale(pc.Vec3.ONE.clone().mulScalar(scale));
         
         this.renderEntity.addComponent('script');
-        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:new Fraction(1,2)}});
+        this.renderEntity.script.create('machineNumberFaucet',{attributes:{fraction:this.fraction}});
 
         this.renderEntity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.75,0.75,4)}); 
         this.renderEntity.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
@@ -87,9 +100,12 @@ export class NumberFaucet extends Template {
 
         this.script = this.renderEntity.script.machineNumberFaucet;
     }
-    
-    get fraction(){ return this.script.fraction; }
-    set fraction(value) { this.script.setFraction(value); }
+
+    fraction=new Fraction(2,1);
+    setFraction(value){
+        this.fraction=value;
+        this.script.setFraction(value);
+    }
 
     toJSON(){}
 

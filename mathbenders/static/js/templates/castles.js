@@ -6,6 +6,8 @@ export class CastleTurret extends Template {
 
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         // Castle Pillar
         const pillarAsset = assets.models.castle_pillar;
         const pillarRender = pillarAsset.resource.instantiateRenderEntity();
@@ -43,9 +45,9 @@ export class Ramp extends Template {
     static _icon = assets.textures.ui.icons.stairs1;
 
     static propertiesMap = [
-         new P.PropertyMap({  
+         new P.Scale({  
             name : "Scale",
-            property : P.ScaleProperty,
+            property : P.Scale,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  template.scale = value; },
             getCurValFn : (template) => { return template.scale },
@@ -78,6 +80,8 @@ export class Ramp extends Template {
     rampScale = new pc.Vec3(0.3,0.3,0.3);
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         // Castle Pillar
         const rampP = assets.models.ramp.resource.instantiateRenderEntity();
         const ramp = rampP.children[0];
@@ -108,10 +112,10 @@ export class CastleWall extends Template {
         // It might be better to divorce the UI the user sees (what is populated in editItemTray) vs what properties are there, 
         // And link or map them separately.
          new P.PropertyMap({  
-            property : P.BuildWallsProperty,
+            property : P.BuildWalls,
          }),
          new P.PropertyMap({  
-            property : P.BuildWallsTurretsProperty,
+            property : P.BuildWallsTurrets,
          }),
     ];
 
@@ -122,6 +126,8 @@ export class CastleWall extends Template {
 
     constructor(args={}){ 
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -147,7 +153,7 @@ export class CastleWallFormed extends Template {
     static propertiesMap = [
          new P.PropertyMap({  
             name : "CastleWallFormed",
-            property : P.GenericDataProperty,
+            property : P.GenericData,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  },//template.setMeshData(value); },
             onInitFn : (template, value) => { template.meshData=value; },
@@ -163,6 +169,8 @@ export class CastleWallFormed extends Template {
     }
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         
         const asset = assets.models.castle_wall;
         const render = asset.resource.instantiateRenderEntity();
@@ -228,7 +236,7 @@ export class ConcretePad extends Template {
     static propertiesMap = [
          new P.PropertyMap({  
             name : "Scale",
-            property : P.ScaleProperty,
+            property : P.Scale,
             // valueType : pc.Vec3,
             onChangeFn : (template,value) => {  template.scale = value; },
             getCurValFn : (template) => { return template.scale },
@@ -259,7 +267,11 @@ export class ConcretePad extends Template {
     }
 
     static defaultScale = new pc.Vec3(10,10,10);
-    setup(args={}){
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties(properties);
+
         const pad = new pc.Entity("concrete pad");
         pad.addComponent("render", {  type: "box" }); 
         pad.addComponent("rigidbody", { type: pc.RIGIDBODY_TYPE_KINEMATIC, restitution: 0.5, });
@@ -281,6 +293,8 @@ export class BigConcretePad extends ConcretePad {
     static defaultScale = new pc.Vec3(50,20,50);
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
         this.pad.tags._list.push(Constants.Tags.Terrain);
     }
 }
@@ -290,6 +304,8 @@ export class CastleGate extends Template {
 
     constructor(args={}){
         super(args);
+        const {properties}=args;
+        this.setProperties(properties);
 
         
         const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];

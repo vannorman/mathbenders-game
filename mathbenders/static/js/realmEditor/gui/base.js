@@ -419,28 +419,25 @@ export default class GUI {
         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Player", items : [
                     //{ templateName:Constants.Templates.PlayerStart,textureAsset:assets.textures.ui.builder.start },
                     { ItemTemplate : PlayerStart },
-                    { ItemTemplate : PlayerPortal },
                     { ItemTemplate:Tree1} ,
                     //{ templateName:Constants.Templates.Portal,textureAsset:assets.textures.ui.builder.portal },
             ],}))
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Machines", items : [
-//                    { templateName:Constants.Templates.Multiblaster, textureAsset:assets.textures.ui.icons.multiblaster },
-//                    { templateName:Constants.Templates.Zooka, textureAsset:assets.textures.ui.icons.zooka },
                     { ItemTemplate:NumberHoop } ,
                     { ItemTemplate:MultiblasterPickup } ,
                     { ItemTemplate:SwordPickup },
-                    // templateName:Constants.Templates.NumberHoop, textureAsset:assets.textures.ui.icons.hoop },
+                    { ItemTemplate : PlayerPortal },
+                    { ItemTemplate:NumberFaucet },
             ],}));
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Numbers", items : [
-                    { ItemTemplate:NumberFaucet },
                     { ItemTemplate:NumberWall },
-                    { ItemTemplate:SpikeyGroup },
-                   // { templateName:Constants.Templates.NumberFaucet, textureAsset:assets.textures.ui.icons.faucet },
-                   //  { templateName : Constants.Templates.NumberWall, textureAsset:assets.textures.ui.icons.numberWall },
             ],}));
-        this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
+        this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Creatures", items : [
+                    { ItemTemplate:SpikeyGroup },
+            ],}));
+         this.#builderPanels.push(new BuilderPanel({ gui:this,  name:"Castle", items : [
                     { ItemTemplate:CastleTurret } ,
                     { ItemTemplate:CastleWall } ,
                     { ItemTemplate:ConcretePad} ,
