@@ -138,7 +138,6 @@ export default class GUI {
                         // return getEditableItemByEntity(editableItemUnderCursor);
                         return editableItemUnderCursor; // Actually an entity ..
                     } else {
-                    //    if (par.name == "NumberHoop") console.log('not found:'+par.name+","+par.getGuid()+" vs "+item.obj.getGuid());
                         par = par.parent ? par.parent : par;
                     }
                 }
@@ -424,11 +423,12 @@ export default class GUI {
             ],}))
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Machines", items : [
-                    { ItemTemplate:NumberHoop } ,
-                    { ItemTemplate:MultiblasterPickup } ,
-                    { ItemTemplate:SwordPickup },
+                    { ItemTemplate : NumberHoop } ,
+                    { ItemTemplate : MultiblasterPickup } ,
+                    { ItemTemplate : SwordPickup },
                     { ItemTemplate : PlayerPortal },
-                    { ItemTemplate:NumberFaucet },
+                    { ItemTemplate : NumberFaucet },
+                    { ItemTemplate : NumberRiser},
             ],}));
         this.#builderPanels.push(
             new BuilderPanel({ gui:this,  name:"Numbers", items : [

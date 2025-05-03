@@ -40,11 +40,13 @@ const Materials = {
  
     },
     get red(){ return Materials.createMaterial(new pc.Color(1,0,0))},
+    get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3))},
+    get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
+    get blue() { return this.createMaterial(new pc.Color(0.3, 0.3, 1))},
+    get purple(){ return Materials.createMaterial(new pc.Color(1,0,1))},
     get redAlpha(){ return Materials.createMaterialAlpha(new pc.Color(1,0,0,0.25))},
     get gray(){ return this.createMaterial(new pc.Color(0.3, 0.3, 0.3))},
 
-    get blue() { return this.createMaterial(new pc.Color(0.3, 0.3, 1))},
-    get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
     get white() { return this.createMaterial(pc.Color.WHITE )},
     get black() { return this.createMaterial(new pc.Color(00,00,00))},
     get brown() { return this.createMaterial(new pc.Color(0.5,0.2,0.2))},

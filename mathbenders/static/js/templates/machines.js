@@ -1,6 +1,106 @@
 import Template from './template.js';
 import * as P from './properties.js';
 
+export class NumberRiser extends Template {
+    static _icon = assets.textures.ui.icons.riser;
+    static properties = [
+         new P.Quantity({  
+            name : "Quantity",
+            onInitFn : (template,value) => {  template.quantity = value },
+            onChangeFn : (template,value) => {  template.setQuantity(value); },
+            getCurValFn : (template) => { return template.quantity },
+            min : 0.1,
+            max : 10
+         }),
+    ];
+  
+    quantity=1;
+    setQuantity(value){
+        this.quantity = quantity;
+    }
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties2(properties);
+        this.riser = assets.riser.resource.instantiateRenderEntity();
+        this.riser.setLocalScale(2,2,2);
+        let rs = this.riser.children;
+        rs[0].children[0].render.meshInstances[0].material = Materials.gray; // funnel1
+        rs[0].children[0].render.meshInstances[1].material = Materials.red; // funnel1
+        // rs[1].children[0].render.meshInstances[0].material = Materials.orange;// funnel2
+        rs[2].children[0].render.meshInstances[0].material = Materials.gray;// cage
+        rs[3].children[0].render.meshInstances[0].material = Materials.gray; // riser thingie
+        rs[4].children[0].render.meshInstances[0].material = Materials.red; // platform
+
+        const receiverLocalPosition = new pc.Vec3(1.5,1,1.7);
+        const receiver = new pc.Entity();
+        receiver.addComponent('render',{type:'box'});
+        receiver.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(2,2,2)});
+        receiver.render.meshInstances[0].material = Materials.redAlpha;
+        this.entity.addChild(receiver);
+        receiver.setLocalPosition(receiverLocalPosition);
+        receiver.setLocalScale(1.5,1.5,0.5);
+        receiver.setLocalEulerAngles(0,90,0);
+        this.receiver=receiver;
+        receiver.collision.on('triggerenter',this.onTriggerEnter,this);
+        this.entity.addChild(this.riser);
+        this.updateColliderMap(); 
+    }
+
+    onCollectNumber(ni){
+        // const amt = ni.fraction.numerator / ni.fraction.denominator;
+        AudioManager.play({source:assets.sounds.plunger,position:this.entity.getPosition()})
+        let heldNumber = new NumberSphereGfxOnly({
+            position:this.entity.getPosition().add(new pc.Vec3(0,1.0,0)),
+            properties:{"NumberSphereGfxOnly":ni.fraction}
+        });
+        ni.entity.destroy();
+        this.entity.addChild(heldNumber.entity);
+    }
+
+    onTriggerEnter(other){
+        const script = other.getComponent('script');
+        const ni = other.script?.numberInfo;
+        if (ni){
+            console.log('collect');
+            this.slurpNumber(ni);
+        }
+    }
+
+    slurpNumber(ni){
+        let ni2 = new NumberSphereGfxOnly({
+            position:this.entity.getPosition().add(new pc.Vec3(0,1.0,0)),
+            properties:{"NumberSphereGfxOnly":ni.fraction}
+        });
+        ni.entity.destroy();
+        this.slurpStartTime = Date.now();
+        pc.app.on('update',this.update,this);
+        this.numberToSlurp = ni2;
+    }
+
+    localSlurpDest = new pc.Vec3(0,1,1.5);
+    slurpStartTime = 0;
+    update(dt){
+        if (!this.numberToSlurp){
+            pc.app.off('update',this.update,this);
+        }else {
+            let d = this.numberToSlurp.entity.getLocalPosition().sub(this.localSlurpDest).length();
+            if (d < 0){
+                
+                console.log('coling');
+                this.onCollectNumber(this.numberToSlurp);
+            }else{
+                let t = Date.now()-this.slurpStartTime/1000;
+                let p = pc.Vec3.lerp(this.numberToSlurp.entity.getPosition(),this.entity.getPosition().add(this.localSlurpDest),t);
+                this.numberToSlurp.entity.moveTo(p);
+            }
+
+        }
+    }
+
+
+}
+
 export class NumberHoop extends Template {
     static isStaticCollider = true;
     static properties = [

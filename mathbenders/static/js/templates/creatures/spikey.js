@@ -50,7 +50,7 @@ export class Spikey extends NumberSphereRaw {
 
     }
 
-    static { Game.f = 10 };
+    static { Game.f = 2 };
     update(dt){
         this.timer -= dt;
         // If the timer reaches zero, change direction and reset timer
