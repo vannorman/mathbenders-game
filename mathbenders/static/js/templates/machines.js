@@ -30,7 +30,16 @@ export class NumberRiser extends Template {
         // rs[1].children[0].render.meshInstances[0].material = Materials.orange;// funnel2
         rs[2].children[0].render.meshInstances[0].material = Materials.gray;// cage
         rs[3].children[0].render.meshInstances[0].material = Materials.gray; // riser thingie
-        rs[4].children[0].render.meshInstances[0].material = Materials.red; // platform
+        this.platform =rs[4].children[0];
+        this.platform.render.meshInstances[0].material = Materials.red; // platform
+        this.platformC = new pc.Entity();
+        this.platformC.addComponent('render',{type:'box'});
+        this.platform.addChild(this.platformC);
+        this.platformC.setLocalPosition(0,1.75,0);
+        this.platformC.setLocalScale(2,0.2,2);
+        this.platformC.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(2,0.2,2)});
+        this.platformC.addComponent('rigidbody',{type:'kinematic'});
+        Game.p=this;
 
         const receiverLocalPosition = new pc.Vec3(1.5,1,1.7);
         const receiver = new pc.Entity();
@@ -45,55 +54,112 @@ export class NumberRiser extends Template {
         receiver.collision.on('triggerenter',this.onTriggerEnter,this);
         this.entity.addChild(this.riser);
         this.updateColliderMap(); 
+        pc.app.on('update',this.update,this);
     }
+
+
+    entityWasDestroyed(){
+        super.entityWasDestroyed();
+        pc.app.off('update',this.update);
+    }
+
+    riseFactor = 3;
 
     onCollectNumber(ni){
         // const amt = ni.fraction.numerator / ni.fraction.denominator;
-        AudioManager.play({source:assets.sounds.plunger,position:this.entity.getPosition()})
         let heldNumber = new NumberSphereGfxOnly({
-            position:this.entity.getPosition().add(new pc.Vec3(0,1.0,0)),
             properties:{"NumberSphereGfxOnly":ni.fraction}
         });
         ni.entity.destroy();
         this.entity.addChild(heldNumber.entity);
+        heldNumber.entity.setLocalPosition(0,1,0);
+        const riseAmt = ni.fraction.numerator/ni.fraction.denominator * this.riseFactor;
+        this.platformTargetPosY = riseAmt;
+        this.setState(NumberRiser.State.Rising);
+        this.riseTime = 0;
+
     }
 
+    platformTargetPosy=0;
+
     onTriggerEnter(other){
+        switch(this.state){
+            case NumberRiser.State.Ready:
+            this.trySlurpNumber(other);
+            break;
+            default:break;
+        }
+   }
+
+   trySlurpNumber(other){
         const script = other.getComponent('script');
         const ni = other.script?.numberInfo;
         if (ni){
-            console.log('collect');
             this.slurpNumber(ni);
         }
-    }
+ 
+   }
 
     slurpNumber(ni){
+        AudioManager.play({source:assets.sounds.plunger,position:this.entity.getPosition()})
         let ni2 = new NumberSphereGfxOnly({
-            position:this.entity.getPosition().add(new pc.Vec3(0,1.0,0)),
+            position:this.slurpedStartPos,
             properties:{"NumberSphereGfxOnly":ni.fraction}
         });
         ni.entity.destroy();
-        this.slurpStartTime = Date.now();
-        pc.app.on('update',this.update,this);
+        this.slurpTime = 0;
         this.numberToSlurp = ni2;
+        this.setState(NumberRiser.State.Slurping);
     }
 
-    localSlurpDest = new pc.Vec3(0,1,1.5);
-    slurpStartTime = 0;
+    static State = {
+        Ready : 0,
+        Slurping : 1,
+        Rising : 2,
+    };
+    state = NumberRiser.State.Ready;
+    get collectedTargetPos() { return this.entity.getPosition().clone().add(pc.Vec3.UP); }
+    get slurpedStartPos() { return this.entity.getPosition().clone().add(new pc.Vec3(1.5,1,1.5));}
+    get slurpedTargetPos() { return this.entity.getPosition().clone().add(new pc.Vec3(0.8,1,1.5));}
+    setState(state){
+        this.state=state;
+    }
+    slurpTime=0;
+    riseTime=0;
     update(dt){
-        if (!this.numberToSlurp){
-            pc.app.off('update',this.update,this);
-        }else {
-            let d = this.numberToSlurp.entity.getLocalPosition().sub(this.localSlurpDest).length();
-            if (d < 0){
-                
-                console.log('coling');
+        switch(this.state){
+
+        case NumberRiser.State.Slurping:
+            let a = this.numberToSlurp.entity.getPosition();
+            let b = this.slurpedTargetPos;
+            let d = a.distance(b);
+            if (d < 0.1){
                 this.onCollectNumber(this.numberToSlurp);
+                this.numberToSlurp.entity.moveTo(this.collectedTargetPos);    
             }else{
-                let t = Date.now()-this.slurpStartTime/1000;
-                let p = pc.Vec3.lerp(this.numberToSlurp.entity.getPosition(),this.entity.getPosition().add(this.localSlurpDest),t);
+                this.slurpTime += dt;
+                const slurpDuration = 2;
+                const t = this.slurpTime/slurpDuration;
+                let p = new pc.Vec3().lerp(this.numberToSlurp.entity.getPosition(),this.slurpedTargetPos,t);
                 this.numberToSlurp.entity.moveTo(p);
+                if (this.slurpTime > slurpDuration){
+                    this.onCollectNumber(this.numberToSlurp);
+                    this.numberToSlurp.entity.moveTo(this.collectedTargetPos);    
+                    
+                }
             }
+            break;
+        case NumberRiser.State.Rising:
+            this.riseTime+=dt;
+            const riseDuration = 3;
+            const t= this.riseTime/riseDuration;
+            let y = Math.lerp(this.platform.getLocalPosition().y,this.platformTargetPosY,t);
+            this.platform.setLocalPosition(0,y,0);
+
+            if (Math.abs(y - this.platformTargetPosY) < 0.1){
+                this.setState(NumberRiser.State.Ready);
+            }
+            break;
 
         }
     }
