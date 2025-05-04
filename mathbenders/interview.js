@@ -1,4 +1,30 @@
 const interview = {
+    /*
+        Sat May 3, 2025
+        No don't do it!
+        Nobody likes to play games anymore!
+        You can't effectively teach math in a game!
+        No one will like it!
+        It's a mistake to build the game by yourself!
+        You have no funding and no plan!
+        You'll fail!
+        Etc.
+
+        Fri May 2, 2025
+        "Stand up" each week? Explain what I'm doing and why? Pitch it? Hmf.
+        Blog about what's going on? Give a demo each Friday about what the game is and how to play it? e.g. with Alicia.
+        Begin meeting with my superfans and advisors each Friday to review, feedback, etc?
+        No one shows up? That's fine. We'll still record it and write a post. Week 1, etc.
+
+        First blog post:
+        I couldn't keep myself away.
+        Here I am, back again at a startup I started 12 years ago, and which ultimately failed 8 years ago.
+        Back at it again, convinced it's the only thing I can do with my time for the short term.
+        Why?
+        Educational games have so much power to effect positive change.
+        So I must build them.
+
+    */
     // Sun Mar 2 2025
     /*
     At the "Get Shit Done" Austin meetup (via Instragram?) and I have realized the biggest thing missing from my ship is a mentor. I can deliver the product, that is not a question. The question is how can I correctly Go To Market including marketing, sales, fundraising, etc. I need help! So, today I'm reaching out to the founders of DragonBox Jean-Baptiste Huynh among others to ideally help find a mentor. Maybe apply to incubators as well."
