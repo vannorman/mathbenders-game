@@ -442,8 +442,9 @@ export default class GUI {
                     { ItemTemplate:CastleWall } ,
                     { ItemTemplate:ConcretePad} ,
                     { ItemTemplate:BigConcretePad} ,
-                    { ItemTemplate:CastleGate} ,
                     { ItemTemplate:Ramp} ,
+                    { ItemTemplate:CastleGate} ,
+                    { ItemTemplate:CastleGateDungeon} ,
             ],}));
         
         // Save icon

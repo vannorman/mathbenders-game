@@ -364,3 +364,110 @@ export class CastleGate extends Template {
 }
 
 
+
+export class CastleGateDungeon extends Template {
+    static _icon = assets.textures.ui.icons.castleDoorDungeon;
+
+    terrainModifierObject;
+    constructor(args={}){
+        super(args);
+        const {properties}=args;
+        this.setProperties2(properties);
+
+        
+        const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];
+        ApplyTextureAssetToEntity({entity:gate,textureAsset:assets.textures.wood}); 
+        const doorCol = new pc.Entity();
+        doorCol.setLocalScale(0.5,2.5,3.5);
+        doorCol.setLocalPosition(0,0,1.5)
+        doorCol.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.5,3.25,3.75)});
+        doorCol.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        gate.addChild(doorCol);
+        gate.setLocalScale(2,2,2);
+
+        const doorwayAsset = assets.models.castle_doorway;
+        const doorway = doorwayAsset.resource.instantiateRenderEntity().children[0];
+        doorway.setLocalScale(2,2,2);
+        ApplyTextureAssetToEntity({entity:doorway,textureAsset:assets.textures.terrain.grid_fine}); 
+        Utils.addMeshCollider({entity:doorway,meshAsset:doorway.render.asset});
+
+        const cover = new pc.Entity();
+        cover.addComponent('render',{type:'box'});
+        const scale = new pc.Vec3(4.5,1,7.9);
+        cover.addComponent('collision',{type:'box',halfExtents:scale.clone().mulScalar(0.5)});
+        cover.addComponent('rigidbody',{type:'kinematic'});
+        cover.setLocalScale(scale);
+
+        ApplyTextureAssetToEntity({entity:cover,textureAsset:assets.textures.terrain.grid_fine});
+
+
+        this.entity.addChild(gate);
+        this.entity.addChild(doorway);
+        this.entity.addChild(cover);
+    
+        doorway.setLocalEulerAngles(-90,0,0); 
+        gate.setLocalEulerAngles(-90,0,0); 
+
+        doorway.setLocalPosition(0,0,0);
+        gate.setLocalPosition(0,0,0);
+        cover.setLocalPosition(0,8,0);
+    
+
+        this.gate=gate;
+        this.doorway=doorway;
+        this.cover=cover;
+        this.updateColliderMap();
+
+        const {level}=args;
+        let tm = new TerrainModifierObject({level:level});
+        this.entity.addChild(tm.entity);
+        tm.entity.setLocalPosition(pc.Vec3.ZERO);
+        this.terrainModifierObject = tm;
+
+    }
+    entityWasDestroyed(){
+        this.terrainModifierObject.RemoveFromTerrain();
+        super.entityWasDestroyed();
+    }
+
+    onEndDragByEditor(args){
+        super.onEndDragByEditor();
+        this.terrainModifierObject.AddToTerrain();
+    }
+
+}
+
+export class TerrainModifierObject extends Template {
+
+    width=60;
+    length=80;
+    depth=40;
+    level;
+    constructor(args){
+        super(args);
+        const {level}=args;
+        this.level = level;
+   }
+
+    AddToTerrain(){
+        console.log('this ud'+this.uuid);
+        this.level.terrain.addTerrainModifier({
+            width:this.width,
+            length:this.length,
+            depth:this.depth,
+            position:this.entity.getPosition(),
+            templateUuid:this.uuid, // prevent double additions.
+        });
+ 
+   }
+
+   RemoveFromTerrain(){
+        console.log('removedud'+this.uuid);
+        this.level.terrain.removeTerrainModifier({templateUuid:this.uuid});
+        
+   }
+}
+
+
+
+

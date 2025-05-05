@@ -38,9 +38,25 @@ TerrainGenerator = {
                     });
                }
                 heights = TerrainGenerator.ModHeights({heights:heights,interval:heightTruncateInterval,heightScale:heightScale})
+
+                const modifiers = options.modifiers;
+                const size = options.size; // is size strictly world units? We need this to calculate the position of each modifier.
+                const centroid = options.centroid;
+                if (modifiers && modifiers.length > 0){
+                    console.log(JSON.stringify(modifiers));
+                    modifiers.forEacH(modifier=>{
+                        heights = TerrainGenerator.ApplyModifier({
+                            heights:heights,
+                            modifier:modifier,
+                            centroid:centroid
+                        })
+                    })
+                }
+
+
                 return heights;
             })(),
-
+            modifiers=[],
         } = options;
         this.textureOffset = textureOffset;
 
@@ -58,7 +74,7 @@ TerrainGenerator = {
 //            setTimeout(function(){ TerrainGenerator.PlaceTrees(terrainEntity,trees,size);},1000);
 //        }
 
-        
+
         return terrainEntity;
     },
     SecondLayerWithExponentialHeights(options){
@@ -224,6 +240,28 @@ TerrainGenerator = {
         })
         return heights;
     },
+
+    ApplyModifier(args){
+        const {heights,modifier,centroid,scale}=args;
+        let dim = Math.sqrt(heights);
+        for(let i=0;i<dim;i++){
+            // need to "inflate" the flat heights array to a 2d array again
+            // or just iterate i and j over it so that i,j is sensibile
+            for(let j=0;j<dim;j++){
+                let worldPos = modifier.position;
+                // which height correponds?
+
+                heights[i*dim + j] = modified;
+            }
+        }
+        heights.forEach((x, i) => {
+             
+            if (interval > 0) {
+                heights[i] = x.toInterval(interval); // affects height only, not x and z, 
+            }
+        })
+        
+    }
     Mesh3(options){
         const { position = pc.Vec3.ZERO, size=500, heights = []} = options;
         let app = pc.app;

@@ -168,6 +168,7 @@ const assets = {
                 numberWall : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/iconNumberWall.png" }),
                 castleGate : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/castleGate.png" }),
                 castleDoor : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/castleDoor.png" }),
+                castleDoorDungeon : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/castleDoorDungeon.png" }),
                 stairs1 : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/stairs1.png" }),
                 stairs1 : new pc.Asset("", "texture", {url : "/static/assets/textures/ui/stairs2.png" }),
             },
@@ -232,7 +233,7 @@ const assets = {
             dirt : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/dirt.jpg' }),
             hex_tile : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/hex_tile.jpg' }),
             grid_blue : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }),
-            grid_fine : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }),
+            grid_fine : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }), // grid black
             water : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/water.jpg' }),
             tree_green : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/tree_green.jpg' }),
             tree_brown : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/tree_brown.jpg' }),

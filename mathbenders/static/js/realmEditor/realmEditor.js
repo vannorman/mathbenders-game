@@ -425,10 +425,7 @@ class RealmEditor {
     }
 
     InstantiateTemplate(args){
-        // is "level" needed here?
-        // console.log("Inst:"+args.toString());
-        // @Eytan; I dislike how iconTextureAsset is passed from builder panel bound image, to dragging object mode, to here ..
-        // Ideally, iconTextureAsset is stored in the data model *at definition time* e.g. in prefabs.js and is thus referenced
+        console.log("Instantiate:"+args.ItemTemplate.name);
         const {
             level=this.currentLevel, 
             ItemTemplate, 
@@ -437,7 +434,7 @@ class RealmEditor {
             uuid=crypto.randomUUID(),
             properties={},
             } = args;
-        const instance = new ItemTemplate({uuid:uuid,position:position,rotation:rotation,properties:properties});
+        const instance = new ItemTemplate({level:level,uuid:uuid,position:position,rotation:rotation,properties:properties});
         const entity = instance.entity;
         entity.tags.add(Constants.Tags.BuilderItem);
 
