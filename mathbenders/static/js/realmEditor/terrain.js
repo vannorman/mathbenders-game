@@ -13,7 +13,7 @@ class TerrainModifier {
 
 export default class Terrain {
     static spacing = 2000;
-    modifiers=[]; 
+    postGenFns=[];
 
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
     // The Terrain is created when the Level is created, and can be modified using BuilderPanel Terrain.
@@ -37,7 +37,8 @@ export default class Terrain {
             trees : 10,
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
-       const { realmEditor } = args;
+       const { realmEditor, level } = args;
+       this.level = level;
        this.realmEditor=realmEditor;
        if (args.data){
             Object.keys(args.data).forEach(k => {
@@ -61,6 +62,10 @@ export default class Terrain {
             // waterLevel:this._data.waterLevel
         });
         this.entity.render.meshInstances[0].material = mat;
+        if (this.postGenFns.length > 0){
+            this.postGenFns.forEach(fn=>{fn();});
+        }
+        this.postGenFns = [];
     }
     
     toJSON(){ 
@@ -90,7 +95,7 @@ export default class Terrain {
     generate(source="none"){
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
         // this.realmEditor.clearTrees();
-        this.entity = TerrainGenerator.Generate(this.data);
+        this.entity = TerrainGenerator.Generate({data:this.data,level:this.level});
         this.postGenerationFunction();
         const $this = this;
         // setTimeout(function(){$this.realmEditor.placeTrees({numTrees:$this.data.trees})},100);
@@ -130,33 +135,6 @@ export default class Terrain {
 
     }
 
-
-    addTerrainModifier(data){
-        let tm = new TerrainModifier({
-            width:data.width,
-            length:data.length,
-            depth:data.depth,
-            position:data.position,
-            templateUuid:data.templateUuid,
-        });
-        if (this.data.modifiers) this.data.modifiers.push(tm);
-        else this.data.modifiers = [tm];
-        this.Regenerate(); // what if realmEditor isn't defined yet. PRobably wait for realmeditor to finish loading before triyng to load levels.
-    }
-
-    removeTerrainModifier(data){
-        const{templateUuid}=data;
-        if (this.data.modifiers){
-            if (this.data.modifiers.filter(x=>{return x.templateUuid == templateUuid}).length != 0){
-                console.log("REMOVED:"+templateUuid);
-                this.data.modifiers = this.data.modifiers.filter(x=>{return x.templateUuid != templateUuid});
-            } else {
-                console.log("CANT REM:"+templateUuid);
-            }
-        } else {
-            console.log("Uh, no modifiers?");
-        }
-    }
 
     // CENTROID MANAGEMENT
     // When placing terrains, they all exist in the same "scene" and so must be spaced away from each other.

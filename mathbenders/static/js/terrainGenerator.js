@@ -3,7 +3,9 @@ TerrainGenerator = {
     Terrains : [], // only we use this var 
     terrainSpacing : 10000,
     Generate(options={}){
-        var  {
+        var  { data, level } = options;
+        this.level = level;
+        var {
             name = "Undefined",
             heightTruncateInterval = 0.0,
             textureOffset = 0,
@@ -14,56 +16,80 @@ TerrainGenerator = {
             size = 250,
             centroid,
             treeCount=100,
-//            extraFn = null,
             terrainInstance = null,
             resolution2=0,
             heightScale2=0,
             exp=0,
-            heights =  (() => {
-                const heights2d = perlin.get2dPerlinArr({
-                    dim:options.dimension,
-                    sampleResolution:resolution,
-                    deterministicFloatSeed:seed,
-                });
-
-
-                var heights = heights2d.flat();
-                if (options.resolution2 != 0) {
-                    heights = TerrainGenerator.SecondLayerWithExponentialHeights({
-                        heights:heights,
-                        exp:options.exp,
-                        dim:options.dimension,
-                        resolution2:options.resolution2,
-                        heightScale2:options.heightScale2
-                    });
-               }
-                heights = TerrainGenerator.ModHeights({heights:heights,interval:heightTruncateInterval,heightScale:heightScale})
-
-                const modifiers = options.modifiers;
-                const size = options.size; // is size strictly world units? We need this to calculate the position of each modifier.
-                const centroid = options.centroid;
-                if (modifiers && modifiers.length > 0){
-                    console.log(JSON.stringify(modifiers));
-                    modifiers.forEacH(modifier=>{
-                        heights = TerrainGenerator.ApplyModifier({
-                            heights:heights,
-                            modifier:modifier,
-                            centroid:centroid
-                        })
-                    })
-                }
-
-
-                return heights;
-            })(),
-            modifiers=[],
-        } = options;
+            heights = [],
+            level
+        } = data;
+        const dimension = size * resolution;
         this.textureOffset = textureOffset;
+
+        if (heights.length == 0){
+            const heights2d = perlin.get2dPerlinArr({
+                dim:dimension,
+                sampleResolution:resolution,
+                deterministicFloatSeed:seed,
+            });
+            heights = heights2d.flat();
+
+        }
+
+        ///// Mod heights
+        const sideResolution = dimension; 
+        const scale = size / sideResolution;
+
+        // Heights were generated "raw" as a range 0-1
+        const baseHeight = 10;
+        
+        heights.forEach((x, i) => {
+            // adjust overall height scale of Terrain
+            if (heightScale != 1) {
+                heights[i] = x * heightScale * baseHeight * scale;
+            }
+        })
+
+
+
+        if (resolution2 != 0) {
+            heights = TerrainGenerator.SecondLayerWithExponentialHeights({
+                heights:heights,
+                exp:exp,
+                dim:dimension,
+                resolution2:resolution2,
+                heightScale2:heightScale2
+            });
+       }
+
+       // One type of "global" mod heights
+        heights = TerrainGenerator.ModHeights({heights:heights,interval:heightTruncateInterval})
+
+        // Another type of "local /object based" mod heights
+
+        let postModifyFns = [];
+        modifierItems = this.level.templateInstances.filter(x=>{return x instanceof TerrainModifierObject});
+        let modifiers = modifierItems.map(x => x.data );
+        if (modifiers.length > 0){
+            modifiers.forEach(modifier=>{
+                heights = TerrainGenerator.ApplyModifier({
+                    modifier:modifier, 
+                    heights:heights,
+                    size:size,
+                    centroid:centroid,
+                })
+                postModifyFns.push(modifier.callback)
+            })
+
+        }
+
+ 
+    ////////
 
         const newTerrain = { entity : null };
         this.Terrains.push(newTerrain);
         const terrainPosition = centroid;
-        let [terrainEntity, positions]  = this.Mesh3({position:terrainPosition,heights:heights,size:size});
+        let [terrainEntity, positions]  = this.Mesh3({centroid:terrainPosition,heights:heights,size:size});
         terrainEntity.name = name;
 
         terrainEntity.tags.add(Constants.Tags.Terrain);
@@ -75,6 +101,7 @@ TerrainGenerator = {
 //        }
 
 
+        postModifyFns.forEach(x=>{x();})
         return terrainEntity;
     },
     SecondLayerWithExponentialHeights(options){
@@ -232,44 +259,91 @@ TerrainGenerator = {
                 heights[i] = x.toInterval(interval); // affects height only, not x and z, 
             }
         })
-        heights.forEach((x, i) => {
-            // adjust overall height scale of Terrain
-            if (heightScale != 1) {
-                heights[i] = x * heightScale;
-            }
-        })
-        return heights;
+       return heights;
     },
 
     ApplyModifier(args){
-        const {heights,modifier,centroid,scale}=args;
+        console.log(args);
+        const {heights,modifier,centroid,size}=args;
         let dim = Math.sqrt(heights);
-        for(let i=0;i<dim;i++){
-            // need to "inflate" the flat heights array to a 2d array again
-            // or just iterate i and j over it so that i,j is sensibile
-            for(let j=0;j<dim;j++){
-                let worldPos = modifier.position;
-                // which height correponds?
+        const radius = (modifier.width + modifier.depth) / 2;
+        console.log("R:"+radius);
+        const  sideResolution = Math.sqrt(heights.length);
+        let heightsToMod2d = TerrainGenerator.GlobalPosToTerrainPos({
+            centroid:centroid,
+            globalPos:modifier.position,
+            radius:radius,
+            sideResolution:sideResolution,
+            size:size,
+        });
+        let minHeight = Infinity;
+        heightsToMod2d.forEach(arr=>{
+            const x = arr[0];
+            const z = arr[1];
+            const index = x*sideResolution+z;
+            let h = heights[index];
+            if (h < minHeight) {
+                minHeight = h;
+                console.log("mh:"+h);
+            }
+        });
 
-                heights[i*dim + j] = modified;
+        const sankHeight = minHeight - modifier.depth;
+        heightsToMod2d.forEach(arr=>{
+            const x = arr[0];
+            const z = arr[1];
+            const index = x*sideResolution+z;
+            // console.log("hi:"+heights[index]+", mh:"+minHeight+", "+modifier.depth);
+            heights[index]=sankHeight;
+
+
+        });
+        return heights;      
+        
+        
+    },
+    GlobalPosToTerrainPos(args){
+        const {
+            centroid,
+            globalPos,
+            radius,
+            sideResolution,
+            size,
+            isSquare=false,
+        }=args;
+        console.log(args);
+        const scale = size  / sideResolution;
+        let positions = [];
+        for (let x = 0; x < sideResolution; x++) {
+            for (let z = 0; z < sideResolution; z++) {
+
+                const localX = scale * (x - sideResolution * 0.5);
+                const localZ = scale * (z - sideResolution * 0.5);
+                const globalX = centroid.x + localX;
+                const globalZ = centroid.z + localZ;
+                let p1 = new pc.Vec2(globalX,globalZ);
+                Utils3.debugSphere({position:p1,timeout:10000})
+                let p2 = new pc.Vec2(globalPos.x,globalPos.z);
+                let d = p1.distance(p2);
+                if (d < radius){
+                    positions.push([x,z])
+                    
+                } else {
+                    // console.log("d:"+d+", p1:"+p1.trunc()+", p2;"+p2.trunc());
+                }
+
             }
         }
-        heights.forEach((x, i) => {
-             
-            if (interval > 0) {
-                heights[i] = x.toInterval(interval); // affects height only, not x and z, 
-            }
-        })
-        
-    }
+        // console.log(positions);
+        return positions;     
+    },
     Mesh3(options){
-        const { position = pc.Vec3.ZERO, size=500, heights = []} = options;
+        const { centroid = pc.Vec3.ZERO, size=500, heights = []} = options;
         let app = pc.app;
-        const  resolution = Math.sqrt(options.heights.length);
-        const scale = size / resolution;
-        const height = 10;
-        const positions = new Float32Array(3 * resolution * resolution);
-        const uvs = new Float32Array(2 * resolution * resolution);
+        const  sideResolution = Math.sqrt(options.heights.length);
+        const scale = size / sideResolution;
+        const positions = new Float32Array(3 * sideResolution * sideResolution);
+        const uvs = new Float32Array(2 * sideResolution * sideResolution);
 
         var vertexFormat = new pc.VertexFormat(pc.app.graphicsDevice, [
             { semantic: pc.SEMANTIC_POSITION, components: 3, type: pc.TYPE_FLOAT32 },
@@ -279,22 +353,23 @@ TerrainGenerator = {
         // Create a vertex buffer
         var vertexBuffer = new pc.VertexBuffer(pc.app.graphicsDevice, vertexFormat, 16*16);
         let index = 0;
-        for (let x = 0; x < resolution; x++) {
-            for (let z = 0; z < resolution; z++) {
+        for (let x = 0; x < sideResolution; x++) {
+            for (let z = 0; z < sideResolution; z++) {
                 
                 // x
-                positions[3 * index] = scale * (x - resolution * 0.5);
+                positions[3 * index] = scale * (x - sideResolution * 0.5);
                
                 // y
                 // the height comes from the value of each vert in the array of verts
-                positions[3 * index + 1] = height * scale * options.heights[index]; 
+                // positions[3 * index + 1] = height * scale * options.heights[index]; 
+                positions[3 * index + 1] = options.heights[index]; 
 
                 // z
-                positions[3 * index + 2] = scale * (z - resolution * 0.5);
+                positions[3 * index + 2] = scale * (z - sideResolution * 0.5);
 
                 // UVs for texture 
-                uvs[2 * index] = x / resolution;
-                uvs[2 * index + 1] = 1 - z / resolution;
+                uvs[2 * index] = x / sideResolution;
+                uvs[2 * index + 1] = 1 - z / sideResolution;
                 index++;
             }
         }
@@ -302,15 +377,15 @@ TerrainGenerator = {
         // Interleave position and color data
         // Generate array of indices to form triangle list - two triangles per grid square
         const indexArray = [];
-        for (let x = 0; x < resolution - 1; x++) {
-            for (let y = 0; y < resolution - 1; y++) {
+        for (let x = 0; x < sideResolution - 1; x++) {
+            for (let y = 0; y < sideResolution - 1; y++) {
                 indexArray.push(
-                    x * resolution + y + 1,
-                    (x + 1) * resolution + y,
-                    x * resolution + y,
-                    (x + 1) * resolution + y,
-                    x * resolution + y + 1,
-                    (x + 1) * resolution + y + 1
+                    x * sideResolution + y + 1,
+                    (x + 1) * sideResolution + y,
+                    x * sideResolution + y,
+                    (x + 1) * sideResolution + y,
+                    x * sideResolution + y + 1,
+                    (x + 1) * sideResolution + y + 1
                 );
             }
         }
@@ -376,8 +451,7 @@ TerrainGenerator = {
         // entity.collision.on('collisionstart',function(result){console.log("Ter col w:"+result.other.name);});
 
         app.root.addChild(entity);
-        entity.moveTo(position);
-        curvyFloor = entity;
+        entity.moveTo(centroid);
         return [entity, positions];
     },
 

@@ -41,7 +41,6 @@ export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
     toggle(mode) {
         // Awkward because sometimes this is toggled internally (drag mouse between map and not-map)
         // Whereas other times it's called externally (as from realmEditor.mode.toggle())
-        console.log("dragger toglge");    
         if (!mode) return;
         if (!this.modes.has(mode)) return;
         if (this.mode) this.mode.onExit();

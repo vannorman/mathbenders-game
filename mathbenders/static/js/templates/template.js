@@ -75,6 +75,7 @@ export default class Template {
         this.entity.on('destroy',this.entityWasDestroyed,this);
     }
 
+    onInflated(){}
 
     entityWasDestroyed(){
         // console.log("%c destroyed "+this.name+":"+this.uuid.substr(0,5),"color:#f88")

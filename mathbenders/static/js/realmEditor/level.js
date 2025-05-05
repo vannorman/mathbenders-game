@@ -12,7 +12,7 @@ export default class Level {
         this.realmEditor=realmEditor;
         this.templateInstances = [];
         if (!skipTerrainGen){
-            const newTerrain = new Terrain({realmEditor:this.realmEditor});
+            const newTerrain = new Terrain({realmEditor:this.realmEditor,level:this});
             newTerrain.generate();
             this.terrain = newTerrain;
         }

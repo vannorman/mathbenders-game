@@ -364,15 +364,27 @@ export class CastleGate extends Template {
 }
 
 
+export class TerrainModifierObject extends Template {
 
-export class CastleGateDungeon extends Template {
+    width=10;
+    length=10;
+    depth=10;
+
+}
+
+
+
+
+export class CastleGateDungeon extends TerrainModifierObject {
     static _icon = assets.textures.ui.icons.castleDoorDungeon;
 
-    terrainModifierObject;
+    level;
+    modifier;
     constructor(args={}){
         super(args);
-        const {properties}=args;
+        const {properties,level}=args;
         this.setProperties2(properties);
+        this.level=level;
 
         
         const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];
@@ -418,55 +430,82 @@ export class CastleGateDungeon extends Template {
         this.cover=cover;
         this.updateColliderMap();
 
-        const {level}=args;
         let tm = new TerrainModifierObject({level:level});
         this.entity.addChild(tm.entity);
         tm.entity.setLocalPosition(pc.Vec3.ZERO);
-        this.terrainModifierObject = tm;
+        this.modifier = tm;
 
     }
     entityWasDestroyed(){
-        this.terrainModifierObject.RemoveFromTerrain();
+        // this.RemoveFromTerrain();
         super.entityWasDestroyed();
     }
 
     onEndDragByEditor(args){
         super.onEndDragByEditor();
-        this.terrainModifierObject.AddToTerrain();
+        realmEditor.currentLevel.terrain.Regenerate();
+        // this.AddToTerrain();
     }
 
-}
+    onInflated(){
+        console.log("inflated");
+        this.level.terrain.RegenerateWithDelay();
+    }
 
-export class TerrainModifierObject extends Template {
-
-    width=60;
-    length=80;
-    depth=40;
-    level;
-    constructor(args){
-        super(args);
-        const {level}=args;
-        this.level = level;
+   dropToTerrain(){
+    console.log("Drop.");
+        const from = this.entity.getPosition().clone();
+        const to = from.clone().add(new pc.Vec3(0,-50,0));
+        const results = pc.app.systems.rigidbody.raycastAll(from, to);
+        results.forEach(result=>{
+            if (result.entity.tags.list().includes(Constants.Tags.Terrain)){
+                this.entity.moveTo(result.point); 
+            }
+        });
    }
 
-    AddToTerrain(){
-        console.log('this ud'+this.uuid);
-        this.level.terrain.addTerrainModifier({
+    get data(){
+        return {
             width:this.width,
             length:this.length,
             depth:this.depth,
             position:this.entity.getPosition(),
             templateUuid:this.uuid, // prevent double additions.
-        });
- 
-   }
-
-   RemoveFromTerrain(){
-        console.log('removedud'+this.uuid);
-        this.level.terrain.removeTerrainModifier({templateUuid:this.uuid});
-        
-   }
+            callback:this.dropToTerrain.bind(this),
+        }
+    }
 }
+/*
+addTerrainModifier(data){
+        let tm = new TerrainModifier({
+            width:data.width,
+            length:data.length,
+            depth:data.depth,
+            position:data.position,
+            templateUuid:data.templateUuid,
+        });
+        if (data.callback) this.postGenFns.push(data.callback);
+        if (this.data.modifiers) this.data.modifiers.push(tm);
+        else this.data.modifiers = [tm];
+        this.Regenerate(); // what if realmEditor isn't defined yet. PRobably wait for realmeditor to finish loading before triyng to load levels.
+    }
+
+    removeTerrainModifier(data){
+        const{templateUuid}=data;
+        if (this.data.modifiers){
+            if (this.data.modifiers.filter(x=>{return x.templateUuid == templateUuid}).length != 0){
+                console.log("REMOVED:"+templateUuid);
+                this.data.modifiers = this.data.modifiers.filter(x=>{return x.templateUuid != templateUuid});
+            } else {
+                console.log("CANT REM:"+templateUuid);
+            }
+        } else {
+            console.log("Uh, no modifiers?");
+        }
+    }
+*/
+
+
 
 
 

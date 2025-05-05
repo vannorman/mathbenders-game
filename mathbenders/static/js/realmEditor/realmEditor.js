@@ -305,10 +305,15 @@ class RealmEditor {
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
             levels.push(thisLevel);
-            
+           
+            // Important! Terrain is always generated BEFORE levelobjects.
+            // Some levelobjects affect terrain.
+            // To avoid circular dependency, we instantiate terrain first, then levelobjects, 
+            // and on the constructor of the levelobject we differentiate between "being created once during inflation"
+            // vs "being created by drag and drop in editor");
             let terrainData = levelJson.terrain;
             terrainData.centroid = Terrain.getCentroid();
-            thisLevel.terrain = new Terrain({data:terrainData,realmEditor:this});
+            thisLevel.terrain = new Terrain({data:terrainData,realmEditor:this,level:thisLevel});
             const $this = this;
             thisLevel.terrain.generate("foreach json for "+realmJson.name);
  
@@ -325,6 +330,7 @@ class RealmEditor {
                         position:x.position.add(thisLevel.terrain.centroid),
                         rotation:x.rotation,
                     });
+                    obj.onInflated(); // for example, on terrain modifiers, this causes the terrain to rebuild
                     if (obj == null){
                         console.log("No temp:");
                         console.log(x);
@@ -375,7 +381,7 @@ class RealmEditor {
         this.#RealmData.Levels.push(level);
         const newTerrainPos = Terrain.getCentroid();
         
-        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this});
+        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this,level:level});
         level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
         
         const zoomFactor = 100;
@@ -425,7 +431,6 @@ class RealmEditor {
     }
 
     InstantiateTemplate(args){
-        console.log("Instantiate:"+args.ItemTemplate.name);
         const {
             level=this.currentLevel, 
             ItemTemplate, 
