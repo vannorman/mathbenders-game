@@ -413,7 +413,10 @@ $(document).on("keydown", function (e) {
         pc.app.root.addChild(a);
         cb=b;
     }
-    // Organic wall garden.
+     if (ee == 'Y'){ if (the_rotated) { rx+=45; the_rotated.setLocalEulerAngles(rx,ry,rz);}} 
+     if (ee == 'U'){ if (the_rotated) { ry+=45; the_rotated.setLocalEulerAngles(rx,ry,rz);}} 
+     if (ee == 'I'){ if (the_rotated) { rz+=45; the_rotated.setLocalEulerAngles(rx,ry,rz);}} 
+
 
 });
 
@@ -453,4 +456,10 @@ var moveMode = false;
 
 const r = {
     get o(){ return realmEditor.currentLevel.templateInstances[0]; }
+}
+
+let rx=ry=rz=0;
+let the_rotated=null;
+function Rotate(e){
+    the_rotated=e;
 }

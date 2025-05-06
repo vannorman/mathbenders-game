@@ -137,7 +137,14 @@ class UISlider {
 
 const UI = {
     createElementGrid(options={}){
-        const {rowDim=3,colDim=3,spacing=[10,10],defaultSize=[50,50]}=options;
+        const {
+            rowDim=3,
+            colDim=3,
+            spacing=[10,10],
+            defaultSize=[50,50],
+            anchor=[0.5, 0.5, 0.5, 0.5],
+            pivot=[0.5,0.5],
+            }=options;
     // Validate input
         if (rowDim <= 0 || colDim <= 0) {
             throw new Error("rowDim and colDim must be greater than 0");
@@ -147,8 +154,8 @@ const UI = {
         const layoutGroup = new pc.Entity("LayoutGroup");
         layoutGroup.addComponent("element", {
             type: "image",
-            anchor: [0.5, 0.5, 0.5, 0.5],
-            pivot: [0.5, 0.5],
+            anchor: anchor,
+            pivot: pivot, 
             width: (colDim * defaultSize[0]) + ((colDim-1) * spacing[0]), 
             height:(rowDim * defaultSize[1]) + ((rowDim-1) * spacing[1]),
             // color:new pc.Color(0,0,0,0),

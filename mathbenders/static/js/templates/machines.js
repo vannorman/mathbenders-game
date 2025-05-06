@@ -317,36 +317,105 @@ export class PlayerPortal extends Template {
     static _icon = assets.textures.ui.builder.portal;
     static properties = [
         new P.PortalConnector({}),
+        new P.GenericData({
+            onInitFn : (template,value) => { template.number=value},
+            getCurValFn : (template) => {return template.number} 
+        }),
     ]
-    number = 1;
+    
+    number =0;
 
-    setup(args={}){
+    static portals = new Map();
+    static RegisterNewNumber(args){
+        const{template} = args;
+        if (PlayerPortal.portals.get(template.number) == undefined){
+            PlayerPortal.portals.set(template.number,template);
+        } else {
+            // Allocate the lowest positive integer value not included in previously allocated numbers
+           let i=0;
+            while (++i < 256) {
+                if (PlayerPortal.portals.get(i) == undefined){
+                    PlayerPortal.portals.set(i,template);
+                    template.number=i;
+                    break;
+                }
+            }
+
+        }
+            
+
+        template.UpdateNumberText();
+    }
+
+    static getPortalByNumber(number){
+        realmEditor.RealmData.Levels.forEach(level =>{
+            level.templateInstances.forEach(x=>{
+                if (x.constructor.name == PlayerPortal && x.number == number){ return x;}
+            });
+        });
+    }
+
+    ConnectTo(number){
+        console.log("Con "+this.number+" to "+number);
+        this.script.ConnectTo(PlayerPortal.portals.get(number).script);
+
+    }
+    
+    constructor(args={}){
+        super(args);
+        this.setupTextEntity();
+        const{properties}=args;
+        this.setProperties2(properties);
+
+        PlayerPortal.RegisterNewNumber({template:this});
+
+        // Was our number not initialized (created new entity, not from inflation/saveload?)
+        if (this.number == -1){
+        }
+
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
-        let visibleNumber1 = new NumberSphereGfxOnly({   
-            position:this.entity.getPosition(),
-            properties:{
-                FractionModifier:new Fraction(1,1)
-            }});
- 
-        this.entity.addChild(visibleNumber1.entity);
-        visibleNumber1.entity.setLocalPosition(4,9,0);
-        visibleNumber1.entity.setLocalEulerAngles(-135,0,0);
-        visibleNumber1.entity.setLocalScale(5,5,5);
- 
-        let visibleNumber2 = new NumberSphereGfxOnly({   
-            position:this.entity.getPosition(),
-            properties:{
-                FractionModifier:new Fraction(1,1)
-            }});
- 
-        this.entity.addChild(visibleNumber2.entity);
-        visibleNumber2.entity.setLocalPosition(-4,9,0);
-        visibleNumber2.entity.setLocalEulerAngles(135,0,0);
-        visibleNumber2.entity.setLocalScale(5,5,5);
+        
+        this.updateColliderMap();
+    }
 
-        this.n1 = visibleNumber1;
-        this.n2 = visibleNumber2;
+    get script(){ return this.entity.script.portal; }
+
+    setupTextEntity(){
+        const textBackboard = new pc.Entity();
+        textBackboard.addComponent('render',{type:'box'});
+        this.entity.addChild(textBackboard);
+        textBackboard.setLocalPosition(0,8,0);
+        textBackboard.setLocalScale(2,0.1,2);
+        const textEntity = new pc.Entity();
+        textEntity.addComponent('element',{
+            type:'text',
+            layers: [pc.LAYERID_WORLD],
+            text:this.number,
+            anchor:[0.5,0.5,0.5,0.5],
+            margin:[0,0,0,0],
+            pivot:[0.5,0.5],
+            width:10,
+            height:10,
+            fontAsset:assets.fonts.montserrat_bold,
+            fontSize:1,
+            color:pc.Color.BLACK
+        });
+        textBackboard.addChild(textEntity);
+        textEntity.setLocalPosition(0,1.5,0);
+        textEntity.setLocalEulerAngles(270,0,0);
+        this.textEntity = textEntity;
+ 
+    }
+
+     UpdateNumberText(){
+        this.textEntity.element.text=this.number;
+        // console.log("Setting number text to:"+this.number);
+     }
+
+     static ClearStatics(){
+        
+        PlayerPortal.portals = new Map();
      }
 }
 

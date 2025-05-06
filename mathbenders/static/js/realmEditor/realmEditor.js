@@ -234,8 +234,12 @@ class RealmEditor {
                 x.entity.destroy();
             //} 
         }); // clean up extraneous numbers
+
+        // Clear statics
+        // @Eytan interesting architecture awkward placement; each "LoadJson" is actually "GameStart" and should flush/refresh any memories
+        PlayerPortal.portals = new Map();
         this.LoadJson(realmData);
- 
+
     }
 
     disable() {
@@ -300,7 +304,7 @@ class RealmEditor {
     
     LoadJson(realmJson){
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
-        // try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
+        try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
@@ -347,6 +351,7 @@ class RealmEditor {
 
         const zoomFactor = 100;
         const newTerrainPos = this.currentLevel.terrain.entity.getPosition();
+        console.log("C tr:"+newTerrainPos+", "+zoomFactor);
         this.camera.translate({source:"terrain",targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
         this.gui.realmNameText.text=this.RealmData.name;
     }

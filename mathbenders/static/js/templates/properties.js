@@ -107,6 +107,7 @@ export class Property {
 
     static panel(args={}){
         const{width=120,height=120,opacity=1}=args;
+        console.log("H:"+height);
         const panel = new pc.Entity("panel");
         panel.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
@@ -178,7 +179,7 @@ export class Property {
             height:height,
            color:pc.Color.BLACK,
         });
-        parent?.addChild(text);
+        parent.addChild(text);
         return text; 
     }
 }
@@ -759,29 +760,40 @@ export class PortalConnector extends Property {
     static icon = assets.textures.ui.builder.portal;
     
     buildUi(){
+        let portals = PlayerPortal.portals.values().toArray();
+        portals = portals.filter(x=>{return x.uuid != this.template.uuid});
 
         const $this = this; 
-        const panel = Property.panel();
+        const portalIconHeight=20;
+        console.log("l:"+portals.length);
+        const panel = Property.panel({height:70 + portals.length * portalIconHeight});
+
       
-        let portals = [];
-        realmEditor.RealmData.Levels.forEach(level=>{
-            level.templateInstances.forEach(template=>{
-                if (template.constructor.name == "PlayerPortal"){
-                    if (template.uuid != this.template.uuid){
-                        portals.push(template);
-                    }
-                }
-            });
-        });
+       
         if (portals.length > 0){ 
+            const textEntity = Property.text({parent:panel,anchor:[0.3,0.8,0.3,0.8]});
+            textEntity.element.text = "Portal "+this.template.number;
+            
+            const label = Property.text({parent:panel,anchor:[0,0.6,0,0.6],pivot:[0,0.5]});
+            label.element.text = "Connect to:"
+           
+
             function text(el){
-                return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
-            }
+                return Property.text({parent:el,pivot:[0.5,0.5]}).element;
+            } 
+
+
+            const bottomTextHeight = 30;
+            const bottomMargin = -1/portals.length;
+            const bottomText = Property.text({parent:panel,anchor:[0.5,0,0.5,0],pivot:[0.5,bottomMargin]});
+
             const elementGrid = UI.createElementGrid({
-                rowDim:portals.length, 
-                colDim:1, 
-                spacing:[15,40],
-                defaultSize:[20,20]
+                rowDim:Math.ceil(portals.length/3), 
+                anchor:[0.5,0,0.5,0],
+                pivot:[0.5,bottomMargin*2],
+                colDim:3, 
+                spacing:[10,10],
+                defaultSize:[30,30]
             });
 
             for(let i=0;i<portals.length;i++){
@@ -789,12 +801,15 @@ export class PortalConnector extends Property {
                 UI.HoverColor({element:el.element});
                 el.element.useInput = true;
                 text(el).text = portals[i].number;
-                el.element.on('mousedown',function(){ console.log("Click portal;"+portals[i].number)});
+                el.element.on('mousedown',function(){ 
+                    $this.template.ConnectTo(portals[i].number); 
+                    bottomText.text = "Connected! ("+portals[i].number+")";
+                });
             }
             panel.addChild(elementGrid.group);
         } else {
             const text = Property.text({parent:panel});
-            text.element.text ="No portals to connect";
+            text.element.text ="No portals \n to connect";
         }
  
         this.ui=panel;
