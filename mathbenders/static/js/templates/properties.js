@@ -106,7 +106,7 @@ export class Property {
 
 
     static panel(args={}){
-        const{width=120,height=120,opacity=0.7}=args;
+        const{width=120,height=120,opacity=1}=args;
         const panel = new pc.Entity("panel");
         panel.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
@@ -164,14 +164,18 @@ export class Property {
             anchor = [0.5,0.5,0.5,0.5],
             pivot = [0.5,0.5],
             parent = null,
+            height = 60,
+            width = 80,
+            fontSize = 18,
         }= args;
         text.addComponent('element',{
             type: 'text',
             anchor:anchor,
             pivot:pivot,
             fontAsset: assets.fonts.montserrat, // Replace with your font asset id
-            fontSize : 18,
-            width:80,
+            fontSize : fontSize,
+            width:width,
+            height:height,
            color:pc.Color.BLACK,
         });
         parent?.addChild(text);
@@ -298,7 +302,8 @@ export class Delete extends Property {
             width:30,height:30,textureAsset:assets.textures.ui.trash,
             anchor:[0.66,0.5,0.66,0.5],
             mouseDown:function(){
-                Fx.Poof({position:$this.template.entity.getPosition(),positionalAudio:false,scale:50,})
+                Fx.Poof({position:$this.template.entity.getPosition(),positionalAudio:false,scale:5,})
+                $this.template.onDeleteByEditor();
                 $this.template.entity.destroy();
                 realmEditor.toggle('normal');
             },//duplicateTemplate();}, //.CopyEditedObject();},
@@ -546,27 +551,75 @@ export class FractionModifier extends Property {
         const $this = this; 
         const panel = Property.panel();
        
-        const fracText = Property.text({parent:panel});
-       //panel.addChild(fracText);
+        const fracText = Property.text({
+            parent:panel,
+            height:200,
+            fontSize:25,
+            });
 
-        function setFracText(frac){
-            fracText.element.text = frac.numerator + "/" + frac.denominator;
-        }
-        setFracText(this.getCurValFn($this.template));
- 
-        const upBtn = Property.upBtn();
-        upBtn.element.on('mousedown',function(){
-            // Where is the fraction stored here ? Do we double store it (once for the UI) or do we dig deep for the frac every time?
-            // Let's dig deep why not
+        const lineText =  Property.text({
+            parent:panel,
+            height:10,
+            pivot:[0.5,0.1],
+            fontSize:25,
+
+        });
+
+        lineText.element.text = "_";
+
+        function modFrac(numeratorAmt=0,denominatorAmt=0){
             let curFrac = $this.getCurValFn($this.template);
-            let newFrac = new Fraction(curFrac.numerator+1,curFrac.denominator);
+            let newNumerator = curFrac.numerator + numeratorAmt;
+            let newDenominator = curFrac.denominator + denominatorAmt;
+            if (newNumerator == 0) newNumerator += numeratorAmt;
+            if (newDenominator == 0) newDenominator += denominatorAmt;
+            let newFrac = new Fraction( newNumerator,newDenominator);
             if ($this.allowChange(newFrac)){
                 $this.onChangeFn($this.template,newFrac);
                 setFracText(newFrac);
             }
+        }
+        
+        function setFracText(frac){
+            fracText.element.text = frac.numerator + "\n" + frac.denominator;
+        }
+
+
+        function text(el){
+            return Property.text({parent:el,pivot:[0.5,0.5]}).element;
+        }
+ 
+
+        const rowDim = 2;
+        const colDim = 2;
+        const elementGrid = UI.createElementGrid({
+            rowDim:rowDim, 
+            colDim:colDim, 
+            spacing:[15,40],
+            defaultSize:[20,20]
         });
 
-        panel.addChild(upBtn);
+        for(let i=0;i<colDim;i++){
+            for(let j=0;j<rowDim;j++){
+                const index = (i * colDim) + j;
+                const el = elementGrid.elements[index];
+                UI.HoverColor({element:el.element});
+                el.element.useInput = true;
+                switch(index){
+                case 0: text(el).text = "-"; el.element.on('mousedown',function(){modFrac(-1,0)}); break;
+                case 1: text(el).text = "+"; el.element.on('mousedown',function(){modFrac(1,0)}); break;
+                case 2: text(el).text = "-"; el.element.on('mousedown',function(){modFrac(0,-1)}); break;
+                case 3: text(el).text = "+"; el.element.on('mousedown',function(){modFrac(0,1)}); break;
+
+
+                }
+            }
+        }
+
+        panel.addChild(elementGrid.group);
+        
+
+        setFracText(this.getCurValFn($this.template));
  
         this.ui=panel;
     }
@@ -700,4 +753,51 @@ export class GenericData extends Property {
     // Its existence is an artifact of how we define, iterate, and inflate templates by "properties"
     // This placeholder enables the saving and loading of arbitrary data inside any template.
     // For example, it is Simply a container for the meshdata which is saved/loaded by the template CaslteWallFormed
+}
+
+export class PortalConnector extends Property {
+    static icon = assets.textures.ui.builder.portal;
+    
+    buildUi(){
+
+        const $this = this; 
+        const panel = Property.panel();
+      
+        let portals = [];
+        realmEditor.RealmData.Levels.forEach(level=>{
+            level.templateInstances.forEach(template=>{
+                if (template.constructor.name == "PlayerPortal"){
+                    if (template.uuid != this.template.uuid){
+                        portals.push(template);
+                    }
+                }
+            });
+        });
+        if (portals.length > 0){ 
+            function text(el){
+                return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
+            }
+            const elementGrid = UI.createElementGrid({
+                rowDim:portals.length, 
+                colDim:1, 
+                spacing:[15,40],
+                defaultSize:[20,20]
+            });
+
+            for(let i=0;i<portals.length;i++){
+                const el = elementGrid.elements[i];
+                UI.HoverColor({element:el.element});
+                el.element.useInput = true;
+                text(el).text = portals[i].number;
+                el.element.on('mousedown',function(){ console.log("Click portal;"+portals[i].number)});
+            }
+            panel.addChild(elementGrid.group);
+        } else {
+            const text = Property.text({parent:panel});
+            text.element.text ="No portals to connect";
+        }
+ 
+        this.ui=panel;
+    }
+    
 }

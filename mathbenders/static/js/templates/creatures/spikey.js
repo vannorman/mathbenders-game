@@ -13,7 +13,6 @@ export class Spikey extends NumberSphereRaw {
     currentDirection=pc.Vec3.ZERO;
     static properties = [
          new P.FractionModifier({  
-            name : this.name, // if this changes, data will break // Should be Fraction1?
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             onInitFn : (template,value) => { template.fraction = value; },
             getCurValFn : (template) => { return template.getFraction(); }, 
@@ -96,19 +95,25 @@ export class Spikey extends NumberSphereRaw {
 
 
 export class SpikeyGroup extends Template {
-    fraction;
     static _icon = assets.textures.ui.icons.spikey;
-    range=5;
-    setup(args={}){}
+    range = 5;
+    fraction = new Fraction(-2,1);
     static properties = [
          new P.Quantity({  
-            name : "SpikeyGroupQuantity",
             onChangeFn : (template,value) => {  template.quantity = value; template.Rebuild(); },
             onInitFn : (template,value) => { template.quantity = value; },
             getCurValFn : (template) => { return template.quantity },
             min:1,
             max:7,
          }),
+         new P.FractionModifier({  
+            onChangeFn : (template,value) => { template.setFraction(value); }, 
+            onInitFn : (template,value) => { template.fraction = value; },
+            getCurValFn : (template) => { return template.fraction; }, 
+            min:new Fraction(-10,1),
+            max:new Fraction(10,1)
+         }),
+ 
     ];
 
     Rebuild(){
@@ -118,6 +123,13 @@ export class SpikeyGroup extends Template {
 
     DestroyGroup(){
         this.spikeys.forEach(x=>{x.entity.destroy();})
+    }
+
+    setFraction(value){
+        this.fraction=value;
+        this.spikeys.forEach(x=>{
+            x.setFraction(value);
+        });
     }
 
     gatherLooseRigidbodies(){
@@ -149,7 +161,7 @@ export class SpikeyGroup extends Template {
             const args = {
                 position : p,
                 properties : {
-                    Spikey : this.fraction
+                    FractionModifier : this.fraction
                 }
             } 
             const s = new Spikey(args);
@@ -193,10 +205,12 @@ export class SpikeyGroup extends Template {
         // When reloading a level from saved data, it inflates each one with properties and must let those values override defaults.
         this.quantity = this.quantity ?? 2; 
 
-        this.fraction = this.fraction ?? new Fraction(-2,1);
         this.CreateGroup();
-        let frac = this.fraction;
-        let visibleSpikey = new NumberSphereGfxOnly({position:this.entity.getPosition(),properties:{NumberSphereGfxOnly:frac}});
+        let visibleSpikey = new NumberSphereGfxOnly({   
+            position:this.entity.getPosition(),
+            properties:{
+                FractionModifier:this.fraction
+            }});
         this.entity.addChild(visibleSpikey.entity);
         let spikeyClothes = assets.models.creatures.spikey.resource.instantiateRenderEntity();
         visibleSpikey.entity.addChild(spikeyClothes);

@@ -7,7 +7,6 @@ MachineNumberWall.attributes.add('size', { type:'integer', array:true, default:[
 
 MachineNumberWall.prototype.initialize = function() {
     this.existingWallObjects=[];
-    console.log("frac1:"+this.fraction1);
 };
 
 
@@ -38,9 +37,10 @@ MachineNumberWall.prototype.rebuildWall = function(){
     function createCube(pos,frac){
         const args = {
             rigidbodyType:pc.RIGIDBODY_TYPE_KINEMATIC,
-            properties: {
+            properties: // awkward: this is actually defining property value map, or "values"; not "properties"
+            {
                 position:pos,
-                "NumberCubeFraction": frac,
+                FractionModifier : frac,
             }
         }
         // console.log(args);

@@ -3,6 +3,7 @@ NumberInfo.attributes.add('moveSpeed', { type: 'number', default: 4, title: 'Mov
 NumberInfo.attributes.add('destroyFxFn', { type:'object'});
 NumberInfo.attributes.add('ignoreCollision', { type:'boolean', default: false});
 NumberInfo.attributes.add('fraction', { type: 'object' });
+NumberInfo.attributes.add('type', { type: 'number', default: 1});
 
 NumberInfo.Type = {
     Bullet : 0,
@@ -11,28 +12,9 @@ NumberInfo.Type = {
     Creature : 3
 };
 
-NumberInfo.attributes.add('numberType', { type: 'number', default: NumberInfo.Type.Sphere });
 
-
-NumberInfo.Shape = {
-    Sphere : "Sphere",
-    Cube : "Cube",
-    None : "None",
-};
 
 NumberInfo.prototype.initialize = function() {
-    Object.defineProperty(this,'numberType', {get: function(){
-        if (this.entity.render === undefined){
-            return NumberInfo.Shape.None;
-        } else {
-            switch(this.entity.render.type){
-                case 'box':return NumberInfo.Shape.Cube;
-                case 'sphere':return NumberInfo.Shape.Sphere;
-                default: return "Uh oh";
-                
-            }
-        }
-    }})
     
     this.destroyFxFn = function(x) {Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter})},
 
@@ -42,8 +24,9 @@ NumberInfo.prototype.initialize = function() {
     }
    // this.fraction = new Fraction(7,1); // dislike!!!
     this.cubeSize = this.entity.getLocalScale().x;
-    if (this.numberType == NumberInfo.Shape.Cube){
-        let d = this.cubeSize / 2 + 0.03;
+    const zDelta = .05;
+    if (this.type == NumberInfo.Type.Cube){
+        let d = this.cubeSize / 2 + zDelta;
         this.int1 = this.createTextEntity('Text1', new pc.Vec3(0, 0, d));
         this.int2 = this.createTextEntity('Text2', new pc.Vec3(d, 0, 0));
         this.int3 = this.createTextEntity('Text3', new pc.Vec3(0, d, 0));
@@ -51,7 +34,7 @@ NumberInfo.prototype.initialize = function() {
         this.int5 = this.createTextEntity('Text5', new pc.Vec3(-d, 0, 0));
         this.int6 = this.createTextEntity('Text6', new pc.Vec3(0, -d, 0));    
         this.ints = [this.int1,this.int2,this.int3,this.int4,this.int5,this.int6,];
-    } else if (this.numberType == NumberInfo.Shape.Sphere) {
+    } else if (this.type== NumberInfo.Type.Sphere) {
         this.pivot = new pc.Entity("numPivot");
         this.entity.addChild(this.pivot);
         
@@ -93,7 +76,7 @@ NumberInfo.prototype.createTextEntity = function(name, pos) {
     entity.setLocalPosition(pos);
     let scale = 0.05;
     entity.setLocalScale(new pc.Vec3(1,1,1).mulScalar(scale));
-    
+   // console.log(this.fraction); 
     // Create the main integer text
     entity.addComponent('element', {
         type: 'text',
@@ -217,7 +200,6 @@ NumberInfo.prototype.updateNumberText = function() {
         const textEntity = this.ints[i];
         
         if (isFraction) {
-            console.log('frac');
             // Update fraction elements
             if (this.fractionElements) {
                 this.fractionElements.numerator.element.text = this.fraction.numerator.toString();
@@ -241,11 +223,6 @@ NumberInfo.prototype.updateNumberText = function() {
 
 NumberInfo.prototype.onCollisionStart = function (result) {
     // if (this.ignoreCollision || result.other.script?.numberInfo?.ignoreCollision) return; //huh?
-    if (this.entity._templateInstance.constructor.name == "NumberCube" && result.other._templateInstance?.constructor.name == "NumberCube"){
-        // console.log("Cubes");
-        // cubes don't combine
-        return;
-    }
     this.OfflineCollision(result);
 }
 
@@ -294,7 +271,11 @@ NumberInfo.prototype.OfflineCollision = function (result){
         if (combinationResult != null) {
             this.entity.enabled = false;
             NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
+        } else {
+            console.log("Null.");
         }
+    } else {
+        // collid w floor
     }
 
 }
@@ -304,7 +285,6 @@ NumberInfo.ResolveCollisionOffline = function(data){
     data.objId1 = obj1.getGuid();
     data.objId2 = obj2.getGuid();
     var detectedIndex = -1;
-    //console.log("try w count "+NumberInfo.collisionPairs.length+"from : "+data.objId1.substr(0,5)+","+data.objId2.substr(0,5));
     NumberInfo.collisionPairs.forEach(pair => {
         if ((pair[0] == data.objId1 && pair[1] == data.objId2) || (pair[0] == data.objId2 && pair[1] == data.objId1)){
             //console.log("pair detected!");
@@ -315,7 +295,7 @@ NumberInfo.ResolveCollisionOffline = function(data){
     });
     if (detectedIndex == -1){
         NumberInfo.collisionPairs.push([data.objId1,data.objId2]);
-        //console.log("detected: "+detectedIndex);
+        // console.log("detected: "+detectedIndex);
      } else {
         // Successful number combination
 
@@ -345,10 +325,12 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
         rotation : JsonUtil.JsonToVec3(collisionResult.rotation),
         rigidbodyType : collisionResult.rigidbodyType,
         rigidbodyVelocity : collisionResult.resultVelocity,
-        properties : {},
+        properties : {
+            FractionModifier : collisionResult.resultFrac
+        },
     }
-    options.properties[TemplateToClone.name]=collisionResult.resultFrac;
-    if (options.properties[TemplateToClone.name].numerator == 0) {
+    if (collisionResult.resultFrac.numerator == 0) {
+        // Awkward place for a destroy fx don't you think?
         NumberInfo.destroyNumberFx({position:options.position,maxNumber:maxNumber});
     } else {
         // console.log("options:"+JSON.stringify(options));
@@ -483,23 +465,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
     const TemplateToClone = resultNi.entity._templateInstance.constructor;
     const rbType = resultNi.entity.rigidbody.type;
     const rot = resultNi.entity.getEulerAngles();
-    /*
-    // Somehow need to prevent collision between two kinematic numbers .. in general
-    const rbType = (wasKin1 || wasKin2) ? pc.RIGIDBODY_TYPE_KINEMATdIC : pc.RIGIDBODY_TYPE_DYNAMIC;
-    if (h1 != h2){
-        TemplateToClone = h1 > h2 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
-        console.log("Hierarchy says:"+TemplateToClone.name);
-    } else {
-        // Hierarchies were equal, so let kinematic decide hierarchy
-        // TODO / awkward : shouldn't there be a hierarchy like "Walls > Spikeys > regular numbers" instead of multiple hierarchies?
-        TemplateToClone = wasKin1 ? obj1._templateInstance.constructor : obj2._templateInstance.constructor;
-        console.log("Hierarchy equal:"+TemplateToClone.name);
-    }
-
-    // need combinationHierarchty here.
-    // console.log("TTC:"+TemplateToClone.name);
-    const rot = wasKin1 ? obj1.getEulerAngles() : wasKin2 ? obj2.getEulerAngles : pc.Vec3.ZERO;
-    */
 
     // Did both numbers have "destroy after seconds"? If so, this new one has it too
     const destroyAfterSecondsScript = (obj1.script.destroyAfterSeconds && obj2.script.destroyAfterSeconds) ? true : false;
@@ -529,7 +494,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         destroyAfterSecondsScript : destroyAfterSecondsScript,
         destroyAfterSeconds : destroyAfterSeconds,
     }
-    //console.log(resultData);
     return resultData;
 }
 

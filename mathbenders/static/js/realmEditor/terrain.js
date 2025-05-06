@@ -14,7 +14,7 @@ class TerrainModifier {
 export default class Terrain {
     static spacing = 2000;
     postGenFns=[];
-
+    static Generator = new TerrainGenerator();
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
     // The Terrain is created when the Level is created, and can be modified using BuilderPanel Terrain.
     // Terrains cannot be created or destroyed independently of Levels.
@@ -95,7 +95,7 @@ export default class Terrain {
     generate(source="none"){
         // console.log("%c load ter:"+source+" at:"+this.data.centroid.trunc(),'color:#5af;font-weight:bold;');
         // this.realmEditor.clearTrees();
-        this.entity = TerrainGenerator.Generate({data:this.data,level:this.level});
+        this.entity = Terrain.Generator.Generate({data:this.data,level:this.level});
         this.postGenerationFunction();
         const $this = this;
         // setTimeout(function(){$this.realmEditor.placeTrees({numTrees:$this.data.trees})},100);
@@ -114,12 +114,11 @@ export default class Terrain {
     }
 
     Regenerate(args){
-        // console.log("regen ter");
         this.entity.destroy();
         this.clearTimeouts();
         this.generate(this.data);
         const terrainPos = this.entity.getPosition();    
-        if (realmEditor) realmEditor.camera.translate({source:'regen',targetPivotPosition:terrainPos, targetZoomFactor:this.scale*2.2});
+        // if (realmEditor) realmEditor.camera.translate({source:'regen',targetPivotPosition:terrainPos, targetZoomFactor:this.scale*2.2});
     } 
 
     clearTimeouts(){

@@ -2,6 +2,7 @@ var AlwaysFaceCamera = pc.createScript('alwaysFaceCamera');
 AlwaysFaceCamera.attributes.add('reverse', {type:'bool',default:false});
 AlwaysFaceCamera.attributes.add('useRadius', {type:'bool',default:false});
 AlwaysFaceCamera.attributes.add('radius', {type:'number',default:12});
+AlwaysFaceCamera.attributes.add('cameraTarget', {type:'entity',default:null});
 
 
 AlwaysFaceCamera.prototype.initialize = function(){

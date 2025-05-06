@@ -174,7 +174,7 @@ class RealmEditor {
             break;
         case GameState.Playing:
             pc.app.off('update',this.update,this);
-            this.ConnectPortals();
+            // this.ConnectPortals();
             this.disable();
             break;
         }

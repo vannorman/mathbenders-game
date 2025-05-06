@@ -1,6 +1,6 @@
 class Fraction {
     asString(){
-        return this.denominator == 1 ? this.numerator : this.numerator + "/" + this.denominator;
+        return this.denominator == 1 ? this.numerator.toString() : this.numerator.toString() + "/" + this.denominator.toString();
     }
     constructor(numerator, denominator) {
         this.numerator = numerator;

@@ -151,6 +151,8 @@ const UI = {
             pivot: [0.5, 0.5],
             width: (colDim * defaultSize[0]) + ((colDim-1) * spacing[0]), 
             height:(rowDim * defaultSize[1]) + ((rowDim-1) * spacing[1]),
+            // color:new pc.Color(0,0,0,0),
+            opacity:0,
         });
 
         Game.l = layoutGroup;

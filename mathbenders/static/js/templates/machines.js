@@ -315,15 +315,39 @@ export class PlayerStart extends Template {
 export class PlayerPortal extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.portal;
+    static properties = [
+        new P.PortalConnector({}),
+    ]
+    number = 1;
 
     setup(args={}){
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
-
-        //const childOffset = new pc.Vec3(-2.75,-1,0.75)
-        //portal.setLocalPosition(childOffset);
+        let visibleNumber1 = new NumberSphereGfxOnly({   
+            position:this.entity.getPosition(),
+            properties:{
+                FractionModifier:new Fraction(1,1)
+            }});
  
-    }
+        this.entity.addChild(visibleNumber1.entity);
+        visibleNumber1.entity.setLocalPosition(4,9,0);
+        visibleNumber1.entity.setLocalEulerAngles(-135,0,0);
+        visibleNumber1.entity.setLocalScale(5,5,5);
+ 
+        let visibleNumber2 = new NumberSphereGfxOnly({   
+            position:this.entity.getPosition(),
+            properties:{
+                FractionModifier:new Fraction(1,1)
+            }});
+ 
+        this.entity.addChild(visibleNumber2.entity);
+        visibleNumber2.entity.setLocalPosition(-4,9,0);
+        visibleNumber2.entity.setLocalEulerAngles(135,0,0);
+        visibleNumber2.entity.setLocalScale(5,5,5);
+
+        this.n1 = visibleNumber1;
+        this.n2 = visibleNumber2;
+     }
 }
 
 

@@ -83,8 +83,6 @@ export class NumberWall extends Template {
 
 export class NumberCube extends Template {
 
-    // TODO: Exclude collision bewteen cubes and cubes
-    // Currently, when numberSphere collides with Numbercube, the sphere may remain; this is wrong; hiearchy should be cube remains.
     static _icon = assets.textures.ui.numberCubePos;
     static _icon_neg = assets.textures.ui.numberCubeNeg;
     static isStaticCollider = true;
@@ -99,7 +97,6 @@ export class NumberCube extends Template {
 
     static properties = [
          new P.FractionModifier({  
-            name : "NumberCubeFraction", // if this changes, data will break 
             onInitFn : (template,value) => { template.setFraction(value);},// = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
@@ -121,9 +118,9 @@ export class NumberCube extends Template {
         this.entity.script.create('numberInfo',{attributes:{
             destroyFxFn:(x)=>{Fx.Shatter(x);AudioManager.play({source:assets.sounds.shatter});},
             fraction:this.fraction,
+            type:NumberInfo.Type.Cube
             }});
 
-        this.script.type = NumberInfo.Type.Cube;
     }
 
     
@@ -144,7 +141,9 @@ export class NumberCube extends Template {
         // Should this create a templateInstance or not? It can't be a NORMAL templateInstance since its gfxonly
         // For now, it's nOT a templateInstance, it's just an orphaned Entity which gets cleaned up immediately after use
         // const {fraction=new Fraction(3,1)}=args;
-        const fraction = properties[this.name]; // awkward data model.
+        console.log(properties)
+        Game.p=properties;
+        const fraction = properties.FractionModifier; // awkward data model.
         const cube = new pc.Entity("helditem");
         cube.addComponent("render",{ type : "box" });
         cube.addComponent('script');
@@ -159,7 +158,6 @@ export class NumberCube extends Template {
 export class NumberSphereGfxOnly extends Template {
     static properties = [
          new P.FractionModifier({  
-            name : "NumberSphereGfxOnly",
             onInitFn : (template,value) => {template.fraction = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction; }, 
@@ -197,7 +195,6 @@ export class NumberSphereRaw extends Template {
 //    fraction=new Fraction(1,3);
     static properties = [
          new P.FractionModifier({  
-            name : "NumberSphere", // if this changes, data will break // Should be Fraction1?
             onInitFn : (template,value) => { template.fraction = value; },
             onChangeFn : (template,value) => { template.setFraction(value); }, 
             getCurValFn : (template) => { return template.fraction;},
@@ -221,7 +218,7 @@ export class NumberSphereRaw extends Template {
     }
 
     setFraction(value) { 
-        this.fraction=fraction;
+        this.fraction=value;
         this.script.setFraction(value); 
     }
    
@@ -257,11 +254,8 @@ export class NumberSphere extends NumberSphereRaw {
 
     static createHeldItem(properties){
         // The "correct" (?) way to create the graphics version is one that is yet another Template, this one without collision.
-        const fraction = properties[this.name];//NumberSphere; // awkward data model.
         const options =  {
-            properties : {
-               NumberSphereGfxOnly : fraction
-            }
+            properties : properties,
         } 
         let template = new NumberSphereGfxOnly(options);
         return new HeldItem({

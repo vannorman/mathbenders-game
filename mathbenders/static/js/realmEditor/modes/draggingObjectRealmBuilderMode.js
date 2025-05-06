@@ -155,6 +155,7 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
                 if (p){
                     // console.log(p);
                     this.#instantiatedItem.entity.moveTo(p);
+                    this.#instantiatedItem.onDragByEditor();
                 } else {
                     console.log("no point under cursor");
                     this.dragger.toggle('pre');

@@ -100,7 +100,6 @@ export class Ramp extends Template {
         const {properties}=args;
 
         this.setProperties2(properties);
-        // Castle Pillar
         const rampM = assets.models.ramp.resource.instantiateRenderEntity();
         const rampC = rampM.children[0];
         const ramp = new pc.Entity();
@@ -210,6 +209,7 @@ export class CastleWallFormed extends Template {
         // console.log("Find previous wall and connect them");
         this.updateColliderMap();
     }
+
 
     updateWallMesh(meshData){
         const {xScale,verts,midpoint,slope}=meshData;
@@ -366,9 +366,10 @@ export class CastleGate extends Template {
 
 export class TerrainModifierObject extends Template {
 
-    width=10;
-    length=10;
-    depth=10;
+    width=30;
+    length=30;
+    depth=4;
+    rampDir=new pc.Vec3(0,0,1);
 
 }
 
@@ -377,7 +378,15 @@ export class TerrainModifierObject extends Template {
 
 export class CastleGateDungeon extends TerrainModifierObject {
     static _icon = assets.textures.ui.icons.castleDoorDungeon;
-
+    static properties= [     
+        new P.Quantity({  
+            onChangeFn : (template,value) => {  template.depth = -value; template.RecalculateTerrain();  },
+            onInitFn : (template,value) => { template.depth = -value; },
+            getCurValFn : (template) => { return -template.depth },
+            min:-15,
+            max:15,
+         }),
+    ]
     level;
     modifier;
     constructor(args={}){
@@ -410,6 +419,32 @@ export class CastleGateDungeon extends TerrainModifierObject {
         cover.addComponent('rigidbody',{type:'kinematic'});
         cover.setLocalScale(scale);
 
+
+        const rampM = assets.models.ramp.resource.instantiateRenderEntity();
+        const rampC = rampM.children[0];
+        const ramp = new pc.Entity();
+        ramp.addChild(rampC);
+        rampM.destroy();
+        this.entity.addChild(ramp);
+        rampC.setLocalScale(.05,.05,.05);
+        rampC.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
+        rampC.addComponent('collision',{type:'mesh',renderAsset:rampC.render.asset});
+
+        rampC.setLocalEulerAngles(-90,0,0);
+        
+        ApplyTextureAssetToEntity({entity:ramp,textureAsset:assets.textures.terrain.grid_fine}); 
+        ramp.setLocalEulerAngles(0,180,0);
+        ramp.setLocalPosition(-6,0,0);
+        ramp.setLocalScale(3,3,3);
+        
+        this.ramp=ramp;
+        this.rampC=rampC;
+        
+       //  this.updateTextureTiling({ent:this.rampC,scaleRef:this.ramp});
+        this.updateCollider({colEnt:this.rampC});
+
+         
+
         ApplyTextureAssetToEntity({entity:cover,textureAsset:assets.textures.terrain.grid_fine});
 
 
@@ -441,10 +476,23 @@ export class CastleGateDungeon extends TerrainModifierObject {
         super.entityWasDestroyed();
     }
 
+    RecalculateTerrain(){
+        this.level.terrain.Regenerate();
+    }
+
     onEndDragByEditor(args){
         super.onEndDragByEditor();
+        this.RecalculateTerrain();
+    }
+    onDragByEditor(){
+        super.onDragByEditor();
+
+        this.RecalculateTerrain();
+    }
+
+    onDeleteByEditor(){
+        super.onEndDragByEditor();
         realmEditor.currentLevel.terrain.Regenerate();
-        // this.AddToTerrain();
     }
 
     onInflated(){
@@ -452,17 +500,32 @@ export class CastleGateDungeon extends TerrainModifierObject {
         this.level.terrain.RegenerateWithDelay();
     }
 
+    get shouldRecalculateTerran(){
+        // only recalculate terrain if this object is directly on the terrain.
+        // For example, if this object is above a concrete pad, do not move the terrain under it.
+
+    }
+
+    timeoutFn = null;
    dropToTerrain(){
-    console.log("Drop.");
-        const from = this.entity.getPosition().clone();
-        const to = from.clone().add(new pc.Vec3(0,-50,0));
-        const results = pc.app.systems.rigidbody.raycastAll(from, to);
-        results.forEach(result=>{
-            if (result.entity.tags.list().includes(Constants.Tags.Terrain)){
-                this.entity.moveTo(result.point); 
-            }
-        });
-   }
+        if (this.timeoutFn){
+            clearTimeout(this.timeoutFn);
+
+         }
+         const $this=this;
+        this.timeoutFn=setTimeout(function(){
+            const from = $this.entity.getPosition().clone().add(new pc.Vec3(0,10,0));
+            const to = from.clone().add(new pc.Vec3(0,-50,0));
+            const results = pc.app.systems.rigidbody.raycastAll(from, to);
+            results.forEach(result=>{
+                if (result.entity.tags.list().includes(Constants.Tags.Terrain)){
+                    $this.entity.moveTo(result.point); 
+                }
+            },500);
+
+
+        })
+    }
 
     get data(){
         return {

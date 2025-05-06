@@ -171,7 +171,7 @@ export default class Sword extends Gadget {
         const rightPos = ni.entity.getPosition().clone().add(Camera.main.entity.right.clone().mulScalar(postSliceDist));
         const leftDir = leftPos.clone().sub(ni.entity.getPosition().clone()).normalize();
         const rightDir = leftDir.clone().mulScalar(-1);
-        const postSliceSpeed = ni.numberType == NumberInfo.Shape.Sphere ? 0.2 : 1.1;
+        const postSliceSpeed = ni.numberType == NumberInfo.Type.Sphere ? 0.2 : 1.1;
         const leftVel = leftDir.mulScalar(postSliceSpeed);
         const rightVel = rightDir.mulScalar(postSliceSpeed);
         const templateName = ni.entity._templateInstance.constructor.name;
@@ -180,7 +180,7 @@ export default class Sword extends Gadget {
         const optsLeft = {
             position : leftPos,
             properties : {
-                NumberSphere : resultFrac
+                FractionModifier : resultFrac
             }
         } 
         const leftResult = new NumberSphere(optsLeft);
@@ -189,7 +189,7 @@ export default class Sword extends Gadget {
         const optsRight = {
             position : rightPos,
             properties : {
-                NumberSphere : resultFrac
+                FractionModifier : resultFrac
             }
         } 
         const rightResult = new NumberSphere(optsRight);
