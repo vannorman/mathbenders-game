@@ -251,7 +251,7 @@ export default class Template {
         mat.update();
     }
 
-
+    onPlayerTouched(){}
 }
 
 

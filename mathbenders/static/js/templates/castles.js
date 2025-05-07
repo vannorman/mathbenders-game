@@ -1,5 +1,7 @@
 import Template from './template.js'
 import * as P from './properties.js';
+import { Button } from './machines.js';
+
 export class CastleTurret extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.icons.turret1;
@@ -359,15 +361,74 @@ export class CastleGate extends Template {
         this.doorway=doorway;
         this.cover=cover;
         this.updateColliderMap();
+
+        const $this=this;
+        const button = new Button({onTouchedFn:$this.toggleGate});
+        this.button=button;
+        this.button.entity.setLocalPosition(1,0,1);
+        this.entity.addChild(button.entity);
+        this.state = 'closed';
+        this.closedPos = this.gate.getLocalPosition().clone();
+        this.openPos = this.gate.getLocalPosition().clone().add(new pc.Vec3(0,5,0));
+        pc.app.on('update',$this.update,this);
+        this.updateColliderMap();
     }
+
+    toggleGate(){
+        console.log("TOG GATE");
+        if (this.state === 'closed') {
+            this.state = 'opening';
+            this.t = 0;
+        } else if (this.state === 'open'){
+            this.state = 'closing';
+            this.t = 0;
+        
+        }
+    }
+
+    t;
+    update(dt) {
+        this.t += dt;
+        if (this.state === 'opening') {
+            const dist = this.gate.getLocalPosition().distance(this.openPos);
+            if (dist > 0.01) {
+                const pushDuration = 0.5;
+                let lt = this.t / pushDuration; 
+                let p = new pc.Vec3().lerp(this.gate.getLocalPosition(),this.openPos,lt);
+                this.gate.setLocalPosition(p);
+            } else {
+                this.gate.setLocalPosition(this.openPos);
+                this.state = 'open';
+            }
+        } else if (this.state === 'closing') {
+            const dist = this.gate.getLocalPosition().distance(this.closedPos);
+            if (dist > 0.01) {
+                const pushDuration = 0.5;
+                let lt = this.t / pushDuration; 
+                let p = new pc.Vec3().lerp(this.gate.getLocalPosition(),this.closedPos,lt);
+                this.gate.setLocalPosition(p);
+            } else {
+                this.gate.setLocalPosition(this.closedPos);
+                this.state = 'closed';
+            }
+        }
+    }
+
+        
+    entityWasDestroyed(){
+        pc.app.off('update',this.update);
+        super.entityWasDestroyed();
+    }
+
+
 
 }
 
 
 export class TerrainModifierObject extends Template {
 
-    width=30;
-    length=30;
+    width=15;
+    length=15;
     depth=4;
     rampDir=new pc.Vec3(0,0,1);
 
@@ -463,14 +524,16 @@ export class CastleGateDungeon extends TerrainModifierObject {
         this.gate=gate;
         this.doorway=doorway;
         this.cover=cover;
-        this.updateColliderMap();
 
         let tm = new TerrainModifierObject({level:level});
         this.entity.addChild(tm.entity);
         tm.entity.setLocalPosition(pc.Vec3.ZERO);
         this.modifier = tm;
+        this.updateColliderMap();
 
     }
+
+
     entityWasDestroyed(){
         // this.RemoveFromTerrain();
         super.entityWasDestroyed();

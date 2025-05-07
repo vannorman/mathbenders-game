@@ -44,6 +44,7 @@ const Materials = {
     get yellow() { return this.createMaterial(new pc.Color(1, 1, 0))},
     get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
     get blue() { return this.createMaterial(new pc.Color(0.3, 0.3, 1))},
+    get liteblue() { return this.createMaterial(new pc.Color(0.6, 0.6, 1))},
     get purple(){ return Materials.createMaterial(new pc.Color(1,0,1))},
     get redAlpha(){ return Materials.createMaterialAlpha(new pc.Color(1,0,0,0.25))},
     get gray(){ return this.createMaterial(new pc.Color(0.3, 0.3, 0.3))},
@@ -105,6 +106,7 @@ const Constants = {
         Tree : 'Tree',
         Terrain : 'Terrain',
         PlayerCanPickUp : 'PlayerCanPickUp',
+        PlayerCanInteract : 'PlayerCanInteract',
 //        MultiblasterBullet : 'MultiblasterBullet',
     },
     Templates : {

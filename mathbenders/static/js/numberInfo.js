@@ -321,7 +321,8 @@ NumberInfo.prototype.OfflineCollision = function (result){
             this.entity.enabled = false;
             NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other,chr:chr});
         } else {
-            console.log("Null.");
+            // Not allowed to combine
+            // console.log("Null.");
         }
     } else {
         // collid w floor

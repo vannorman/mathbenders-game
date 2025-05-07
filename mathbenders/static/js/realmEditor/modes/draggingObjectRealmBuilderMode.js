@@ -148,17 +148,19 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
         if (this.#instantiatedItem) this.#instantiatedItem.entity.destroy();     // does this not destroy the ItemTemplate? @Eytan
     }
 
+    #lastP;
     onMouseMove(e){
         if (realmEditor.gui.isMouseOverMap){
             if (this.#instantiatedItem){
                 const p = realmEditor.gui.worldPointUnderCursor;
                 if (p){
+                    this.#lastP=p;
                     // console.log(p);
                     this.#instantiatedItem.entity.moveTo(p);
                     this.#instantiatedItem.onDragByEditor();
                 } else {
-                    console.log("no point under cursor");
-                    this.dragger.toggle('pre');
+                    // console.log("no point under cursor");
+                    this.#instantiatedItem.entity.moveTo(this.#lastP);
 
                 }
             } else {

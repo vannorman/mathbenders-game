@@ -1,6 +1,5 @@
 import Template from './template.js';
 import * as P from './properties.js';
-
 export class NumberRiser extends Template {
     static _icon = assets.textures.ui.icons.riser;
     static properties = [
@@ -394,7 +393,6 @@ export class PlayerPortal extends Template {
 
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
-        this.updateColliderMap();
         const $this=this;
         function onRealmEditorStateChange(state){
             if (state == RealmEditorState.GameLoaded){
@@ -416,9 +414,12 @@ export class PlayerPortal extends Template {
             }
         }
         GameManager.subscribe(this,onGameStateChange);
-        
+    
+
+        this.updateColliderMap();
      
     }
+
 
     onGameFinishedLoad(){
         if (this.connectedTo != undefined) this.ConnectTo(this.connectedTo);
@@ -495,4 +496,96 @@ export class PlayerPortal extends Template {
 }
 
 
+export class Button extends Template {
+
+
+    constructor(args = {}) {
+        super(args);
+        this.state = 'ready';
+
+        const { onTouchedFn } = args;
+        this.onTouchedFn=onTouchedFn;
+
+        const button = assets.models.spike.resource.instantiateRenderEntity();
+        //button.children[0].setLocalPosition(-5,-0,-40); // weirdly still off center after converting dae > obj > glb 
+        //bu
+        const housing = assets.models.funnel.resource.instantiateRenderEntity();
+        housing.getComponentsInChildren('render')[0].meshInstances[0].material = Materials.blue;
+        const base = assets.models.funnel.resource.instantiateRenderEntity();
+        base.getComponentsInChildren('render')[0].meshInstances[0].material = Materials.gray;
+
+        button.setLocalPosition(0.7, 1.5, 0);
+        button.setLocalScale(0.3,0.2,0.3);
+        button.setLocalEulerAngles(90,90,0);
+        button.render.meshInstances[0].material = Materials.red;
+        
+        housing.setLocalPosition(0.2,1.5,0)
+        housing.setLocalScale(1, 6, 1);
+        housing.setLocalEulerAngles(90,-90,0);
+        
+        base.setLocalPosition(0, 1, 0);
+        base.setLocalScale(4, 15, 4);
+
+        this.entity.addChild(button);
+        this.entity.addChild(housing);
+        this.entity.addChild(base);
+        this.entity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(1,3,1)});
+        this.entity.addComponent('rigidbody',{type:'kinematic'});
+
+        this.pushedInPos = button.getLocalPosition().clone().add(new pc.Vec3(-0.15, 0, 0));
+        this.pushedOutPos = button.getLocalPosition().clone();
+        this.moveSpeed = 0.02;
+
+        pc.app.on('update', this.update, this);
+        this.button = button;
+        this.housing = housing;
+        this.base = base;
+        this.entity.tags.add(Constants.Tags.PlayerCanInteract);
+        this.updateColliderMap();
+    }
+
+    t;
+    update(dt) {
+        this.t += dt;
+        if (this.state === 'pushingin') {
+            const dist = this.button.getLocalPosition().distance(this.pushedInPos);
+            if (dist > 0.01) {
+                const pushDuration = 0.5;
+                let lt = this.t / pushDuration; 
+                let p = new pc.Vec3().lerp(this.button.getLocalPosition(),this.pushedInPos,lt);
+                this.button.setLocalPosition(p);
+            } else {
+                this.button.setLocalPosition(this.pushedInPos);
+                this.state = 'pushingout';
+            }
+        } else if (this.state === 'pushingout') {
+            const dist = this.button.getLocalPosition().distance(this.pushedOutPos);
+            if (dist > 0.01) {
+                const pushDuration = 0.5;
+                let lt = this.t / pushDuration; 
+                let p = new pc.Vec3().lerp(this.button.getLocalPosition(),this.pushedOutPos,lt);
+                this.button.setLocalPosition(p);
+            } else {
+                this.button.setLocalPosition(this.pushedOutPos);
+                this.state = 'ready';
+            }
+        }
+    }
+
+    onPlayerTouched() {
+        super.onPlayerTouched();
+        if (this.state === 'ready') {
+            this.state = 'pushingin';
+            this.t = 0;
+            this.onTouchedFn();
+        }
+    }
+
+    entityWasDestroyed(){
+        super.entityWasDestroyed();
+        pc.app.off('update',this.update);
+    }
+
+
+}
 

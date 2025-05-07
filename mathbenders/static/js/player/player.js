@@ -242,16 +242,19 @@ class PlayerClass {
                 console.log("Player failed to get gadg");
             }
         } else {
-            console.log(`Player interact failed on:${entity.name}`);
+            template.onPlayerTouched();
+            console.log(`Player interact sent to::${entity.name}`);
             
         }
     }
 
    onCollisionStart(result){
-        if (result.other.tags.list().includes(Constants.Tags.PlayerCanPickUp)){  // new way
+        if (result.other.tags.list().includes(Constants.Tags.PlayerCanPickUp) || 
+        result.other.tags.list().includes(Constants.Tags.PlayerCanInteract)  ){  
             if (result.other.script?.numberInfo) {
                 this.interactWithNumber({entity:result.other});
             } else {
+                console.log("Int");
                 this.interactWithObject({entity:result.other});
             }
         }

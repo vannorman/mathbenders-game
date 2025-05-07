@@ -97,9 +97,7 @@ export default class Terrain {
     }
     
     toJSON(){ 
-        console.log(this._data);
         const data = JSON.parse(JSON.stringify(this._data));
-        data.terrainInstance 
         return data;
     }
     

@@ -26,6 +26,8 @@ const assets = {
     },
     models : {
         // mr_ball_faceless : new pc.Asset("", "container", { url: "/static/assets/models/mr_ball_faceless@.glb",    }),
+        funnel : new pc.Asset("", "container", { url: "/static/assets/models/funnel.glb",    }),
+        spike : new pc.Asset("", "container", { url: "/static/assets/models/spike.glb",    }),
         arrow : new pc.Asset("", "container", { url: "/static/assets/models/arrow.glb",    }),
         mascot : new pc.Asset("", "container", { url: "/static/assets/models/mascot.glb",    }), 
 //        mascot_idle :  new pc.Asset("", "container", { url: "/static/assets/models/mascot@idle.glb",    }),
