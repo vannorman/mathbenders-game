@@ -496,7 +496,6 @@ export class CastleGateDungeon extends TerrainModifierObject {
     }
 
     onInflated(){
-        console.log("inflated");
         this.level.terrain.RegenerateWithDelay();
     }
 
