@@ -22,7 +22,6 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
         this.timer=0;
         if (realmEditor.gui.isMouseOverMap){
             const itemToEdit = this.realmEditor.gui.editableItemUnderCursor;
-            
             if (itemToEdit != null){
                 realmEditor.editItem({entity:this.realmEditor.gui.editableItemUnderCursor});
             }
@@ -33,7 +32,7 @@ export default class NormalRealmBuilderMode extends RealmBuilderMode {
     update(dt){
         if (this.mouseHeld){
             this.timer += dt;
-            const handPanHoldThreshold = 0.1;
+            const handPanHoldThreshold = 0.2;
             if (this.timer > handPanHoldThreshold && this.realmEditor.gui.isMouseOverMap){
                 this.realmEditor.toggle('handpan');
             }

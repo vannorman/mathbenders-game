@@ -107,7 +107,6 @@ export class Property {
 
     static panel(args={}){
         const{width=120,height=120,opacity=1}=args;
-        console.log("H:"+height);
         const panel = new pc.Entity("panel");
         panel.addComponent("element", {
             anchor: [0.5, 0.5, 0.5, 0.5],
@@ -765,7 +764,6 @@ export class PortalConnector extends Property {
 
         const $this = this; 
         const portalIconHeight=50;
-        console.log("l:"+portals.length);
         const panel = Property.panel({height:70 + portals.length/3 * portalIconHeight});
 
         
@@ -779,7 +777,6 @@ export class PortalConnector extends Property {
                 if (num != undefined){
                     let s = "\n Linked to "+ num; 
                     tt += s;
-                    console.log(s);
 
                 } else {
                     tt += "\n not linked."

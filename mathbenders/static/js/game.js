@@ -3,10 +3,40 @@ GameState = Object.freeze({
     RealmBuilder : 'RealmBuilder',
     Playing : 'Playing',
 });
- 
-class GameManagerClass {
+
+
+class Listener {
+    constructor(){
+        this.state = 'NONE';
+        this.listeners = [];
+    }
+
+    setState(newState) {
+        if (this.state !== newState) {
+            this.state = newState;
+            // console.log("notify:"+this.listeners.length+" from:"+this.constructor.name);
+            this.notifyListeners();
+        }
+    }
+
+    notifyListeners() {
+        this.listeners.forEach(({ listener, callback }) => {
+            callback.call(listener, this.state);
+        })
+    }
+
+    subscribe(listener, callback) {
+        this.listeners.push({ listener, callback });
+    }
+
+    unsubscribe(listener) {
+        this.listeners = this.listeners.filter(x => {return x.listener != listener});
+    } 
+}
+class GameManagerClass extends Listener {
     // tODO: Use a game namespace such as Game.GameManager then window.GameManager = new Game.GameManager
     constructor(){
+        super();
         this.state = GameState.None;
         this.listeners = [];
     }

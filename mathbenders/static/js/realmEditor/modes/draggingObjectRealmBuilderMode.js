@@ -166,7 +166,6 @@ class PostInstantiationDragMode extends InstantiationDraggingMode {
             }
         }
         if (!realmEditor.gui.isMouseOverMap){
-            console.log("not over map.");
             this.dragger.toggle('pre');
         }
     }

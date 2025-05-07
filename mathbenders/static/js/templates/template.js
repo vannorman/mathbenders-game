@@ -251,7 +251,6 @@ export default class Template {
         mat.update();
     }
 
-    static ClearStatics(){}
 
 }
 

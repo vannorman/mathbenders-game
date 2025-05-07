@@ -39,7 +39,6 @@ export class NumberRiser extends Template {
         this.platformC.setLocalScale(2,0.2,2);
         this.platformC.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(2,0.2,2)});
         this.platformC.addComponent('rigidbody',{type:'kinematic'});
-        Game.p=this;
 
         const receiverLocalPosition = new pc.Vec3(1.5,1,1.7);
         const receiver = new pc.Entity();
@@ -54,13 +53,14 @@ export class NumberRiser extends Template {
         receiver.collision.on('triggerenter',this.onTriggerEnter,this);
         this.entity.addChild(this.riser);
         this.updateColliderMap(); 
-        pc.app.on('update',this.update,this);
+       //  pc.app.on('update',this.update,this);
+
     }
 
 
     entityWasDestroyed(){
         super.entityWasDestroyed();
-        pc.app.off('update',this.update);
+        // pc.app.off('update',this.update);
     }
 
     riseFactor = 3;
@@ -281,7 +281,7 @@ export class PlayerStart extends Template {
         const childOffset = new pc.Vec3(0,0,0.5)
         const scale = 1.5
         
-        this.entity.addComponent("collision", { type: "sphere", halfExtents: new pc.Vec3(6,6,6)});
+        this.entity.addComponent("collision", { type: "sphere", radius:6});
         this.entity.addComponent('render', { type: 'sphere'  });
         this.entity.render.material = Materials.green;
         this.entity.setLocalScale(6,6,6);
@@ -291,11 +291,9 @@ export class PlayerStart extends Template {
             switch(state){
             case GameState.RealmBuilder:
                 // ("enable save/load so we can start worldbuilding.")
-                //console.log("Levelbuilder on");
                 $this.entity.enabled=true;
                 break;
             case GameState.Playing:
-                //console.log("Levelbuilder off");
                 Player.entity.moveTo($this.entity.getPosition().clone().add(pc.Vec3.UP.clone().mulScalar(2)));
                 $this.entity.enabled=false;
                 break;
@@ -307,6 +305,7 @@ export class PlayerStart extends Template {
             // awkward singleton implementation .. may need to modify later ..
             if (other.getGuid() !== this.entity.getGuid()) other.destroy(); // only one start 
         });
+        this.updateColliderMap();
 
    }
 
@@ -322,13 +321,13 @@ export class PlayerPortal extends Template {
     static _icon = assets.textures.ui.builder.portal;
     static properties = [
         new P.PortalConnector({
-            onInitFn : (template,value) => { console.log("init pc with:"+value); template.connectedTo=value},
-            getCurValFn : (template) => {console.log("getcur pc with:"+template.connectedTo); return template.connectedTo} 
+            onInitFn : (template,value) => { template.connectedTo=value},
+            getCurValFn : (template) => {return template.connectedTo} 
 
         }),
         new P.GenericData({
-            onInitFn : (template,value) => { console.log("init gendata with:"+value); template.number=value},
-            getCurValFn : (template) => {console.log("getcur gendata:"+template.number); return template.number} 
+            onInitFn : (template,value) => { template.number=value},
+            getCurValFn : (template) => { return template.number} 
         }),
     ]
     
@@ -372,60 +371,97 @@ export class PlayerPortal extends Template {
     }
 
     ConnectTo(number){
-        console.log("Con "+this.number+" to "+number);
         this.connectedTo=number;
         this.script.ConnectTo(PlayerPortal.portals.get(number).script);
+        this.UpdateLinkGraphics();
 
     }
     
     constructor(args={}){
         super(args);
-        this.setupTextEntity();
+        this.setupSkyTextEntity({
+            number:this.number,
+            localPos:new pc.Vec3(0,8,0),
+            parent:this.entity
+        });
         const{properties}=args;
         this.setProperties2(properties);
 
         PlayerPortal.RegisterNewNumber({template:this});
 
         // Was our number not initialized (created new entity, not from inflation/saveload?)
-        if (this.number == -1){
-        }
 
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
         this.updateColliderMap();
         const $this=this;
+        function onRealmEditorStateChange(state){
+            if (state == RealmEditorState.GameLoaded){
+                $this.onGameFinishedLoad();
+            }
+        }
+        realmEditor.subscribe(this,onRealmEditorStateChange);
+
+
         function onGameStateChange(state) {
             switch(state){
             case GameState.RealmBuilder:
+                // ("enable save/load so we can start worldbuilding.")
+                if($this.linkGraphics) $this.linkGraphics.enabled=true;
                 break;
             case GameState.Playing:
-                this.LinkPortal();
+                if($this.linkGraphics) $this.linkGraphics.enabled=false;
                 break;
             }
         }
- 
         GameManager.subscribe(this,onGameStateChange);
+        
+     
     }
 
-    LinkPortal(){
-        if (this.connectedTo){
-            this.ConnectTo(this.connectedTo);
-        }
+    onGameFinishedLoad(){
+        if (this.connectedTo != undefined) this.ConnectTo(this.connectedTo);
+
     }
+
+
+    UpdateLinkGraphics(){
+        if (this.linkGraphics){
+            this.linkGraphics.destroy();
+        }
+        this.linkGraphics = new pc.Entity();
+        this.entity.addChild(this.linkGraphics);
+        const linkArrow = assets.models.arrow.resource.instantiateRenderEntity();
+        this.linkGraphics.addChild(linkArrow);
+        linkArrow.setLocalScale(2,2,2);
+        linkArrow.setLocalPosition(0,8,-5);
+        linkArrow.setLocalEulerAngles(90,0,0);
+        linkArrow.render.meshInstances[0].material = Materials.yellow;
+        this.linkArrow=linkArrow;
+        this.setupSkyTextEntity({
+            number:this.connectedTo,
+            localPos:new pc.Vec3(0,8,-10),
+            parent:this.linkGraphics
+        });
+ 
+    }
+
 
     get script(){ return this.entity.script.portal; }
 
-    setupTextEntity(){
+    setupSkyTextEntity(args){
+        const {number,localPos,parent=this.entity} = args;
         const textBackboard = new pc.Entity();
         textBackboard.addComponent('render',{type:'box'});
-        this.entity.addChild(textBackboard);
-        textBackboard.setLocalPosition(0,8,0);
+        parent.addChild(textBackboard);
+
+        textBackboard.setLocalPosition(localPos);
         textBackboard.setLocalScale(2,0.1,2);
         const textEntity = new pc.Entity();
         textEntity.addComponent('element',{
             type:'text',
             layers: [pc.LAYERID_WORLD],
-            text:this.number,
+            text:number,
             anchor:[0.5,0.5,0.5,0.5],
             margin:[0,0,0,0],
             pivot:[0.5,0.5],
@@ -450,6 +486,7 @@ export class PlayerPortal extends Template {
     entityWasDestroyed(){
         super.entityWasDestroyed();
         GameManager.unsubscribe(this);
+        realmEditor.unsubscribe(this);
         PlayerPortal.DeRegisterNumber({number:this.number});
 
 

@@ -19,9 +19,16 @@ import {
     UndoRedo
 } from  "./index.js";
 
+// Some templates care about each other and so need to subscribe to a "all templates successfully loaded" event.
+const RealmEditorState = Object.freeze({
+    Initializing : 'Initializing',
+    GameLoading : 'GameLoading',
+    GameLoaded : 'GameLoaded',
+});
+
 // import { Template, etc. }
 
-class RealmEditor {
+class RealmEditor extends Listener {
 
     // 'object', 'entity', 'item' terminology ?
 
@@ -41,6 +48,8 @@ class RealmEditor {
     }
 
     constructor() {
+        super();
+        this.state = RealmEditor.Initializing;
         this.wasEnabled = false;
         this.#isEnabled = false;
         this.#realm = null;
@@ -213,6 +222,7 @@ class RealmEditor {
     }
     
     enable() {
+        this.setState(RealmEditorState.Enabling);
         this.wasEnabled = true; // first time enabled flag for messaging during prototype
         this.#isEnabled = true;
         this.toggle('normal');
@@ -303,8 +313,9 @@ class RealmEditor {
 
     
     LoadJson(realmJson){
+        this.setState(RealmEditorState.GameLoading);
         realmJson = JsonUtil.cleanJson(realmJson); // If we used Eytan's idea of a json file service ......
-        try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
+        // try { console.log("Lodaing:"+realmJson.Levels[0].templateInstances[0].uuid); } catch {console.log('nonyet');}
         const levels = [];
         realmJson.Levels.forEach(levelJson => {
             let thisLevel = new Level({skipTerrainGen:true,realmEditor:this});
@@ -351,9 +362,10 @@ class RealmEditor {
 
         const zoomFactor = 100;
         const newTerrainPos = this.currentLevel.terrain.entity.getPosition();
-        console.log("C tr:"+newTerrainPos+", "+zoomFactor);
         this.camera.translate({source:"terrain",targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
         this.gui.realmNameText.text=this.RealmData.name;
+
+        this.setState(RealmEditorState.GameLoaded);
     }
     Save(){
         if (this.blockSavetimer > 0){

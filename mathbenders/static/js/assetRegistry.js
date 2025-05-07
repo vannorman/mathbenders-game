@@ -25,8 +25,9 @@ const assets = {
         swim : new pc.Asset("", "container", { url: "/static/assets/animations/swim.glb",    }),
     },
     models : {
-        mr_ball_faceless : new pc.Asset("", "container", { url: "/static/assets/models/mr_ball_faceless@.glb",    }),
-        mascot :  new pc.Asset("", "container", { url: "/static/assets/models/mascot.glb",    }),
+        // mr_ball_faceless : new pc.Asset("", "container", { url: "/static/assets/models/mr_ball_faceless@.glb",    }),
+        arrow : new pc.Asset("", "container", { url: "/static/assets/models/arrow.glb",    }),
+        mascot : new pc.Asset("", "container", { url: "/static/assets/models/mascot.glb",    }), 
 //        mascot_idle :  new pc.Asset("", "container", { url: "/static/assets/models/mascot@idle.glb",    }),
         creatures: {
             sheep :  new pc.Asset("", "container", { url: "/static/assets/models/creatures/sheep.glb",    }),

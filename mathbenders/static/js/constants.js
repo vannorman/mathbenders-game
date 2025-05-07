@@ -41,6 +41,7 @@ const Materials = {
     },
     get red(){ return Materials.createMaterial(new pc.Color(1,0,0))},
     get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3))},
+    get yellow() { return this.createMaterial(new pc.Color(1, 1, 0))},
     get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
     get blue() { return this.createMaterial(new pc.Color(0.3, 0.3, 1))},
     get purple(){ return Materials.createMaterial(new pc.Color(1,0,1))},
@@ -134,3 +135,12 @@ const Constants = {
 
 
 }
+// Some templates care about each other and so need to subscribe to a "all templates successfully loaded" event.
+const RealmEditorState = Object.freeze({
+    Initializing : 'Initializing',
+    GameLoading : 'GameLoading',
+    GameLoaded : 'GameLoaded',
+    Enabling : 'Enabling',
+});
+
+
