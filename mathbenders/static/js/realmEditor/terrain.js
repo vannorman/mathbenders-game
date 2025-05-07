@@ -58,7 +58,10 @@ export default class Terrain {
     postGenerationFunction() { 
         const mat = Shaders.GrassDirtByHeight({
             yOffset:this.centroid.y+this._data.waterLine+Terrain.baseTextureOffset,
-            snowLine:this._data.snowLine
+            snowLine:this._data.snowLine,
+            texture1:assets.textures.terrain.grid_fine.resource,
+            texture2:assets.textures.terrain.grid_fine.resource,
+            texture3:assets.textures.terrain.grid_fine.resource,
             // waterLevel:this._data.waterLevel
         });
         this.entity.render.meshInstances[0].material = mat;

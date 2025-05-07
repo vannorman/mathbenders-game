@@ -307,6 +307,9 @@ var Shaders = {
         const {
             yOffset=0, // waterlevel set here
             snowLine=30,
+            texture1=assets.textures.terrain.grass.resource,
+            texture2=assets.textures.terrain.dirt.resource,
+            texture3=assets.textures.terrain.water.resource,
             // waterLevel=1
         }=options;
         let material = new pc.StandardMaterial(); // StandardMaterial gives shadows but doesn't let you set textures.
@@ -374,9 +377,9 @@ var Shaders = {
 
 
             }`;
-        material.setParameter('uTexture1',assets.textures.terrain.grass.resource);
-        material.setParameter('uTexture2',assets.textures.terrain.dirt.resource);
-        material.setParameter('uTexture3',assets.textures.terrain.water.resource);
+        material.setParameter('uTexture1',texture1);//assets.textures.terrain.grass.resource);
+        material.setParameter('uTexture2',texture2);//assets.textures.terrain.dirt.resource);
+        material.setParameter('uTexture3',texture3);//assets.textures.terrain.water.resource);
         material.setParameter('uYoffset',yOffset);
         material.setParameter('uSnowLine',snowLine);
         // material.setParameter('uWaterLevel',waterLevel);
