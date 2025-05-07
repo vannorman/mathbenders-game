@@ -113,7 +113,7 @@ export default class TerrainGui {
 
         const $this =this;
         function uiGroup(name){
-            const group = new pc.Entity("global group");
+            const group = new pc.Entity(name);
             group.addComponent('element',{
                   type:'image',
                 anchor:[0,0,1,1],
@@ -133,6 +133,10 @@ export default class TerrainGui {
             return group;
         }
 
+        // Awkward UI coding setup but here ya go.
+        // TabGroup is the parent UI element for all Terrain ediitng gui tabs.
+        // "globals" is the first tab
+        // "seconds" is the second tab
         const tabGroup = new pc.Entity("tabgroup");
         tabGroup.addComponent('element',{
                   type:'image',
@@ -182,16 +186,12 @@ export default class TerrainGui {
         this.#TerrainTools.resolution = CreateTerrainEditingSlider({key:'resolution',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale = CreateTerrainEditingSlider({key:'heightScale',maxVal:4,minStep:0.02});
         this.#TerrainTools.heightTruncateInterval = CreateTerrainEditingSlider({key:'heightTruncateInterval',maxVal:2,minStep:0.01});
-        this.#TerrainTools.waterLine = CreateTerrainEditingSlider({key:'waterLine',maxVal:128,minStep:1});
-        this.#TerrainTools.snowLine = CreateTerrainEditingSlider({key:'snowLine',maxVal:512,minStep:1});
         globals.addChild(this.#TerrainTools.size.group);
         globals.addChild(this.#TerrainTools.dimension.group);
         globals.addChild(this.#TerrainTools.seed.group);
         globals.addChild(this.#TerrainTools.resolution.group);
         globals.addChild(this.#TerrainTools.heightScale.group);
         globals.addChild(this.#TerrainTools.heightTruncateInterval.group);
-        globals.addChild(this.#TerrainTools.waterLine.group);
-        globals.addChild(this.#TerrainTools.snowLine.group);
 //        this.#TerrainTools.spacer = spacer();
 
 
@@ -214,6 +214,8 @@ export default class TerrainGui {
         tabGroup.addChild(toggleSeconds);
         this.screen.addChild(seconds);
 
+        this.#TerrainTools.waterLine = CreateTerrainEditingSlider({key:'waterLine',maxVal:128,minStep:1});
+        this.#TerrainTools.snowLine = CreateTerrainEditingSlider({key:'snowLine',maxVal:512,minStep:1});
         this.#TerrainTools.resolution2 = CreateTerrainEditingSlider({key:'resolution2',maxVal:0.2,minStep:.001,precision:3});
         this.#TerrainTools.heightScale2 = CreateTerrainEditingSlider({key:'heightScale2',maxVal:4,minStep:.02});
         this.#TerrainTools.exp = CreateTerrainEditingSlider({key:'exp',maxVal:10,minStep:1});
@@ -224,6 +226,45 @@ export default class TerrainGui {
             realmEditor.placeTrees({numTrees:val})
         }
         this.#TerrainTools.trees = CreateTerrainEditingSlider({onChangeFn:treeChangeFn,key:'trees',maxVal:2000,minStep:1});
+
+
+        const motifs = Object.freeze({
+            0 : "Grass",
+            1 : "Grid",
+         });
+        function ChangeMotif(m){
+            console.log("Chang: "+motifs[m]);
+            const curTer = realmEditor.currentLevel.terrain;
+            switch(m){
+               case 0: 
+                    console.log("Grass");
+                    curTer._data.textures={
+                        texture1:'textures.terrain.grass',
+                        texture2:'textures.terrain.dirt',
+                        texture3:'textures.terrain.water',
+                    }
+                    break;
+               case 1: 
+                   console.log("Grid");
+                   curTer._data.textures={
+                        texture1:'textures.terrain.grid_fine',
+                        texture2:'textures.terrain.grid_fine',
+                        texture3:'textures.terrain.grid_fine',
+                    }
+                    break;
+                default:break;
+            }
+            curTer.RegenerateWithDelay();
+
+        }
+        const motifDropdown = new DropDown({
+            title:"Motif",
+            options:Object.values(motifs),
+            onChangeFn:ChangeMotif,
+        });
+        seconds.addChild(motifDropdown.entity);
+        seconds.addChild(this.#TerrainTools.waterLine.group);
+        seconds.addChild(this.#TerrainTools.snowLine.group);
         seconds.addChild(this.#TerrainTools.resolution2.group);
         seconds.addChild(this.#TerrainTools.heightScale2.group);
         seconds.addChild(this.#TerrainTools.exp.group);

@@ -354,7 +354,7 @@ export default class GUI {
         });
 
 
-
+        // Select "HandPan" or "Select Groups" mode
         this.modeSelect = new OptionButtonGroupUI({
             parent: this.mapPanel,
             options: [

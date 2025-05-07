@@ -1,3 +1,4 @@
+import Level from './level.js';
 class TerrainModifier {
     width;
     length;
@@ -18,6 +19,26 @@ export default class Terrain {
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
     // The Terrain is created when the Level is created, and can be modified using BuilderPanel Terrain.
     // Terrains cannot be created or destroyed independently of Levels.
+
+    static CreateNewTerrain(args={}){
+        const { zoomCamera = true } = args;
+        const level = new Level({skipTerrainGen:true,realmEditor:realmEditor});
+        realmEditor.RealmData.Levels.push(level);
+        const newTerrainPos = Terrain.getCentroid();
+        
+        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this,level:level});
+        level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
+        
+        if (zoomCamera){
+            const zoomFactor = 100;
+            realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
+        }
+        return level;    
+    }
+
+
+
+
     constructor(args={}){
         let data = {
             name : "New Terrain", 
@@ -35,6 +56,12 @@ export default class Terrain {
             heightScale2 : 0,
             exp : 0,
             trees : 10,
+            textures : {
+                texture1:'textures.terrain.grass',
+                texture2:'textures.terrain.dirt',
+                texture3:'textures.terrain.water',
+            },
+
             /// realmEditor @Eytan should I be passing realmEditor everywhere here or is accessing the global ok?
        };
        const { realmEditor, level } = args;
@@ -59,9 +86,7 @@ export default class Terrain {
         const mat = Shaders.GrassDirtByHeight({
             yOffset:this.centroid.y+this._data.waterLine+Terrain.baseTextureOffset,
             snowLine:this._data.snowLine,
-//            texture1:assets.textures.terrain.grid_fine.resource,
-//            texture2:assets.textures.terrain.grid_fine.resource,
-//            texture3:assets.textures.terrain.grid_fine.resource,
+            textures:this._data.textures,
             // waterLevel:this._data.waterLevel
         });
         this.entity.render.meshInstances[0].material = mat;
@@ -72,6 +97,7 @@ export default class Terrain {
     }
     
     toJSON(){ 
+        console.log(this._data);
         const data = JSON.parse(JSON.stringify(this._data));
         data.terrainInstance 
         return data;
@@ -107,7 +133,7 @@ export default class Terrain {
     }
    
     RegenerateWithDelay(opts={}){
-        const {delay=500,realmEditor} =opts;
+        const {delay=500} =opts;
         this.clearTimeouts();
         const $this = this;
         this.regenerateTimeoutFn = setTimeout(function(){

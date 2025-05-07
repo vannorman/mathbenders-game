@@ -393,19 +393,6 @@ class RealmEditor extends Listener {
 
     }
 
-    createNewLevel(){
-        const level = new Level({skipTerrainGen:true,realmEditor:this});
-        this.#RealmData.Levels.push(level);
-        const newTerrainPos = Terrain.getCentroid();
-        
-        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this,level:level});
-        level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
-        
-        const zoomFactor = 100;
-        this.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
-        return level;    
-    }
-
 
     BeginDraggingNewObject(options={}){
 

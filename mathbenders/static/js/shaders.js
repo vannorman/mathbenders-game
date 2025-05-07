@@ -307,21 +307,16 @@ var Shaders = {
         const {
             yOffset=0, // waterlevel set here
             snowLine=30,
-            texture1=assets.textures.terrain.grass.resource,
-            texture2=assets.textures.terrain.dirt.resource,
-            texture3=assets.textures.terrain.water.resource,
+            textures={
+                texture1:'textures.terrain.grass',
+                texture2:'textures.terrain.dirt',
+                texture3:'textures.terrain.water',
+            },
             // waterLevel=1
         }=options;
-        let material = new pc.StandardMaterial(); // StandardMaterial gives shadows but doesn't let you set textures.
-        // Solution: Create standard material, then overwrite materials.chunks.diffusePS and material.chunks.startVS 
-        // But, we need to start with playcanvas's original diffuseos/startvs since we cant just overwrite it with our random one
-        // because it breaks things in the long and complex shaderchunks chain (
-            // https://forum.playcanvas.com/t/shader-chunks-compilation-order/34918
-            // https://gist.github.com/JohannesDeml/1124520e5618f6c0ec736c48790d929c
 
-        // So, to get the original diffuseps startvs chunks, grab it from any standardmaterial object e.g. concrete pad meshinstance_shaders[0] and shaders[5] (not sure why there are two but they are diff shaders!) then copy the shader.definition.vshader and fshader to edit. 
 
-        // material.shader = Shaders.DefaultShader1({yOffset:yOffset});
+        let material = new pc.StandardMaterial(); 
         material.chunks.startVS=vs;
         material.chunks.diffusePS=`
             precision highp float;
@@ -377,9 +372,9 @@ var Shaders = {
 
 
             }`;
-        material.setParameter('uTexture1',texture1);//assets.textures.terrain.grass.resource);
-        material.setParameter('uTexture2',texture2);//assets.textures.terrain.dirt.resource);
-        material.setParameter('uTexture3',texture3);//assets.textures.terrain.water.resource);
+        material.setParameter('uTexture1',resolvePath(assets,textures.texture1).resource);//assets.textures.terrain.grass.resource);
+        material.setParameter('uTexture2',resolvePath(assets,textures.texture2).resource);//assets.textures.terrain.dirt.resource);
+        material.setParameter('uTexture3',resolvePath(assets,textures.texture3).resource);//assets.textures.terrain.dirt.resource);
         material.setParameter('uYoffset',yOffset);
         material.setParameter('uSnowLine',snowLine);
         // material.setParameter('uWaterLevel',waterLevel);

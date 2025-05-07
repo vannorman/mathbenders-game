@@ -228,49 +228,98 @@ NumberInfo.prototype.onCollisionStart = function (result) {
 
 
 NumberInfo.GetCombinationHierarchyResult = function(ni1,ni2){
+    let midpoint = ni1.entity.getPosition();
+    let resultNi = ni1;
+    let allowed = false;
+    // console.log(ni1.type+","+ni2.type);
     switch(ni1.type){
         case NumberInfo.Type.Bullet:
             switch(ni2.type){
-                case NumberInfo.Type.Bullet: return ni1;
+                case NumberInfo.Type.Bullet: 
+                    if (ni1.entity.rigidbody.linearVelocity.length() > ni2.entity.rigidbody.linearVelocity.length()){
+                        midpoint = ni2.entity.getPosition();
+                    } else {
+                        midpoint = ni1.entity.getPosition();
+                    }
+                    resultNi = ni2;
+                    allowed=true;
+                    break;
                 case NumberInfo.Type.Sphere: 
                 case NumberInfo.Type.Cube:
-                case NumberInfo.Type.Creature: return ni2;
+                case NumberInfo.Type.Creature: 
+                    midpoint = ni2.entity.getPosition();
+                    resultNi = ni2;
+                    allowed=true;
+                    break;
             }
+            break;
          case NumberInfo.Type.Sphere:
             switch(ni2.type){
                 case NumberInfo.Type.Bullet: 
-                case NumberInfo.Type.Sphere: return ni1;
+                    midpoint = ni1.entity.getPosition();
+                    resultNi = ni1;
+                    allowed=true;
+
+                    break;
+                case NumberInfo.Type.Sphere: 
+                    midpoint = ni1.entity.getPosition().add(ni2.entity.getPosition()).mulScalar(0.5);
+                    resultNi = ni1;
+                    allowed=true;
+                    break;
                 case NumberInfo.Type.Cube:
-                case NumberInfo.Type.Creature: return ni2;
+                case NumberInfo.Type.Creature: 
+                    midpoint = ni2.entity.getPosition();
+                    resultNi = ni2;
+                    allowed=true;
+                    break;
             }
+            break;
          case NumberInfo.Type.Cube:
             switch(ni2.type){
                 case NumberInfo.Type.Bullet:
-                case NumberInfo.Type.Sphere: return ni1;
+                case NumberInfo.Type.Sphere: 
+                    midpoint = ni1.entity.getPosition();
+                    resultNi = ni1;
+                    allowed=true;
+                    break;
                 case NumberInfo.Type.Cube:  
-                case NumberInfo.Type.Creature: return null;
+                case NumberInfo.Type.Creature: 
+                    midpoint = null;
+                    resultNi = null;
+                    allowed=false;
+                    break;
             }
-         case NumberInfo.Type.Creature:
+            break;
+        case NumberInfo.Type.Creature:
             switch(ni2.type){
                 case NumberInfo.Type.Bullet: 
-                case NumberInfo.Type.Sphere: return ni1;
+                case NumberInfo.Type.Sphere: 
+                    midpoint = ni1.entity.getPosition();
+                    resultNi = ni1;
+                    allowed=true;
+                    break;
                 case NumberInfo.Type.Cube:
-                case NumberInfo.Type.Creature: return null;
+                case NumberInfo.Type.Creature: 
+                    midpoint = null;
+                    resultNi = null;
+                    allowed=false;
+                    break;
             }
-        default: console.log("NOCOMB");break;
+            break;
+        default: console.error("NO COMB"); break;
     }
-    // console.error("ERRROR: No combination, "+ni1.type+","+ni2.type+" ,"+ni1.entity.getGuid()+","+ni2.entity.getGuid());
-    return null;
+
+    return {allowed:allowed,resultNi:resultNi,midpoint:midpoint};
 }
 
 
 NumberInfo.prototype.OfflineCollision = function (result){
     const resultNi = result.other?.script?.numberInfo;
     if (resultNi){
-        let combinationResult = NumberInfo.GetCombinationHierarchyResult(this,resultNi);
-        if (combinationResult != null) {
+        let chr = NumberInfo.GetCombinationHierarchyResult(this,resultNi);
+        if (chr.allowed == true){
             this.entity.enabled = false;
-            NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other});
+            NumberInfo.ResolveCollisionOffline({obj1:this.entity,obj2:result.other,chr:chr});
         } else {
             console.log("Null.");
         }
@@ -281,26 +330,24 @@ NumberInfo.prototype.OfflineCollision = function (result){
 }
 
 NumberInfo.ResolveCollisionOffline = function(data){
-    const {obj1,obj2} = data;
+    const {obj1,obj2,chr} = data;
     data.objId1 = obj1.getGuid();
     data.objId2 = obj2.getGuid();
     var detectedIndex = -1;
     NumberInfo.collisionPairs.forEach(pair => {
         if ((pair[0] == data.objId1 && pair[1] == data.objId2) || (pair[0] == data.objId2 && pair[1] == data.objId1)){
-            //console.log("pair detected!");
             detectedIndex = NumberInfo.collisionPairs.indexOf(pair);
         } else {
-            //console.log("nopair");
         }
     });
     if (detectedIndex == -1){
+        // This combination pair wasn't already matched, so add it for detecting
+        // This is needed since each collision produces *two* events, one from each collider, and must match each other
         NumberInfo.collisionPairs.push([data.objId1,data.objId2]);
-        // console.log("detected: "+detectedIndex);
      } else {
-        // Successful number combination
+        // Two collider events were matched with each other; proceed
 
-        // get resulting number and produce it
-        const collisionResult = NumberInfo.GetCollisionResolutionOffline({obj1:obj1,obj2:obj2});
+        const collisionResult = NumberInfo.GetCollisionResolutionOffline({obj1:obj1,obj2:obj2,chr:chr});
         if (!collisionResult) {
             console.log("skip col");
             return;
@@ -421,52 +468,19 @@ NumberInfo.prototype.setFraction = function(fraction){
     
 NumberInfo.CollisionPairs = {};
 NumberInfo.GetCollisionResolutionOffline = function(collisionData){
-    const { obj1, obj2 } = collisionData;
-
-    // # Determine the POSITION of the resulting (added) fraction between two numberinfos.
-    // USUALLY, we want the "midpoint" between the two dynamic numbers that collided.
-    // SOMETIMES, for example multiblaster bullet hits number we don't want this; we want the larger of the two numbers to remain and the bullet to have little effect.
-
-    let midpoint = obj1.getPosition().clone().add(obj2.getPosition()).mulScalar(0.5);
-
-    // Awkward check for multiblaster bullets.
-    if (obj1.tags.list().includes(Constants.Tags.MultiblasterBullet)) { midpoint = obj2.getPosition(); }
-    else if (obj2.tags.list().includes(Constants.Tags.MultiblasterBullet)) { midpoint = obj1.getPosition(); }
-
-    // Ensure kinematic wins in dynamic+kinematic combo
-    let wasKin1 = false;
-    let wasKin2 = false;
-    if (obj1.rigidbody && obj1.rigidbody.type == pc.RIGIDBODY_TYPE_KINEMATIC) {
-        midpoint = obj1.getPosition();
-        wasKin1 = true;
-    } else if (obj2.rigidbody && obj2.rigidbody.type == pc.RIGIDBODY_TYPE_KINEMATIC) {
-        midpoint = obj2.getPosition();
-        wasKin2 = true;
-    }
-    if (wasKin1 && wasKin2) {
-    //    console.log("kin1, kin2 true");
-    } else {
-        // console.log("k1:"+wasKin1+", k2:"+wasKin2);
-    }
+    const { obj1, obj2, chr} = collisionData;
 
     let n1 = obj1.script.numberInfo;
     let n2 = obj2.script.numberInfo;
-    let resultNi = NumberInfo.GetCombinationHierarchyResult(n1,n2);
-    if (!resultNi){
-        console.log("%c failed comb:"+n1.entity.getGuid()+","+n2.entity.getGuid(),"color:red");
-        return;
-    }
+    let resultNi = chr.resultNi;
+    let midpoint = chr.midpoint;
+    
     const TemplateToClone = resultNi.entity._templateInstance.constructor;
     const rbType = resultNi.entity.rigidbody.type;
     const rot = resultNi.entity.getEulerAngles();
 
     // Did both numbers have "destroy after seconds"? If so, this new one has it too
-    const destroyAfterSecondsScript = (obj1.script.destroyAfterSeconds && obj2.script.destroyAfterSeconds) ? true : false;
-    const destroyAfterSeconds = destroyAfterSecondsScript ? Math.max(obj1.script.destroyAfterSeconds.seconds,obj2.script.destroyAfterSeconds.seconds) : 0;
 
-    // If two objs collide and one wasn't pick-uppable, then the result is not pick-uppable
-    let pickup = true;
-    if (!obj1.script.pickUpItem || !obj2.script.pickUpItem) pickup = false;
     var resultVelocity = pc.Vec3.ZERO;
     if (obj1.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC && obj2.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC) {
         resultVelocity = obj1.rigidbody.linearVelocity.clone().add(obj2.rigidbody.linearVelocity).mulScalar(0.5);
@@ -485,8 +499,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
         rotation : rot,
         position : JsonUtil.Vec3ToJson(midpoint), // because we pass to server and back, server prefers json over vec3 obj
         maxNumber : Math.abs(frac1.numerator/frac1.denominator),
-        destroyAfterSecondsScript : destroyAfterSecondsScript,
-        destroyAfterSeconds : destroyAfterSeconds,
     }
     return resultData;
 }

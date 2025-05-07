@@ -8,7 +8,6 @@ export default class Multiblaster extends Gadget {
     ammo = [];
     ammoGfx = [];
     #lastFiredTime=0;
-    #bulletScale=0.6;
     fireTimeDelta=0.1;
 
     constructor(){
@@ -56,13 +55,10 @@ export default class Multiblaster extends Gadget {
         if (timeSinceLastFired > this.fireTimeDelta * 1000) {
             let frac = this.ammo.pop();
             const firePos = this.heldItemGfx.getPosition().clone().add(this.heldItemGfx.down);
-            const sc = this.#bulletScale;
 
             
-            const ns = new NumberSphereBullet({position:firePos,properties:{NumberSphere:frac}}); // should be Bullet template.
+            const ns = new NumberSphereBullet({position:firePos,properties:{FractionModifier:frac}}); // should be Bullet template.
             const s = ns.entity;
-
-            s.setLocalScale(new pc.Vec3(sc,sc,sc));
             s.rigidbody.linearVelocity=this.heldItemGfx.down.clone().mulScalar(50)
             this.#lastFiredTime = Date.now();
             this.ammoGfx.pop().entity.destroy();
@@ -109,7 +105,7 @@ export default class Multiblaster extends Gadget {
         const frac = new Fraction(num,1);
         const options =  {
             properties : {
-               NumberSphereGfxOnly : frac
+               FractionModifier : frac
             }
         } 
         let b = new NumberSphereGfxOnly(options);

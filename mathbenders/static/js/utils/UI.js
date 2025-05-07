@@ -648,7 +648,8 @@ const UI = {
 
         const opts = { 
             maxVal:maxVal, 
-            group:group,indicatorElement : sliderIndicator.element, 
+            group:group,
+            indicatorElement : sliderIndicator.element, 
             labelElement: label.element,
             sliderElement:slider.element,
             textIndicatorElement:textIndicator.element,
@@ -665,6 +666,37 @@ const UI = {
         const x = element.screenCorners[1].x - element.screenCorners[0].x;
         const y = element.screenCorners[2].y - element.screenCorners[1].y;
         return new pc.Vec2(x,y);
+    },
+    CreateDropdown(args={}) {
+        const { title="Choose option", options=["Option 1", "Option 2", "Option 3"],onChangeFn}=args;
+        const entity = new pc.Entity("Dropdown");
+
+        entity.addComponent("element", {
+            type: "image",
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            fontSize: 32,
+            width: 200,
+            height: 50
+        });
+
+        const dropdown = new pc.Entity("Select");
+        dropdown.addComponent("element", {
+            type: "dropdown",
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [0.5, 0.5],
+            width: 200,
+            height: 50,
+            options: options,
+            value: 0
+        });
+
+        entity.addChild(dropdown);
+        dropdown.element.on('change', function (value, index) {
+            console.log("Selected:", value, "at index", index);
+            onChangeFn(index);
+        });
+        return entity;
     }
 
 }
@@ -734,4 +766,114 @@ class OptionButtonGroupUI {
     }
 }
 
+class DropDown {
+    constructor(args){
+        const { options = ['option1', 'option2'], title = 'Select', onChangeFn } = args;
 
+        const dropdownEntity = new pc.Entity('Dropdown');
+        dropdownEntity.addComponent('element', {
+            type: 'image',
+            width: 100,
+            height: 35,
+            useInput: true
+        });
+        dropdownEntity.addComponent('layoutgroup', {
+            orientation: pc.ORIENTATION_VERTICAL,
+            spacing: [0,0],
+            widthFitting: pc.FITTING_NONE,
+            heightFitting: pc.FITTING_NONE,
+            wrap: false,
+
+        });
+
+        const topElement = new pc.Entity('Top');
+        topElement.addComponent('element', {
+            type: 'image',
+            width: 100,
+            height: 35,
+            useInput: true
+        });
+
+        const topText = new pc.Entity('TopText');
+        topText.addComponent('element', {
+            type: 'text',
+            anchor: [0.5, 0.5, 0.5, 0.5],
+            pivot: [1, 0.5],
+            margin:[0,0,0,0],
+            text: title,
+            fontSize: 18,
+            fontAsset:assets.fonts.montserrat,
+            color:pc.Color.BLACK,
+        });
+        topElement.addChild(topText);
+
+        const arrow = new pc.Entity('Arrow');
+        arrow.addComponent('element', {
+            type: 'image',
+            width: 20,
+            height: 20,
+            anchor: [1, 0.5, 1, 0.5],
+            pivot: [1, 0.5],
+            color:pc.Color.YELLOW,
+        });
+        topElement.addChild(arrow);
+        dropdownEntity.addChild(topElement);
+
+        let expanded = false;
+        const optionEntities = [];
+
+        function collapse() {
+            dropdownEntity.element.height = 35;
+            optionEntities.forEach(opt => opt.enabled = false);
+            expanded = false;
+        }
+
+        function expand() {
+            dropdownEntity.element.height = 35 * (options.length + 1);
+            optionEntities.forEach(opt => opt.enabled = true);
+            expanded = true;
+        }
+
+        topElement.element.on('click', () => {
+            expanded ? collapse() : expand();
+        });
+        Game.tt = topText;
+        
+        UI.HoverColor({element:topElement.element})
+        
+        for(let i=0;i<options.length;i++){
+            let optName = options[i];
+            const optEntity = new pc.Entity(optName);
+            optEntity.addComponent('element', {
+                type: 'image',
+                width: 100,
+                height: 35,
+                useInput: true
+            });
+            const textEntity = new pc.Entity(optName + '_text');
+            textEntity.addComponent('element', {
+                type: 'text',
+                text: optName,
+                fontSize: 16,
+                anchor: [0.5, 0.5, 0.5, 0.5],
+                pivot: [1, 0.5],
+                margin:[0,0,0,0],
+                fontAsset:assets.fonts.montserrat,
+                color:pc.Color.BLACK,
+            });
+            optEntity.addChild(textEntity);
+            dropdownEntity.addChild(optEntity);
+            optEntity.enabled = false;
+            optionEntities.push(optEntity);
+
+            optEntity.element.on('click', () => {
+                topText.element.text = optName;
+                collapse();
+                onChangeFn(i);
+            });
+            UI.HoverColor({element:optEntity.element})
+        };
+        Game.d = dropdownEntity;
+        this.entity = dropdownEntity;
+    }
+}

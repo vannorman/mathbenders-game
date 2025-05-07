@@ -1568,3 +1568,7 @@ function arraysEqual(a, b) {
   }
   return true;
 }
+
+function resolvePath(obj, path) {
+    return path.split('.').reduce((o, k) => o && o[k], obj);
+}
