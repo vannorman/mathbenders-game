@@ -263,5 +263,12 @@ export class NumberSphere extends NumberSphereRaw {
         });
     }
 }
-
-
+export class NumberSphereBullet extends NumberSphereRaw {
+    constructor(args={}){
+        super(args);
+        this.script.type = NumberInfo.Type.Bullet;
+        this.entity.name="bullet";
+        this.entity.script.create('destroyAfterSeconds');
+        // this.entity.tags.add(Constants.Tags.MultiblasterBullet);
+    }
+}

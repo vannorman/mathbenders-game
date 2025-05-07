@@ -24,6 +24,7 @@ export default class Multiblaster extends Gadget {
             entity:heldItemGfx,
             position:new pc.Vec3(0.7,0.5,-0.8),
             rotation:new pc.Vec3(115,0,0),
+            scale:0.8,
         });
 
 
@@ -58,19 +59,10 @@ export default class Multiblaster extends Gadget {
             const sc = this.#bulletScale;
 
             
-            const ns = new NumberSphere({position:firePos,properties:{NumberSphere:frac}}); // should be Bullet template.
-            ns.type = NumberInfo.Type.Bullet;
+            const ns = new NumberSphereBullet({position:firePos,properties:{NumberSphere:frac}}); // should be Bullet template.
             const s = ns.entity;
 
-            s.tags.add(Constants.Tags.MultiblasterBullet);
-//            Game.Instantiate.NumberSphere({position:firePos});
-            // s.script.destroy('pickUpItem');
             s.setLocalScale(new pc.Vec3(sc,sc,sc));
-            s.tags.remove(Constants.Tags.PlayerCanPickUp); // todo: Both "Bullet" and "NumberSphere" should inherit from NumberObject
-            // Never create stuff then remove stuff.. to get a different stuff lol
-
-            s.name="bullet";
-            s.script.create('destroyAfterSeconds');
             s.rigidbody.linearVelocity=this.heldItemGfx.down.clone().mulScalar(50)
             this.#lastFiredTime = Date.now();
             this.ammoGfx.pop().entity.destroy();
@@ -121,14 +113,14 @@ export default class Multiblaster extends Gadget {
             }
         } 
         let b = new NumberSphereGfxOnly(options);
-        b.entity.setLocalScale(new pc.Vec3(0.45,0.45,0.45));
-        Game.hi = this.heldItemGfx;
+        b.entity.setLocalScale(new pc.Vec3(0.6,0.6,0.6));
+        // Game.hi = this.heldItemGfx;
         this.heldItemGfx.addChild(b.entity);
         b.entity.setLocalPosition(0,0.2,0);
         this.ammoGfx.push(b);
 
         // Ammo (1-9) in a circle at base
-        const ammoScale = new pc.Vec3(0.2,0.2,0.2);
+        const ammoScale = new pc.Vec3(0.33,0.33,0.33);
         const circle = Utils.GetCircleOfPoints3d({degreesToComplete:360,radius:.3,scale:.18,autoCount:false,count:9});
         circle.forEach(pos => { 
             if (--count > 0){

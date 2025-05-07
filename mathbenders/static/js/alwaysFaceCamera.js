@@ -7,22 +7,24 @@ AlwaysFaceCamera.attributes.add('cameraTarget', {type:'entity',default:null});
 
 AlwaysFaceCamera.prototype.initialize = function(){
     this.frames = 0;
-    if (Camera && Camera.main) this.cachedCamPos = Camera.main.entity.getPosition();
-    else this.cachedCamPos = pc.Vec3.ZERO;
+    this.cachedCamPos = Camera.main.entity.getPosition();
+    this.look();
 }
 AlwaysFaceCamera.prototype.update = function(dt){
     // TODO: For NumberInfo make this a floater follower, not a child, because if its a child it responds to the rotation of the parent
     // If player was behind a portal, then face the nearest portal instead.
-//    if (this.entity.getPosition()
 
     if (this.useRadius && pc.Vec3.distance(this.entity.getPosition(),this.cachedCamPos) > this.radius) return;
+    this.look();
+};
+
+AlwaysFaceCamera.prototype.look = function(){
     if (this.reverse){
         const q = Quaternion.LookRotation(this.entity.getPosition().clone().sub(this.cachedCamPos));
         this.entity.setRotation(q);
     } else {
         const q = Quaternion.LookRotation(this.cachedCamPos.clone().sub(this.entity.getPosition()));
         this.entity.setRotation(q);
-    
     }
 };
 
@@ -32,7 +34,7 @@ AlwaysFaceCamera.prototype.camPos = function(){
     this.frames--;
     if (this.frames < 1) {
         this.frames = 30;
-        this.cachedCamPos = this.entity.getNearestObjectOfType('camera').entity.getPosition();
+        this.cachedCamPos = Camera.main.entity.getPosition(); //this.entity.getNearestObjectOfType('camera').entity.getPosition();
     } else {
     }
     return this.cachedCamPos;

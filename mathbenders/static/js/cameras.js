@@ -48,7 +48,7 @@ class PlayerCamera{
             priority:4,
             clearColorBuffer:true,
             clearDepthBuffer:true,
-
+            nearClip:0.4,
             farClip:1500,
             aspectRatio:Constants.Resolution.aspectRatio,
             aspectRatioMode:1,

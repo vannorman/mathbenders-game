@@ -105,7 +105,7 @@ const Constants = {
         Tree : 'Tree',
         Terrain : 'Terrain',
         PlayerCanPickUp : 'PlayerCanPickUp',
-        MultiblasterBullet : 'MultiblasterBullet',
+//        MultiblasterBullet : 'MultiblasterBullet',
     },
     Templates : {
         // Hmm.. would rather define these as new PlacedItem(name:CastleWall,props:...) inside Prefabs - @Eytan

@@ -340,12 +340,6 @@ NumberInfo.ProduceCollisionResult = function(collisionResult){
         // NumberSphere(options); //Game2.Instantiate[templateName](options); // TODO: Replace with Promise return
 
         result.entity.script.create('sinePop');
-
-        // Awkward way to propagate "destroy after seconds" which was detected if both parent numbers had destroyAfterSEconds
-        if (collisionResult.destroyAfterSecondsScript){
-            result.script.entity.create('destroyAfterSeconds',{attributes:{seconds:collisionResult.destroyAfterSeconds}});
-        }
-
         AudioManager.play({source:assets.sounds.numberEat,position:options.position,positional:true,refDist:20});
     }
 

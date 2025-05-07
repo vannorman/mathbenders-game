@@ -261,6 +261,7 @@ export class NumberFaucet extends Template {
         renders[2].meshInstances[2].material=Materials.white;
 
         this.script = this.renderEntity.script.machineNumberFaucet;
+        this.updateColliderMap();
     }
 
     fraction=new Fraction(2,1);
