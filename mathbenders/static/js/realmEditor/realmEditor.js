@@ -237,7 +237,7 @@ class RealmEditor {
 
         // Clear statics
         // @Eytan interesting architecture awkward placement; each "LoadJson" is actually "GameStart" and should flush/refresh any memories
-        PlayerPortal.portals = new Map();
+        // PlayerPortal.portals = new Map(); // actually this can be wrapped in the destroy fn
         this.LoadJson(realmData);
 
     }

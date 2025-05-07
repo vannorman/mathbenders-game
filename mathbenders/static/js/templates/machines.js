@@ -301,7 +301,7 @@ export class PlayerStart extends Template {
                 break;
             }
         }
-        GameManager.subscribe(this.entity,onGameStateChange);
+        GameManager.subscribe(this,onGameStateChange);
         this.entity.tags.add(Constants.Templates.PlayerStart);
         pc.app.root.findByTag(Constants.Templates.PlayerStart).forEach(other => {
             // awkward singleton implementation .. may need to modify later ..
@@ -310,27 +310,43 @@ export class PlayerStart extends Template {
 
    }
 
+   entityWasDestroyed(){
+        super.entityWasDestroyed();
+        GameManager.unsubscribe(this);
+   }
+
 }
 
 export class PlayerPortal extends Template {
     static isStaticCollider = true;
     static _icon = assets.textures.ui.builder.portal;
     static properties = [
-        new P.PortalConnector({}),
+        new P.PortalConnector({
+            onInitFn : (template,value) => { console.log("init pc with:"+value); template.connectedTo=value},
+            getCurValFn : (template) => {console.log("getcur pc with:"+template.connectedTo); return template.connectedTo} 
+
+        }),
         new P.GenericData({
-            onInitFn : (template,value) => { template.number=value},
-            getCurValFn : (template) => {return template.number} 
+            onInitFn : (template,value) => { console.log("init gendata with:"+value); template.number=value},
+            getCurValFn : (template) => {console.log("getcur gendata:"+template.number); return template.number} 
         }),
     ]
     
     number =0;
+    connectedPortal;
 
     static portals = new Map();
+    static DeRegisterNumber(args){
+        const {number}=args;
+        PlayerPortal.portals.delete(number);
+
+    }
     static RegisterNewNumber(args){
         const{template} = args;
         if (PlayerPortal.portals.get(template.number) == undefined){
             PlayerPortal.portals.set(template.number,template);
         } else {
+            // Find the 
             // Allocate the lowest positive integer value not included in previously allocated numbers
            let i=0;
             while (++i < 256) {
@@ -357,6 +373,7 @@ export class PlayerPortal extends Template {
 
     ConnectTo(number){
         console.log("Con "+this.number+" to "+number);
+        this.connectedTo=number;
         this.script.ConnectTo(PlayerPortal.portals.get(number).script);
 
     }
@@ -375,8 +392,25 @@ export class PlayerPortal extends Template {
 
         this.entity.addComponent("script");
         this.entity.script.create("portal"); //,{attributes:{portalPlane:portalPlane}}); // comment out this line to see the geometry
-        
         this.updateColliderMap();
+        const $this=this;
+        function onGameStateChange(state) {
+            switch(state){
+            case GameState.RealmBuilder:
+                break;
+            case GameState.Playing:
+                this.LinkPortal();
+                break;
+            }
+        }
+ 
+        GameManager.subscribe(this,onGameStateChange);
+    }
+
+    LinkPortal(){
+        if (this.connectedTo){
+            this.ConnectTo(this.connectedTo);
+        }
     }
 
     get script(){ return this.entity.script.portal; }
@@ -413,9 +447,12 @@ export class PlayerPortal extends Template {
         // console.log("Setting number text to:"+this.number);
      }
 
-     static ClearStatics(){
-        
-        PlayerPortal.portals = new Map();
+    entityWasDestroyed(){
+        super.entityWasDestroyed();
+        GameManager.unsubscribe(this);
+        PlayerPortal.DeRegisterNumber({number:this.number});
+
+
      }
 }
 

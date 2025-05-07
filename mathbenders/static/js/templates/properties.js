@@ -764,18 +764,32 @@ export class PortalConnector extends Property {
         portals = portals.filter(x=>{return x.uuid != this.template.uuid});
 
         const $this = this; 
-        const portalIconHeight=20;
+        const portalIconHeight=50;
         console.log("l:"+portals.length);
-        const panel = Property.panel({height:70 + portals.length * portalIconHeight});
+        const panel = Property.panel({height:70 + portals.length/3 * portalIconHeight});
 
-      
-       
+        
         if (portals.length > 0){ 
-            const textEntity = Property.text({parent:panel,anchor:[0.3,0.8,0.3,0.8]});
-            textEntity.element.text = "Portal "+this.template.number;
-            
-            const label = Property.text({parent:panel,anchor:[0,0.6,0,0.6],pivot:[0,0.5]});
-            label.element.text = "Connect to:"
+            const textEntity = Property.text({fontSize:16,parent:panel,anchor:[0,1,0,1],pivot:[0,1],alignment:[0,0]});
+            Game.tt = textEntity.element;
+            const template = this.template;
+            function UpdateText(){
+                let tt = "Portal "+template.number.toString();
+                let num = template.connectedTo;
+                if (num != undefined){
+                    let s = "\n Linked to "+ num; 
+                    tt += s;
+                    console.log(s);
+
+                } else {
+                    tt += "\n not linked."
+
+                }
+                tt += "\n Click to link:";
+                textEntity.element.text = tt;
+            }
+            UpdateText();
+           
            
 
             function text(el){
@@ -785,12 +799,12 @@ export class PortalConnector extends Property {
 
             const bottomTextHeight = 30;
             const bottomMargin = -1/portals.length;
-            const bottomText = Property.text({parent:panel,anchor:[0.5,0,0.5,0],pivot:[0.5,bottomMargin]});
+            const bottomText = Property.text({parent:panel,anchor:[0.5,0,0.5,0],pivot:[0.5,0.05]});
 
             const elementGrid = UI.createElementGrid({
                 rowDim:Math.ceil(portals.length/3), 
                 anchor:[0.5,0,0.5,0],
-                pivot:[0.5,bottomMargin*2],
+                pivot:[0.5,-0.05],
                 colDim:3, 
                 spacing:[10,10],
                 defaultSize:[30,30]
@@ -804,6 +818,7 @@ export class PortalConnector extends Property {
                 el.element.on('mousedown',function(){ 
                     $this.template.ConnectTo(portals[i].number); 
                     bottomText.text = "Connected! ("+portals[i].number+")";
+                    UpdateText();
                 });
             }
             panel.addChild(elementGrid.group);
