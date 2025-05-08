@@ -1,6 +1,6 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
-export default class BuildWallsMode extends RealmBuilderMode {
+export default class BuildWalls extends Base {
 
     #closeBtn;
     #lastPosition;

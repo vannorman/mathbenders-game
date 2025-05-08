@@ -60,7 +60,6 @@ export default class Template {
         if (rigidbodyType != 'none'){
             //console.log("T;"+rigidbodyType+" on:"+this.name);
             this.entity.addComponent('rigidbody',{type:rigidbodyType});
-            this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
         }
         this.entity.addComponent('script');
         this.name = this.constructor.name;

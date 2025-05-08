@@ -1,13 +1,8 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
-// Dislike / awkward how sometimes i call realmEditor.gui from the global object instead of something passed here
-// Also dislike passing realmEditor instance from class to class down this hierarchy. Perhaps it's best
 
-// Bug - on second initiate drag of existing item via Move button on popUpItem interface, the ItemTemplate is lost.
+export default class DraggingObject extends Base {
 
-export default class DraggingObjectRealmBuilderMode extends RealmBuilderMode {
-
-    // Todo: Eytan help? Pass relevant data from gui button press -> realmEditor -> set drag mode -> get data for obj and begin drag behavior
     modes;
     mode;
 

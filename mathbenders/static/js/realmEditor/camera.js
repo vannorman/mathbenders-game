@@ -104,14 +104,17 @@ export default class EditorCamera {
     }
 
     // MoveCamera(opts = {})
-    translate(parameters = {}) {
+    translate(args = {}) {
         const {
+            source="unknown",
             targetPivotPosition,
             targetZoomFactor,
             scrollDelta,
             shouldLerpPivot = true,
             shouldLerpZoom = true,
-        } = parameters;
+        } = args;
+        // console.log("translate from:"+source+",:"+JSON.stringify(args));
+
         if (targetPivotPosition)  this.targetPivotPosition = targetPivotPosition.clone();
         if (targetZoomFactor) this.targetZoomFactor = targetZoomFactor;
         else if (scrollDelta){

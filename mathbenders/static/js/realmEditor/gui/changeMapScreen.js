@@ -1,4 +1,4 @@
-import Terrain from '../terrain.js';
+import Level from '../level.js'; 
 export default class ChangeMapScreen {
 
     mapIcons = []; // show user all availble maps in this realm; click map to navigate to it for editing 
@@ -156,7 +156,7 @@ export default class ChangeMapScreen {
             mouseDown:function(){
                 // Create new level AND new terrain by GUI interaction
 
-                const level = Terrain.CreateNewTerrain();
+                const level = Level.CreateNewLevel();
                 realmEditor.currentLevel = level;
                 realmEditor.camera.translate({source:"new terrain",targetPivotPosition:realmEditor.currentLevel.terrain.centroid,targetZoomFactor:50});
 

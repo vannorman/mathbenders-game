@@ -7,6 +7,23 @@ import Terrain from './terrain.js';
 
 export default class Level {
     terrain;
+    static CreateNewLevel(args={}){
+        const { zoomCamera = true } = args;
+        const level = new Level({skipTerrainGen:true,realmEditor:realmEditor});
+        realmEditor.RealmData.Levels.push(level);
+        
+        level.terrain = new Terrain({data:{seed:Math.random()},realmEditor:this,level:level});
+        const newTerrainPos = level.terrain.centroid;
+        level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
+        
+        if (zoomCamera){
+            const zoomFactor = 100;
+            realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
+        }
+        return level;    
+    }
+
+
      constructor(opts={}) {
         const { skipTerrainGen=false, realmEditor } = opts; 
         this.realmEditor=realmEditor;

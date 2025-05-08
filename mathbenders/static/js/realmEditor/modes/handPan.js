@@ -1,6 +1,6 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
-export default class HandPanRealmBuilderMode extends RealmBuilderMode {
+export default class HandPan extends Base {
 
     onEnter () {
         this.realmEditor.gui.setHandPanCursor();

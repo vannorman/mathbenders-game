@@ -1,6 +1,6 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
-export default class MapScreenRealmBuilderMode extends RealmBuilderMode {
+export default class MapScreen extends Base {
 
     #modes;
     #mode;

@@ -1,6 +1,6 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
-export default class SelectRealmBuilderMode extends RealmBuilderMode {
+export default class Select extends Base {
 
     #mouseHeld=false;
     #screenStart;

@@ -1,6 +1,7 @@
 import Template from './template.js'
 import * as P from './properties.js';
 import { Button } from './machines.js';
+import Terrain from '../realmEditor/terrain.js';
 
 export class CastleTurret extends Template {
     static isStaticCollider = true;
@@ -452,21 +453,34 @@ export class CastleGateDungeon extends CastleGate {
     static _icon = assets.textures.ui.icons.castleDoorDungeon;
     static properties= [     
         new P.Quantity({  
-            onChangeFn : (template,value) => {  template.terrainModifier.depth = -value; template.RecalculateTerrain();  },
             onInitFn : (template,value) => { template.terrainModifier.depth = -value; },
+            onChangeFn : (template,value) => {  template.terrainModifier.depth = -value; template.RecalculateTerrain();  },
             getCurValFn : (template) => { return -template.terrainModifier.depth },
             min:-15,
             max:15,
          }),
+        new P.DungeonData({
+            onInitFn : (template,value) => { template.setDungeonData(value) },
+            onChangeFn : (template,value) => {  template.setDungeonData(value);},
+            getCurValFn : (template) => { return template.getDungeonData();},
+        }),
     ]
     isTerrainModifier = true;
     level;
+    dungeonData = {difficulty:2}
+    setDungeonData(value){
+        console.log("Set dungeon:"+value);
+        this.dungeonData = value;
+    }
+    getDungeonData(){
+        return this.dungeonData;
+
+    }
     constructor(args={}){
         args.setProperties = false;
         super(args);
         const {properties,level}=args;
         this.terrainModifier = new TerrainModifier({})
-        console.log("this ter mod:"+this.terrainModifier);
         this.setProperties2(properties);
         this.level=level;
         
@@ -497,9 +511,51 @@ export class CastleGateDungeon extends CastleGate {
         
        //  this.updateTextureTiling({ent:this.rampC,scaleRef:this.ramp});
         this.updateCollider({colEnt:this.rampC});
+        GameManager.subscribe(this,this.onGameStarted);
+    }
 
-         
+    onGameStarted(state){
+        if (state == GameState.Playing){
+            let p1 = new PlayerPortal();
+            this.entity.addChild(p1.entity);
+            p1.entity.setLocalPosition(0,0,0);
+            p1.entity.setLocalEulerAngles(0,90,0);
+            
+            let t = new Terrain({
+                data: {
+                    seed:Math.random(),
+                    textures: {
+                        texture1:'textures.terrain.grid_coarse',
+                        texture2:'textures.terrain.grid_coarse',
+                        texture3:'textures.terrain.grid_coarse',
+                    },
+                    waterLine:0,
+                    snowLine:100,
+                    heightTruncateInterval:0.2,
+                    heightScale:0.2,
+                    textureTiling:2,
+                },
+            });
+            t.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
+            // Player.entity.moveTo(t.centroid.clone().add(pc.Vec3.UP.clone().mulScalar(50)));
 
+            this.entity.addChild(t.entity);
+            t.entity.moveTo(t.centroid);
+            this.dungeonTerrain = t;
+
+            let p2 = new PlayerPortal();
+            t.entity.addChild(p2.entity);
+            p2.entity.setLocalPosition(0,50,0);
+
+            p2.entity.setLocalEulerAngles(0,90,0);
+            console.log("drop p2 ent:"+p2.entity.name);
+            this.dropToTerrain(p2.entity);
+
+            p1.ConnectTo(p2.number);
+            p2.ConnectTo(p1.number);
+ 
+
+        } 
     }
 
     RecalculateTerrain(){
@@ -527,23 +583,24 @@ export class CastleGateDungeon extends CastleGate {
 
 
     timeoutFn = null;
-    dropToTerrain(){
+    dropToTerrain(entity=null){
+        if (entity==null){
+            entity=this.entity;
+        }
         if (this.timeoutFn){
             clearTimeout(this.timeoutFn);
 
          }
-         const $this=this;
+        const $this=this;
         this.timeoutFn=setTimeout(function(){
-            const from = $this.entity.getPosition().clone().add(new pc.Vec3(0,10,0));
-            const to = from.clone().add(new pc.Vec3(0,-50,0));
+            const from = entity.getPosition().clone().add(new pc.Vec3(0,10,0));
+            const to = from.clone().add(new pc.Vec3(0,-150,0));
             const results = pc.app.systems.rigidbody.raycastAll(from, to);
             results.forEach(result=>{
                 if (result.entity.tags.list().includes(Constants.Tags.Terrain)){
-                    $this.entity.moveTo(result.point); 
+                    entity.moveTo(result.point); 
                 }
             },500);
-
-
         })
     }
 
@@ -558,8 +615,4 @@ export class CastleGateDungeon extends CastleGate {
         }
     }
 }
-
-
-
-
 

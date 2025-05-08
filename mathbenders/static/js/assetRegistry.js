@@ -230,6 +230,7 @@ const assets = {
             purple : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/purple.jpg' }),
             dirt : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/dirt.jpg' }),
             hex_tile : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/hex_tile.jpg' }),
+            grid_coarse : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_coarse.jpg' }),
             grid_blue : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }),
             grid_fine : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/grid_fine.jpg' }), // grid black
             water : new pc.Asset("", "texture", { url: '/static/assets/textures/terrain/water.jpg' }),

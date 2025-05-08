@@ -53,17 +53,23 @@ class TerrainGenerator {
             heights = this.SecondLayerWithExponentialHeights({ heights, exp, dim: dimension, resolution2, heightScale2 });
         }
 
-        heights = this.ModHeights({ heights, interval: heightTruncateInterval });
+        heights = this.ModHeights({ heights, interval: heightTruncateInterval * 40 });
 
         let postModifyFns = [];
-        const modifierItems = this.level.templateInstances.filter(x => x.isTerrainModifier);// instanceof TerrainModifierObject);
-        const modifiers = modifierItems.map(x => x.data);
+        if (this.level) {
+            // awkward because we only needed to pass the level at all in order to search for modifiers
+            // Perhaps it's better to simply pass the modifiers themselves?
+            const modifierItems = this.level.templateInstances.filter(x => x.isTerrainModifier); 
+            const modifiers = modifierItems.map(x => x.data);
 
-        for (const modifier of modifiers) {
-            heights = this.ApplyModifier({ modifier, heights, size, centroid });
-            postModifyFns.push(modifier.callback);
+            for (const modifier of modifiers) {
+                heights = this.ApplyModifier({ modifier, heights, size, centroid });
+                postModifyFns.push(modifier.callback);
+            }
+        } else{
+            // cases when level wouldn't be passed:
+            // don't need it (no level, just a rouge terrain, for example created in conjunction with a dungeon)
         }
-
         const newTerrain = { entity: null };
         this.Terrains.push(newTerrain);
 
@@ -86,10 +92,19 @@ class TerrainGenerator {
         }
         return heights;
     }
-
-    ModHeights({ heights, interval = 0 }) {
-        return heights.map(h => interval > 0 ? h.toInterval(interval) : h);
+    ModHeights(options){
+        const { heights,interval=0,heightScale=1} = options;
+        heights.forEach((x, i) => {
+            // trunc heights to specific y values; create a "stepped" Terrain instead of a smooth one
+            //so it results in smooth curves right and forward, with rough steps up and down
+            if (interval > 0) {
+                heights[i] = x.toInterval(interval); // affects height only, not x and z, 
+            }
+        })
+       return heights;
     }
+
+ 
 
     ApplyModifier({ heights, modifier, centroid, size }) {
         const sideResolution = Math.sqrt(heights.length);
@@ -347,22 +362,7 @@ class TerrainGenerator = {
         // Another type of "local /object based" mod heights
 
         let postModifyFns = [];
-        modifierItems = this.level.templateInstances.filter(x=>{return x instanceof TerrainModifierObject});
-        let modifiers = modifierItems.map(x => x.data );
-        if (modifiers.length > 0){
-            modifiers.forEach(modifier=>{
-                heights = TerrainGenerator.ApplyModifier({
-                    modifier:modifier, 
-                    heights:heights,
-                    size:size,
-                    centroid:centroid,
-                })
-                postModifyFns.push(modifier.callback)
-            })
-
-        }
-
- 
+         
     ////////
 
         const newTerrain = { entity : null };
@@ -526,7 +526,7 @@ class TerrainGenerator = {
         return combined
 
     },
-    ModHeights(options){
+   ModHeights(options){
         const { heights,interval=0,heightScale=1} = options;
         heights.forEach((x, i) => {
             // trunc heights to specific y values; create a "stepped" Terrain instead of a smooth one

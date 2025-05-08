@@ -1,5 +1,5 @@
 // Superclass of all Realm builder modes. Any new realm builder mode should extend this class
-export default class RealmBuilderMode {
+export default class Base {
 
     constructor(params) {
         this.realmEditor = params.realmEditor;
@@ -42,3 +42,4 @@ export default class RealmBuilderMode {
     mapClicked(){}
     clickOffMap(){}
 }
+

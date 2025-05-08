@@ -828,3 +828,93 @@ export class PortalConnector extends Property {
     }
     
 }
+
+export class DungeonData extends Property {
+    
+    buildUi(){
+        // TODO: Combine this with SizeProperty UI (they're the same almost);
+        const $this = this;
+        const panel = Property.panel();
+
+
+        var y=0;
+        const rowDim = 3;
+        const colDim = 3;
+        const elementGrid = UI.createElementGrid({
+            rowDim:rowDim, 
+            colDim:colDim, 
+            spacing:[15,40],
+            defaultSize:[20,20]
+        });
+
+        var text0;
+        var text1;
+        var text2;
+
+        function setSizeText(size){
+            text0.text = size[0];
+            text1.text = size[1];
+            text2.text = size[2];
+        }
+        
+        function modData(m){
+            /*
+            . load save dungeon data, procedurally create a level and terrain with this data, then link it's level identifier to this portal, so that level save/load works as expected, it will either find the level/terrain by id and mod it and regen it, or it .. wait
+            if the level and terrain is a new one each time
+            then there should be no level 
+            only a terrain. The terrain can exist below this dungeon gameobject one by some delta
+            even we dont need to create a terrain we could just create a dungeon, and only create it on game start, do not store any of these entities or placedentities
+            let data = $this.getCurValFn($this.template);
+            console.log("data:"+JSON.stringify(data));
+            $this.onChangeFn($this.template,data);
+            size = $this.getCurValFn($this.template);
+            seatSizeText(size);*/
+        }
+
+        function text(el){
+            return Property.text({parent:el,pivot:[0.5,-0.5]}).element;
+        }
+        
+        const deltaSize = 1;
+
+        for(let i=0;i<colDim;i++){
+            for(let j=0;j<rowDim;j++){
+                const index = (j * colDim) + i;
+                const el = elementGrid.elements[index];
+                UI.HoverColor({element:el.element});
+                el.element.useInput = true;
+                switch(i){
+                case 0: text(el).text = "<";break;
+                case 1: break;
+                case 2: text(el).text = ">";break;
+                }
+
+                switch(index){
+                case 0: el.element.on('mousedown',function(){modSize([-deltaSize,0,0])}); break;
+                case 1: text0 = text(el); text0.text="?";break; 
+                case 2: el.element.on('mousedown',function(){modSize([+deltaSize,0,0])}); break;
+                
+                case 3: el.element.on('mousedown',function(){modSize([0,-deltaSize,0])}); break;
+                case 4: text1 = text(el); text1.text="?";break; 
+                case 5: el.element.on('mousedown',function(){modSize([0,+deltaSize,0])}); break;
+
+                case 6: el.element.on('mousedown',function(){modSize([0,0,-deltaSize])}); break;
+                case 7: text2 = text(el); text2.text="2";break;
+                case 8: el.element.on('mousedown',function(){modSize([0,0,+deltaSize])}); break;
+
+
+                }
+            }
+        }
+
+        panel.addChild(elementGrid.group);
+        
+        const size = this.getCurValFn(this.template);
+        setSizeText(size);
+
+        this.ui=panel;
+ 
+    }
+}
+
+

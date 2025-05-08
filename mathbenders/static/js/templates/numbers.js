@@ -205,7 +205,7 @@ export class NumberSphereRaw extends Template {
     constructor(args={}) {
         args['rigidbodyType'] = pc.RIGIDBODY_TYPE_DYNAMIC;
         super(args); 
-        const {properties}=args;
+        const {properties,rigidbodyVelocity=pc.Vec3.ZERO}=args;
         this.setProperties2(properties);
         // console.log("this prop was set:"+JSON.stringify(properties));
         this.entity.addComponent("render",{ type : "sphere" });
@@ -214,6 +214,8 @@ export class NumberSphereRaw extends Template {
         this.entity.rigidbody.linearDamping = 0.5;
         this.entity.addComponent('script');
         this.entity.script.create('numberInfo',{attributes:{fraction:this.fraction}});
+        this.entity.rigidbody.linearVelocity = rigidbodyVelocity;
+
         // this.script = sphere.script.numberInfo;
     }
 

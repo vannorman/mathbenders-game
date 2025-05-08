@@ -541,7 +541,10 @@ export default class GUI {
             textureAsset:assets.textures.ui.builder.newRealm,
             anchor:[0.56, 0.9, 0.56, 0.9],
             cursor:'pointer',
-            mouseDown:function(){$this.CloseLoadRealmUI();realmEditor.NewRealm();}
+            mouseDown:function(){
+                $this.CloseLoadRealmUI();
+                realmEditor.NewRealm();
+            }
         }).element;
 
 

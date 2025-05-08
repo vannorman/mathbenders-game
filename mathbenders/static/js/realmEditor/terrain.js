@@ -1,17 +1,4 @@
 import Level from './level.js';
-class TerrainModifier {
-    width;
-    length;
-    depth;
-    position;
-    templateUuid;
-    
-    constructor(args){
-        const {width,length,depth,position,templateUuid}=args;
-        this.width=width;this.length=length;this.depth=depth;this.position=position;this.templateUuid=templateUuid;
-    }
-}
-
 export default class Terrain {
     static spacing = 2000;
     postGenFns=[];
@@ -19,22 +6,6 @@ export default class Terrain {
     // Each "Level" (with mutiple Levels per Realm) has a Terrain associated with it.
     // The Terrain is created when the Level is created, and can be modified using BuilderPanel Terrain.
     // Terrains cannot be created or destroyed independently of Levels.
-
-    static CreateNewTerrain(args={}){
-        const { zoomCamera = true } = args;
-        const level = new Level({skipTerrainGen:true,realmEditor:realmEditor});
-        realmEditor.RealmData.Levels.push(level);
-        const newTerrainPos = Terrain.getCentroid();
-        
-        level.terrain = new Terrain({data:{centroid:newTerrainPos,seed:Math.random()},realmEditor:this,level:level});
-        level.terrain.generate(); // race condiiton with regenerate() callbacks on TerrainTools change
-        
-        if (zoomCamera){
-            const zoomFactor = 100;
-            realmEditor.camera.translate({targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
-        }
-        return level;    
-    }
 
 
 
@@ -45,6 +16,7 @@ export default class Terrain {
             heightTruncateInterval : Math.random()*.1, // 0 : smooth, 1 : blocky
             waterLine : 32,
             snowLine : 30,
+            textureTiling : 15,
             heightScale : Math.random()*0.5+0.5, // how tall hills
             seed : Math.random(),  
             dimension : Math.round(Math.random()*32)+8, // x^2 verts
@@ -87,6 +59,7 @@ export default class Terrain {
             yOffset:this.centroid.y+this._data.waterLine+Terrain.baseTextureOffset,
             snowLine:this._data.snowLine,
             textures:this._data.textures,
+            textureTiling:this._data.textureTiling,
             // waterLevel:this._data.waterLevel
         });
         this.entity.render.meshInstances[0].material = mat;
@@ -104,6 +77,7 @@ export default class Terrain {
     get entity(){ return this._entity; }
     set entity(value){ this._entity = value; }
     get centroid() {
+        // Passively populate centroid to handle where terrains exist in world space; no other part of the application should care about this
         if (!this._data.centroid){
             this._data.centroid = Terrain.getCentroid();
         }
@@ -155,6 +129,7 @@ export default class Terrain {
     }
 
     destroy(){
+        console.log("Relinquish:"+this._data.centroid);
         Terrain.relinquishCentroid(this._data.centroid);
         this.clearTimeouts();
         this.entity.destroy();

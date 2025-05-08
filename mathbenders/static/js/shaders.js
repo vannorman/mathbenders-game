@@ -312,6 +312,7 @@ var Shaders = {
                 texture2:'textures.terrain.dirt',
                 texture3:'textures.terrain.water',
             },
+            textureTiling = 15,
             // waterLevel=1
         }=options;
 
@@ -329,6 +330,7 @@ var Shaders = {
             varying vec2 uvv;
             uniform float uTime;
             uniform float uYoffset;
+            uniform float uTextureTiling;
             vec3 toLinear(vec3 srgbColor) {
                 return pow(srgbColor, vec3(2.2));
             }
@@ -340,26 +342,26 @@ var Shaders = {
                 float blueShade = 0.5 + wave * 0.5; // Keep within range [0,1]
                 vec3 waterColor = vec3(0.0, 0.0, blueShade); 
                 if (y < 0.0){ // uWaterLevel) { // Water
-                    vec2 uv = vPositionW.xz / 15.0;
+                    vec2 uv = vPositionW.xz / uTextureTiling;
                     color = vec4(waterColor, 1.0);
                     // color = texture2D(uTexture3, uv);
                 } else if (y < 1.0) { // Blend
-                    vec2 uv = vPositionW.xz / 15.0;
+                    vec2 uv = vPositionW.xz / uTextureTiling;
                     float t = y / 1.0;
                     vec4 color1 = vec4(waterColor,1.0); //texture2D(uTexture2, uv);
                     vec4 color2 = texture2D(uTexture1, uv);
                     color = mix(color1, color2, t); // mix the colors based on vY
                  } else if (y < 10.0) { // Grass
-                    vec2 uv = vPositionW.xz / 15.0;
+                    vec2 uv = vPositionW.xz / uTextureTiling;
                     color = texture2D(uTexture1, uv);
                 } else if (y < 20.0) { // Blend
-                    vec2 uv = vPositionW.xz / 15.0;
+                    vec2 uv = vPositionW.xz / uTextureTiling;
                     float t = (y - 10.0) / (20.0 - 10.0); // normalize vY to the range [0, 1]
                     vec4 color1 = texture2D(uTexture1, uv);
                     vec4 color2 = texture2D(uTexture2, uv);
                     color = mix(color1, color2, t); // mix the colors based on vY
                 } else if (y < uSnowLine) { // Rock
-                    vec2 uv = vPositionW.xz / 15.0;
+                    vec2 uv = vPositionW.xz / uTextureTiling;
                     color = texture2D(uTexture2, uv);
                 } else { // Snow
                     color = vec4(1,1,1,1); //1.0 * wR, 1.0 * wG, 1.0, 1.0);
@@ -377,6 +379,7 @@ var Shaders = {
         material.setParameter('uTexture3',resolvePath(assets,textures.texture3).resource);//assets.textures.terrain.dirt.resource);
         material.setParameter('uYoffset',yOffset);
         material.setParameter('uSnowLine',snowLine);
+        material.setParameter('uTextureTiling',textureTiling);
         // material.setParameter('uWaterLevel',waterLevel);
         
         pc.app.on('update',function(dt){

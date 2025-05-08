@@ -1,14 +1,4 @@
-import {
-    DraggingObjectRealmBuilderMode,
-    EditingItemRealmBuilderMode,
-    HandPanRealmBuilderMode,
-    LoadScreenRealmBuilderMode,
-    MapScreenRealmBuilderMode,
-    NormalRealmBuilderMode,
-    OrbitRealmBuilderMode,
-    SelectRealmBuilderMode,
-    BuildWallsMode,
-} from "./modes/index.js";
+import * as Mode from "./modes/index.js";
 
 import {
     GUI,
@@ -60,15 +50,14 @@ class RealmEditor extends Listener {
         this.undoRedo = new UndoRedo({ realmEditor:this });
 
         this.#modes = new Map([
-            ['draggingObject', new DraggingObjectRealmBuilderMode({realmEditor: this})],
-            ['editingItem', new EditingItemRealmBuilderMode({realmEditor: this})],
-            ['handpan', new HandPanRealmBuilderMode({realmEditor: this})],
-            ['loadScreen', new LoadScreenRealmBuilderMode({realmEditor: this})],
-            ['mapScreen', new MapScreenRealmBuilderMode({realmEditor: this})],
-            ['normal', new NormalRealmBuilderMode({realmEditor: this})],
-            ['select', new SelectRealmBuilderMode({realmEditor: this})],
-            ['orbit', new OrbitRealmBuilderMode({realmEditor: this})],
-            ['buildWalls', new BuildWallsMode({realmEditor: this})]
+            ['draggingObject', new Mode.DraggingObject({realmEditor: this})],
+            ['editingItem', new Mode.EditingItem({realmEditor: this})],
+            ['handpan', new Mode.HandPan({realmEditor: this})],
+            ['loadScreen', new Mode.LoadScreen({realmEditor: this})],
+            ['mapScreen', new Mode.MapScreen({realmEditor: this})],
+            ['normal', new Mode.Normal({realmEditor: this})],
+            ['select', new Mode.Select({realmEditor: this})],
+            ['buildWalls', new Mode.BuildWalls({realmEditor: this})]
         ]);
 
         this.toggle('normal');
@@ -81,9 +70,7 @@ class RealmEditor extends Listener {
         GameManager.subscribe(this,this.onGameStateChange);
 
 
-
-        this.#RealmData = new RealmData({levels:[new Level({realmEditor:this})]});
-        this.currentLevel = this.#RealmData.Levels[0];
+        this.NewRealm();
     }
 
     buildRandomLevels(){
@@ -228,12 +215,10 @@ class RealmEditor extends Listener {
         this.toggle('normal');
         this.gui.enable();
         AudioManager.play({source:assets.sounds.ui.open});
-        this.camera.translate({source:"enable",targetPivotPosition:this.levelClosestToPlayer.terrain.centroid});
-        // To re-load the existing level ..
-        // console.log("%c ENABLE","color:#77f;font-weight:bold;");
-//        if (this.#RealmData.Levels?.length > 0 && this.#RealmData.Levels[0].templateInstances.length > 0){
-//            console.log(this.#RealmData.Levels[0].templateInstances[0].uuid);
-//         }
+        this.camera.translate({
+            targetPivotPosition:this.levelClosestToPlayer.terrain.centroid,
+            targetZoomFactor:300
+        });
         const realmData = JsonUtil.stringify(this.#RealmData); // copy existing realm data
 
         this.#RealmData.Clear(); // delete everything
@@ -360,7 +345,7 @@ class RealmEditor extends Listener {
         this.currentLevel = this.RealmData.Levels[0];
         this.gui.CloseLoadRealmUI();
 
-        const zoomFactor = 100;
+        const zoomFactor = 200;
         const newTerrainPos = this.currentLevel.terrain.entity.getPosition();
         this.camera.translate({source:"terrain",targetPivotPosition:newTerrainPos,targetZoomFactor:zoomFactor});
         this.gui.realmNameText.text=this.RealmData.name;
@@ -387,10 +372,14 @@ class RealmEditor extends Listener {
     }
 
     NewRealm(){
-        this.#RealmData.Clear();
-        this.#RealmData = new RealmData();
-        this.currentLevel = this.RealmData.Levels[0];
+        this.#RealmData?.Clear();
+        this.#RealmData = new RealmData({levels:[new Level({realmEditor:this})]});
+        this.currentLevel = this.#RealmData.Levels[0];
+        this.CenterCameraOnCurrentLevel();
+    }
 
+    CenterCameraOnCurrentLevel(){
+        this.camera.translate({targetPivotPosition:this.currentLevel.terrain.centroid,targetZoomFactor:300})
     }
 
 

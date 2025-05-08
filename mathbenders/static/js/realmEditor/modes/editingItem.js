@@ -1,10 +1,10 @@
-import RealmBuilderMode from "./realmBuilderMode.js";
+import Base from "./base.js";
 
 // @Eytan - This will be a key file in next architecture decision, since all editable items will inherit from a superclass
 // properties (unique per object) need to be saved and loaded in a predictable, serializable way
 // properties need to dynamically populate the "editing" buttons and functionality
 
-export default class EditingItemRealmBuilderMode extends RealmBuilderMode {
+export default class EditingItem extends Base {
 
     #modes;
     #mode;

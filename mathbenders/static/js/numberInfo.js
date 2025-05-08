@@ -262,7 +262,11 @@ NumberInfo.GetCombinationHierarchyResult = function(ni1,ni2){
 
                     break;
                 case NumberInfo.Type.Sphere: 
-                    midpoint = ni1.entity.getPosition().add(ni2.entity.getPosition()).mulScalar(0.5);
+                    if (ni1.entity.rigidbody.linearVelocity.length() > ni2.entity.rigidbody.linearVelocity.length()){
+                        midpoint = ni2.entity.getPosition();
+                    } else {
+                        midpoint = ni1.entity.getPosition();
+                    }
                     resultNi = ni1;
                     allowed=true;
                     break;
@@ -479,8 +483,6 @@ NumberInfo.GetCollisionResolutionOffline = function(collisionData){
     const TemplateToClone = resultNi.entity._templateInstance.constructor;
     const rbType = resultNi.entity.rigidbody.type;
     const rot = resultNi.entity.getEulerAngles();
-
-    // Did both numbers have "destroy after seconds"? If so, this new one has it too
 
     var resultVelocity = pc.Vec3.ZERO;
     if (obj1.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC && obj2.rigidbody?.type == pc.RIGIDBODY_TYPE_DYNAMIC) {
