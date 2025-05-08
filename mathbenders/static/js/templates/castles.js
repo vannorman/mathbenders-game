@@ -313,9 +313,12 @@ export class CastleGate extends Template {
     static _icon = assets.textures.ui.icons.castleDoor;
 
     constructor(args={}){
+        const {setProperties=true} = args; // a class that extends me doesn't want me to set properties yet
         super(args);
         const {properties}=args;
-        this.setProperties2(properties);
+        if (setProperties) {
+            this.setProperties2(properties);
+        }
 
         
         const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];
@@ -361,6 +364,7 @@ export class CastleGate extends Template {
         this.doorway=doorway;
         this.cover=cover;
         this.updateColliderMap();
+
 
         const $this=this;
         const button = new Button({onTouchedFn:()=>$this.toggleGate()});
@@ -424,62 +428,52 @@ export class CastleGate extends Template {
 }
 
 
-export class TerrainModifierObject extends Template {
+class TerrainModifier  {
+    constructor(args={}){
+        const {
+            width=15,
+            length=15,
+            depth=4,
+            rampDir=new pc.Vec3(0,0,1), 
+        } =args;
+        this.width=width;
+        this.length=length;
+        this.depth=depth;
+        this.rampDir=rampDir;
 
-    width=15;
-    length=15;
-    depth=4;
-    rampDir=new pc.Vec3(0,0,1);
+    }
 
 }
 
 
 
 
-export class CastleGateDungeon extends TerrainModifierObject {
+export class CastleGateDungeon extends CastleGate {
     static _icon = assets.textures.ui.icons.castleDoorDungeon;
     static properties= [     
         new P.Quantity({  
-            onChangeFn : (template,value) => {  template.depth = -value; template.RecalculateTerrain();  },
-            onInitFn : (template,value) => { template.depth = -value; },
-            getCurValFn : (template) => { return -template.depth },
+            onChangeFn : (template,value) => {  template.terrainModifier.depth = -value; template.RecalculateTerrain();  },
+            onInitFn : (template,value) => { template.terrainModifier.depth = -value; },
+            getCurValFn : (template) => { return -template.terrainModifier.depth },
             min:-15,
             max:15,
          }),
     ]
+    isTerrainModifier = true;
     level;
-    modifier;
     constructor(args={}){
+        args.setProperties = false;
         super(args);
         const {properties,level}=args;
+        this.terrainModifier = new TerrainModifier({})
+        console.log("this ter mod:"+this.terrainModifier);
         this.setProperties2(properties);
         this.level=level;
-
         
-        const gate = assets.models.castle_gate.resource.instantiateRenderEntity().children[0];
-        ApplyTextureAssetToEntity({entity:gate,textureAsset:assets.textures.wood}); 
-        const doorCol = new pc.Entity();
-        doorCol.setLocalScale(0.5,2.5,3.5);
-        doorCol.setLocalPosition(0,0,1.5)
-        doorCol.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.5,3.25,3.75)});
-        doorCol.addComponent('rigidbody',{type:pc.RIGIDBODY_TYPE_KINEMATIC});
-        gate.addChild(doorCol);
-        gate.setLocalScale(2,2,2);
-
-        const doorwayAsset = assets.models.castle_doorway;
-        const doorway = doorwayAsset.resource.instantiateRenderEntity().children[0];
-        doorway.setLocalScale(2,2,2);
-        ApplyTextureAssetToEntity({entity:doorway,textureAsset:assets.textures.terrain.grid_fine}); 
-        Utils.addMeshCollider({entity:doorway,meshAsset:doorway.render.asset});
-
-        const cover = new pc.Entity();
-        cover.addComponent('render',{type:'box'});
-        const scale = new pc.Vec3(4.5,1,7.9);
-        cover.addComponent('collision',{type:'box',halfExtents:scale.clone().mulScalar(0.5)});
-        cover.addComponent('rigidbody',{type:'kinematic'});
-        cover.setLocalScale(scale);
-
-
+       
+        // Update texture assets from castle stone to grid fine
+        ApplyTextureAssetToEntity({entity:this.doorway,textureAsset:assets.textures.terrain.grid_fine}); 
+        ApplyTextureAssetToEntity({entity:this.cover,textureAsset:assets.textures.terrain.grid_fine});
         const rampM = assets.models.ramp.resource.instantiateRenderEntity();
         const rampC = rampM.children[0];
         const ramp = new pc.Entity();
@@ -499,43 +493,13 @@ export class CastleGateDungeon extends TerrainModifierObject {
         
         this.ramp=ramp;
         this.rampC=rampC;
+        ApplyTextureAssetToEntity({entity:this.ramp,textureAsset:assets.textures.terrain.grid_fine}); 
         
        //  this.updateTextureTiling({ent:this.rampC,scaleRef:this.ramp});
         this.updateCollider({colEnt:this.rampC});
 
          
 
-        ApplyTextureAssetToEntity({entity:cover,textureAsset:assets.textures.terrain.grid_fine});
-
-
-        this.entity.addChild(gate);
-        this.entity.addChild(doorway);
-        this.entity.addChild(cover);
-    
-        doorway.setLocalEulerAngles(-90,0,0); 
-        gate.setLocalEulerAngles(-90,0,0); 
-
-        doorway.setLocalPosition(0,0,0);
-        gate.setLocalPosition(0,0,0);
-        cover.setLocalPosition(0,8,0);
-    
-
-        this.gate=gate;
-        this.doorway=doorway;
-        this.cover=cover;
-
-        let tm = new TerrainModifierObject({level:level});
-        this.entity.addChild(tm.entity);
-        tm.entity.setLocalPosition(pc.Vec3.ZERO);
-        this.modifier = tm;
-        this.updateColliderMap();
-
-    }
-
-
-    entityWasDestroyed(){
-        // this.RemoveFromTerrain();
-        super.entityWasDestroyed();
     }
 
     RecalculateTerrain(){
@@ -561,14 +525,9 @@ export class CastleGateDungeon extends TerrainModifierObject {
         this.level.terrain.RegenerateWithDelay();
     }
 
-    get shouldRecalculateTerran(){
-        // only recalculate terrain if this object is directly on the terrain.
-        // For example, if this object is above a concrete pad, do not move the terrain under it.
-
-    }
 
     timeoutFn = null;
-   dropToTerrain(){
+    dropToTerrain(){
         if (this.timeoutFn){
             clearTimeout(this.timeoutFn);
 
@@ -590,45 +549,15 @@ export class CastleGateDungeon extends TerrainModifierObject {
 
     get data(){
         return {
-            width:this.width,
-            length:this.length,
-            depth:this.depth,
+            width:this.terrainModifier.width,
+            length:this.terrainModifier.length,
+            depth:this.terrainModifier.depth,
             position:this.entity.getPosition(),
             templateUuid:this.uuid, // prevent double additions.
             callback:this.dropToTerrain.bind(this),
         }
     }
 }
-/*
-addTerrainModifier(data){
-        let tm = new TerrainModifier({
-            width:data.width,
-            length:data.length,
-            depth:data.depth,
-            position:data.position,
-            templateUuid:data.templateUuid,
-        });
-        if (data.callback) this.postGenFns.push(data.callback);
-        if (this.data.modifiers) this.data.modifiers.push(tm);
-        else this.data.modifiers = [tm];
-        this.Regenerate(); // what if realmEditor isn't defined yet. PRobably wait for realmeditor to finish loading before triyng to load levels.
-    }
-
-    removeTerrainModifier(data){
-        const{templateUuid}=data;
-        if (this.data.modifiers){
-            if (this.data.modifiers.filter(x=>{return x.templateUuid == templateUuid}).length != 0){
-                console.log("REMOVED:"+templateUuid);
-                this.data.modifiers = this.data.modifiers.filter(x=>{return x.templateUuid != templateUuid});
-            } else {
-                console.log("CANT REM:"+templateUuid);
-            }
-        } else {
-            console.log("Uh, no modifiers?");
-        }
-    }
-*/
-
 
 
 

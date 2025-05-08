@@ -41,7 +41,7 @@ const Materials = {
  
     },
     get red(){ return Materials.createMaterial(new pc.Color(1,0,0))},
-    get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3),new pc.Color(1,0,0))},
+    get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3),new pc.Color(0.5,0,0))},
     get yellow() { return this.createMaterial(new pc.Color(1, 1, 0))},
     get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
     get blue() { return this.createMaterial(new pc.Color(0, 0, 1))},
@@ -55,39 +55,40 @@ const Materials = {
     get white() { return this.createMaterial(pc.Color.WHITE )},
     get black() { return this.createMaterial(new pc.Color(00,00,00))},
     get brown() { return this.createMaterial(new pc.Color(0.5,0.2,0.2))},
+
     createCelMaterial(options = {}) {
-    const { isNegative = false } = options;
+        const { isNegative = false } = options;
 
-    const vert = assets.shaders.cel_shader_object_vert.resource;
-    const frag = assets.shaders.cel_shader_object_frag.resource;
+        const vert = assets.shaders.cel_shader_object_vert.resource;
+        const frag = assets.shaders.cel_shader_object_frag.resource;
 
-    const material = new pc.ShaderMaterial({
-        vertexCode: vert,
-        fragmentCode: frag,
-        attributes: {
-            aPosition: pc.SEMANTIC_POSITION,
-            aNormal: pc.SEMANTIC_NORMAL,
-            aUv: pc.SEMANTIC_TEXCOORD0
-        },
-        name: 'celMaterial'
-    });
+        const material = new pc.ShaderMaterial({
+            vertexCode: vert,
+            fragmentCode: frag,
+            attributes: {
+                aPosition: pc.SEMANTIC_POSITION,
+                aNormal: pc.SEMANTIC_NORMAL,
+                aUv: pc.SEMANTIC_TEXCOORD0
+            },
+            name: 'celMaterial'
+        });
 
-    // Set parameters
-    material.setParameter('uSunDir', Game.sunDir.data);//Game.sunDir.clone().normalize().data);
-    material.setParameter('uIsNegative', isNegative);
-    // Optional texture binding
-    // material.setParameter('uTexture', yourTexture.resource);
+        // Set parameters
+        material.setParameter('uSunDir', Game.sunDir.data);//Game.sunDir.clone().normalize().data);
+        material.setParameter('uIsNegative', isNegative);
+        // Optional texture binding
+        // material.setParameter('uTexture', yourTexture.resource);
 
-    // Optional cameraPos usage in shader — not needed in this shader
-    pc.app.on('update', () => {
-        material.setParameter('uCameraPos', Camera.main.entity.getPosition().data);
-    });
+        // Optional cameraPos usage in shader — not needed in this shader
+        pc.app.on('update', () => {
+            material.setParameter('uCameraPos', Camera.main.entity.getPosition().data);
+        });
 
-    material.update(); // 💥 Important in ShaderMaterial
+        material.update(); // 💥 Important in ShaderMaterial
 
-    return material;
-},
-   get celWhite() { return this.createCelMaterial()},
+        return material;
+    },
+    get celWhite() { return this.createCelMaterial()},
     get celBlack() { return this.createCelMaterial({isNegative:true})},
 } 
 

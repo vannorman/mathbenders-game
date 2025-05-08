@@ -207,15 +207,6 @@ export default class Template {
             return;
             //console.log(properties);
         }
-        if (false && this.constructor.name != "NumberCube"){
-            console.log("this:");
-            console.log(this)
-            console.log("const:");
-            console.log(this.constructor);
-            console.log(properties)
-            console.log(this.constructor.properties);
-        }
-
         this.constructor.properties.forEach(x=>{
             if (typeof properties[x.name] !== 'undefined'){
                 const val = properties[x.name];

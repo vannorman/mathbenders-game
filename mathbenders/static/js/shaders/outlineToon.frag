@@ -39,24 +39,22 @@ vec3 getWorldPosition(vec2 uv, float depth) {
 
 float applyOutline(sampler2D depthMap, vec2 uv) {
     float depth = texture2D(depthMap, uv).r; // 0 near, 1 far 1500
-    float depthDiff = .005;
-    depthDiff = uDepthDiff;
-    float depthThreshold = uOutlineThreshold;
+    float depthDiff =.00921; // base depth test value?
+    float outlineThickness = 0.0005;
     float diff = 0.0;
+
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            vec2 offset = vec2(float(x) * uOutlineThickness, float(y) * uOutlineThickness*2.0);// * uOutlineThickness * uPixelSize;
+            vec2 offset = vec2(float(x) * outlineThickness, float(y) * outlineThickness*2.0);// * uOutlineThickness * uPixelSize;
             float sampleDepth = texture2D(depthMap, uv + offset).r;
             float newDiff = abs(sampleDepth - depth);
-            if (newDiff > depthThreshold){
-                if (newDiff > diff) diff = newDiff;
-            }
+            if (newDiff > diff) diff = newDiff;
         }
     }
-    depthDiff += diff; // take max only, not sum
-    float adaptiveThreshold = mix(uMin, uMax, depth);//min(1.0,depth));
-    //return step(adaptiveThreshold, depthDiff);
-    return step(uMax, depthDiff); // either returns 1 (full black outline) or 0 (no outline). "was depthDiff above the threshold? 1 else 0"
+    depthDiff += diff; // add the max delta found during pixel test 
+
+    float thresh= 0.0105; // final delta depth must be above this
+    return step(thresh, depthDiff); // either returns 1 (full black outline) or 0 (no outline). "was depthDiff above the threshold? 1 else 0"
 }
 vec3 applyCelShading(vec3 color) {
     float uCelLevels = 2.0;

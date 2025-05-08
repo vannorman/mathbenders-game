@@ -415,7 +415,7 @@ export class PlayerPortal extends Template {
         }
         GameManager.subscribe(this,onGameStateChange);
     
-
+        this.UpdateLinkGraphics();
         this.updateColliderMap();
      
     }
@@ -440,12 +440,13 @@ export class PlayerPortal extends Template {
         linkArrow.setLocalEulerAngles(90,0,0);
         linkArrow.render.meshInstances[0].material = Materials.yellow;
         this.linkArrow=linkArrow;
-        this.setupSkyTextEntity({
-            number:this.connectedTo,
-            localPos:new pc.Vec3(0,8,-10),
-            parent:this.linkGraphics
-        });
- 
+        if (this.connectedTo != undefined){
+            this.setupSkyTextEntity({
+                number:this.connectedTo,
+                localPos:new pc.Vec3(0,8,-10),
+                parent:this.linkGraphics
+            });
+        }
     }
 
 

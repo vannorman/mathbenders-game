@@ -29,14 +29,14 @@ pc.extend(pc, function () {
         this.device = graphicsDevice;
     };
 
+    // Debug outline
+    /*
     const Sh = {};
     window.Sh = Sh;
     Sh.depthDiff =.00921;
-//    Sh.sampleRadius = 2;  
-//    Sh.min = 0.112;
     Sh.max = 0.0105;
     Sh.outlineThickness = 0.0005;
-    Sh.threshold = -0.0001;
+    Sh.threshold = -0.0001;*/
     // Frame to connect the posteffect to the variables in the shader
     GroundFog.prototype = pc.extend(pc.PostEffect.prototype, {
         // Every post effect must implement the render method which 
@@ -73,12 +73,13 @@ pc.extend(pc, function () {
             scope.resolve('uPlayerPos').setValue(this.playerEntity.getPosition().clone().data);
             scope.resolve('uAdjustedPlayerHeight').setValue(currentTerrainHeightManager.adjustedPlayerHeight);
 
+            /* debug outline
             scope.resolve('uMin').setValue(Sh.min);
             scope.resolve('uMax').setValue(Sh.max);
             scope.resolve('uDepthDiff').setValue(Sh.depthDiff);
             scope.resolve('uOutlineThickness').setValue(Sh.outlineThickness);
             scope.resolve('uOutlineThreshold').setValue(Sh.threshold);
-
+            */
 
            // this.playerEntity.getPosition().clone().data);
 

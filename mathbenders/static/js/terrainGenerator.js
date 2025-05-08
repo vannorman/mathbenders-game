@@ -56,7 +56,7 @@ class TerrainGenerator {
         heights = this.ModHeights({ heights, interval: heightTruncateInterval });
 
         let postModifyFns = [];
-        const modifierItems = this.level.templateInstances.filter(x => x instanceof TerrainModifierObject);
+        const modifierItems = this.level.templateInstances.filter(x => x.isTerrainModifier);// instanceof TerrainModifierObject);
         const modifiers = modifierItems.map(x => x.data);
 
         for (const modifier of modifiers) {

@@ -49,7 +49,7 @@ PortalCameraRenderTexture.prototype.setupCamera = function(){
         renderTarget: this.renderTarget,
 //        clearColorBuffer:false,
         priority:-1,
-        nearClip:7,
+        nearClip:this.nearClip(),
     });
     pc.app.root.addChild(cam3);
     Camera.portal = cam3.camera;
@@ -192,8 +192,16 @@ PortalCameraRenderTexture.prototype.postUpdate = function(dt){
     // Match our follow object (this entity) to target globals
     this.targetCam.setRotation(this.targetTracker.getRotation());
     this.targetCam.setPosition(this.targetTracker.getPosition());
-
+    
+    Camera.portal.nearClip = this.nearClip();
 
 };
 
+
+
+PortalCameraRenderTexture.prototype.nearClip = function(){
+    if (this.targetTracker){
+        return this.targetTracker.getLocalPosition().length();
+    } else return 7;
+};
 
