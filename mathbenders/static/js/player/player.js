@@ -241,10 +241,12 @@ class PlayerClass {
             } else {
                 console.log("Player failed to get gadg");
             }
-        } else {
+        } else if (template) {
             template.onPlayerTouched();
             console.log(`Player interact sent to::${entity.name}`);
             
+        } else {
+            entity.fire('playerTouched',this);
         }
     }
 
@@ -254,7 +256,7 @@ class PlayerClass {
             if (result.other.script?.numberInfo) {
                 this.interactWithNumber({entity:result.other});
             } else {
-                console.log("Int");
+                // console.log("Int");
                 this.interactWithObject({entity:result.other});
             }
         }

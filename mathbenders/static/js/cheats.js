@@ -153,6 +153,22 @@ $(document).on("keydown", function (e) {
 
     
     var numOpts = { position : Player.droppedPosition,  numberInfo : { fraction : { numerator:-1, denominator:1 }, } };
+    if (pc.app.keyboard.wasPressed(pc.KEY_1)) {
+        Sh.max = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? Sh.max - 0.001 : Sh.max + 0.001
+        console.log("sh stepmin:"+Sh.max);
+    }
+    if (pc.app.keyboard.wasPressed(pc.KEY_2)) {
+        Sh.depthDiff = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? Sh.depthDiff - 0.0005 : Sh.depthDiff + 0.0005
+        console.log("sh depthDiff:"+Sh.depthDiff);
+    }
+    if (pc.app.keyboard.wasPressed(pc.KEY_3)) {
+        Sh.outlineThickness = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? Sh.outlineThickness - 0.00005 : Sh.outlineThickness + 0.00005
+        console.log("sh outlineThickness:"+Sh.outlineThickness);
+    }
+    if (pc.app.keyboard.wasPressed(pc.KEY_4)) {
+        Sh.threshold = pc.app.keyboard.isPressed(pc.KEY_CONTROL) ? Sh.threshold - 0.0005 : Sh.threshold + 0.0005
+        console.log("sh threshold:"+Sh.threshold);
+    }
 
     if (pc.app.keyboard.isPressed(pc.KEY_CONTROL)) { 
         if (pc.app.keyboard.wasPressed(pc.KEY_P)){
@@ -173,31 +189,13 @@ $(document).on("keydown", function (e) {
             console.log("Move anchor:"+moveAnchorMode);
             
         }
-        if (pc.app.keyboard.wasPressed(pc.KEY_1)){
-            numOpts.numberInfo.fraction.numerator = 1; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -1; Game.Instantiate.NumberSphere(numOpts);
-        }
          if (pc.app.keyboard.wasPressed(pc.KEY_2)){
-            numOpts.numberInfo.fraction.numerator = 2; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -2; Game.Instantiate.NumberSphere(numOpts);
         }
          if (pc.app.keyboard.wasPressed(pc.KEY_3)){
-            numOpts.numberInfo.fraction.numerator = 3; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -3; Game.Instantiate.NumberSphere(numOpts);
         }
          if (pc.app.keyboard.wasPressed(pc.KEY_4)){
-            numOpts.numberInfo.fraction.numerator = 4; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -4; Game.Instantiate.NumberSphere(numOpts);
-        }
-         if (pc.app.keyboard.wasPressed(pc.KEY_5)){
-            console.log('20');
-            numOpts.numberInfo.fraction.numerator = 20; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -20; Game.Instantiate.NumberSphere(numOpts);
         }
          if (pc.app.keyboard.wasPressed(pc.KEY_6)){
-            console.log('50');
-            numOpts.numberInfo.fraction.numerator = 50; Game.Instantiate.NumberSphere(numOpts);
-            numOpts.numberInfo.fraction.numerator = -50; Game.Instantiate.NumberSphere(numOpts);
         }
          if (pc.app.keyboard.wasPressed(pc.KEY_7)){
             console.log('100');

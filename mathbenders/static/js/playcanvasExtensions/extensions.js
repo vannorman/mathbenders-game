@@ -142,6 +142,17 @@ pc.Entity.prototype.cloneWithMesh = function(){
 
 pc.Vec3.prototype.max = function(){ return Math.max(this.x,this.y,this.z);} // is this really necessary??!
 
+pc.Entity.prototype.moveToLocal = function(p,r){
+    if (this.rigidbody){
+        if (r) this.rigidbody.teleport(this.parent.getPosition().add(p),this.parent.getEulerAngles().add(r));
+        else this.rigidbody.teleport(this.parent.getPosition().add(p));
+        this.rigidbody.linearVelocity = pc.Vec3.ZERO;
+    } else {
+        this.setLocalPosition(p);
+        if (r) this.setLocalEulerAngles(r);
+    }
+};
+
 pc.Entity.prototype.moveTo = function(p,r){
     if (this.rigidbody){
         if (r) this.rigidbody.teleport(p,r);

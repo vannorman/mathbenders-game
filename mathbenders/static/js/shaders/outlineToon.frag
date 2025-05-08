@@ -19,8 +19,11 @@ uniform float uWorldAngryB;
 
 uniform sampler2D uMat3Texture; // pass in vec3+t to warp a local event based on t value
 uniform int uMat3Count; // how many vec3+t are in uVec4Texture
-
-
+uniform float uDepthDiff;
+uniform float uMin;
+uniform float uMax;
+uniform float uOutlineThickness; // 0.0006
+uniform float uOutlineThreshold; // 0.0006
 vec3 getWorldPosition(vec2 uv, float depth) {
     mat4 ivp = uInverseViewProjectionMatrix; // passed in from CPU
 
@@ -35,17 +38,25 @@ vec3 getWorldPosition(vec2 uv, float depth) {
 }
 
 float applyOutline(sampler2D depthMap, vec2 uv) {
-    float depth = texture2D(depthMap, uv).r;
-    float depthDiff = .009;
-    float uOutlineThickness = 0.0006;
+    float depth = texture2D(depthMap, uv).r; // 0 near, 1 far 1500
+    float depthDiff = .005;
+    depthDiff = uDepthDiff;
+    float depthThreshold = uOutlineThreshold;
+    float diff = 0.0;
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            vec2 offset = vec2(float(x) * uOutlineThickness, float(y) * uOutlineThickness);// * uOutlineThickness * uPixelSize;
+            vec2 offset = vec2(float(x) * uOutlineThickness, float(y) * uOutlineThickness*2.0);// * uOutlineThickness * uPixelSize;
             float sampleDepth = texture2D(depthMap, uv + offset).r;
-            depthDiff += abs(sampleDepth - depth);
+            float newDiff = abs(sampleDepth - depth);
+            if (newDiff > depthThreshold){
+                if (newDiff > diff) diff = newDiff;
+            }
         }
     }
-    return step(0.01, depthDiff); // either returns 1 (full black outline) or 0 (no outline)
+    depthDiff += diff; // take max only, not sum
+    float adaptiveThreshold = mix(uMin, uMax, depth);//min(1.0,depth));
+    //return step(adaptiveThreshold, depthDiff);
+    return step(uMax, depthDiff); // either returns 1 (full black outline) or 0 (no outline). "was depthDiff above the threshold? 1 else 0"
 }
 vec3 applyCelShading(vec3 color) {
     float uCelLevels = 2.0;

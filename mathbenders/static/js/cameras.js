@@ -66,10 +66,6 @@ class PlayerCamera{
             playerEntity:playerEntity,
         
         });
-//        this.entity.script.groundFogshader.init({
-//        });
-        // This is where fog gets added as fog is part of this shader.
-        // performance
 
 
         // ADd text to camera.

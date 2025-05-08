@@ -507,31 +507,54 @@ export class Button extends Template {
         this.onTouchedFn=onTouchedFn;
 
         const button = assets.models.spike.resource.instantiateRenderEntity();
+        button.render.meshInstances[0].material = Materials.orange;
         //button.children[0].setLocalPosition(-5,-0,-40); // weirdly still off center after converting dae > obj > glb 
         //bu
         const housing = assets.models.funnel.resource.instantiateRenderEntity();
-        housing.getComponentsInChildren('render')[0].meshInstances[0].material = Materials.blue;
+        housing.getComponentsInChildren('render')[0].meshInstances[0].material = Materials.gray;
         const base = assets.models.funnel.resource.instantiateRenderEntity();
         base.getComponentsInChildren('render')[0].meshInstances[0].material = Materials.gray;
+        const stand = assets.models.fin.resource.instantiateRenderEntity();
+        stand.render.meshInstances[0].material = Materials.darkgray;
+        const head = new pc.Entity();
+        head.addComponent('render',{type:'sphere'});
+        head.render.meshInstances[0].material = Materials.liteblue;
+       
+        this.entity.addChild(button);
+        this.entity.addChild(housing);
+        this.entity.addChild(base);
+        this.entity.addChild(stand);
+        this.entity.addChild(head);
+
+  
 
         button.setLocalPosition(0.7, 1.5, 0);
-        button.setLocalScale(0.3,0.2,0.3);
+        button.setLocalScale(0.3,0.1,0.3);
         button.setLocalEulerAngles(90,90,0);
-        button.render.meshInstances[0].material = Materials.red;
         
         housing.setLocalPosition(0.2,1.5,0)
         housing.setLocalScale(1, 6, 1);
         housing.setLocalEulerAngles(90,-90,0);
         
-        base.setLocalPosition(0, 1, 0);
-        base.setLocalScale(4, 15, 4);
+        // base.setLocalPosition(0, 1, 0);
+        base.setLocalScale(4, 4, 4);
 
-        this.entity.addChild(button);
-        this.entity.addChild(housing);
-        this.entity.addChild(base);
-        this.entity.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(1,3,1)});
-        this.entity.addComponent('rigidbody',{type:'kinematic'});
+        head.setLocalPosition(0,1.5,0);
+        head.setLocalScale(0.8,0.8,0.8);
 
+        stand.setLocalEulerAngles(0,0,-90);
+        stand.setLocalScale(1.5,1.5,1.5);
+        stand.setLocalPosition(0,1.5,0);
+
+
+        
+
+        button.addComponent('rigidbody',{type:'kinematic'});
+        button.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(0.6,0.2,0.6)});
+        const $this=this;
+        button.on('playerTouched',$this.onPlayerTouched,this);
+        button.tags.add(Constants.Tags.PlayerCanInteract);
+       
         this.pushedInPos = button.getLocalPosition().clone().add(new pc.Vec3(-0.15, 0, 0));
         this.pushedOutPos = button.getLocalPosition().clone();
         this.moveSpeed = 0.02;
@@ -540,6 +563,8 @@ export class Button extends Template {
         this.button = button;
         this.housing = housing;
         this.base = base;
+        this.head = head;
+        this.stand = stand;
         this.entity.tags.add(Constants.Tags.PlayerCanInteract);
         this.updateColliderMap();
     }
@@ -553,7 +578,7 @@ export class Button extends Template {
                 const pushDuration = 0.5;
                 let lt = this.t / pushDuration; 
                 let p = new pc.Vec3().lerp(this.button.getLocalPosition(),this.pushedInPos,lt);
-                this.button.setLocalPosition(p);
+                this.button.moveToLocal(p);
             } else {
                 this.button.setLocalPosition(this.pushedInPos);
                 this.state = 'pushingout';
@@ -564,7 +589,7 @@ export class Button extends Template {
                 const pushDuration = 0.5;
                 let lt = this.t / pushDuration; 
                 let p = new pc.Vec3().lerp(this.button.getLocalPosition(),this.pushedOutPos,lt);
-                this.button.setLocalPosition(p);
+                this.button.moveToLocal(p);
             } else {
                 this.button.setLocalPosition(this.pushedOutPos);
                 this.state = 'ready';

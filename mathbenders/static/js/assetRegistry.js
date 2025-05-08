@@ -26,6 +26,7 @@ const assets = {
     },
     models : {
         // mr_ball_faceless : new pc.Asset("", "container", { url: "/static/assets/models/mr_ball_faceless@.glb",    }),
+        fin : new pc.Asset("", "container", { url: "/static/assets/models/fin.glb",    }),
         funnel : new pc.Asset("", "container", { url: "/static/assets/models/funnel.glb",    }),
         spike : new pc.Asset("", "container", { url: "/static/assets/models/spike.glb",    }),
         arrow : new pc.Asset("", "container", { url: "/static/assets/models/arrow.glb",    }),
@@ -117,15 +118,9 @@ const assets = {
     shaders : {
         cel_shader_object_vert : new pc.Asset("", "shader" , { url : "/static/js/shaders/celShaderObject.vert"}),
         cel_shader_object_frag : new pc.Asset("", "shader" , { url : "/static/js/shaders/celShaderObject.frag"}),
-        claude_fog_outline_vert : new pc.Asset("", "shader", { url : "/static/js/shaders/claude-fog-outline.vert"}),
-        claude_fog_outline_frag : new pc.Asset("", "shader", { url : "/static/js/shaders/claude-fog-outline.frag"}), 
-        post_effect_vert : new pc.Asset("-effect_vert", "shader", { url : "/static/js/shaders/post-effect.vert"}),
-        post_effect_frag : new pc.Asset("-effect_frag", "shader", { url : "/static/js/shaders/post-effect.frag"}), 
         outlineToonVert : new pc.Asset("-effect_vert", "shader", { url : "/static/js/shaders/outlineToon.vert"}),
-        outlineToonFrag : new pc.Asset("-effect_frag", "shader", { url : "/static/js/shaders/outlineToon.frag"}), 
-        toon_edge_frag : new pc.Asset("", "shader", { url : "/static/assets/shaders/toon_edge_frag.shader"}),
-        toon_frag : new pc.Asset("", "shader", { url : "/static/assets/shaders/toon_frag.shader"}),
-        toon_vert : new pc.Asset("", "shader", { url : "/static/assets/shaders/toon_vert.shader"}),
+        // Most shader logic including WarpFx / WarpByPoints, OutlineToon, and GroundFog is in outlineToon.frag
+        outlineToonFrag : new pc.Asset("-effect_frag", "shader", { url : "/static/js/shaders/outlineToon.frag"}),  
 
     },
     textures : {

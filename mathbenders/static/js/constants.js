@@ -22,9 +22,10 @@ const TerrainWorldPositions = {
 }
 
 const Materials = {
-    createMaterial(color) {
+    createMaterial(color,emissive=new pc.Color(0,0,0)) {
         const material = new pc.StandardMaterial();
         material.diffuse = color;
+        material.emissive = emissive;
         // we need to call material.update when we change its properties
         material.update();
         return material;
@@ -40,14 +41,16 @@ const Materials = {
  
     },
     get red(){ return Materials.createMaterial(new pc.Color(1,0,0))},
-    get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3))},
+    get orange(){ return Materials.createMaterial(new pc.Color(1,.6,.3),new pc.Color(1,0,0))},
     get yellow() { return this.createMaterial(new pc.Color(1, 1, 0))},
     get green() { return this.createMaterial(new pc.Color(0.3, 1, 0.3))},
-    get blue() { return this.createMaterial(new pc.Color(0.3, 0.3, 1))},
-    get liteblue() { return this.createMaterial(new pc.Color(0.6, 0.6, 1))},
+    get blue() { return this.createMaterial(new pc.Color(0, 0, 1))},
+    get liteblue() { return this.createMaterial(new pc.Color(0, 0.4, 1))},
+    get liteblue2() { return this.createMaterial(new pc.Color(0, 0.7, 1))},
     get purple(){ return Materials.createMaterial(new pc.Color(1,0,1))},
     get redAlpha(){ return Materials.createMaterialAlpha(new pc.Color(1,0,0,0.25))},
     get gray(){ return this.createMaterial(new pc.Color(0.3, 0.3, 0.3))},
+    get darkgray(){ return this.createMaterial(new pc.Color(0.15, 0.15, 0.15))},
 
     get white() { return this.createMaterial(pc.Color.WHITE )},
     get black() { return this.createMaterial(new pc.Color(00,00,00))},

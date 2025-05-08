@@ -363,9 +363,9 @@ export class CastleGate extends Template {
         this.updateColliderMap();
 
         const $this=this;
-        const button = new Button({onTouchedFn:$this.toggleGate});
+        const button = new Button({onTouchedFn:()=>$this.toggleGate()});
         this.button=button;
-        this.button.entity.setLocalPosition(1,0,1);
+        this.button.entity.setLocalPosition(2,0,2);
         this.entity.addChild(button.entity);
         this.state = 'closed';
         this.closedPos = this.gate.getLocalPosition().clone();
@@ -375,7 +375,6 @@ export class CastleGate extends Template {
     }
 
     toggleGate(){
-        console.log("TOG GATE");
         if (this.state === 'closed') {
             this.state = 'opening';
             this.t = 0;
@@ -392,7 +391,7 @@ export class CastleGate extends Template {
         if (this.state === 'opening') {
             const dist = this.gate.getLocalPosition().distance(this.openPos);
             if (dist > 0.01) {
-                const pushDuration = 0.5;
+                const pushDuration = 1.5;
                 let lt = this.t / pushDuration; 
                 let p = new pc.Vec3().lerp(this.gate.getLocalPosition(),this.openPos,lt);
                 this.gate.setLocalPosition(p);
@@ -403,7 +402,7 @@ export class CastleGate extends Template {
         } else if (this.state === 'closing') {
             const dist = this.gate.getLocalPosition().distance(this.closedPos);
             if (dist > 0.01) {
-                const pushDuration = 0.5;
+                const pushDuration = 0.8;
                 let lt = this.t / pushDuration; 
                 let p = new pc.Vec3().lerp(this.gate.getLocalPosition(),this.closedPos,lt);
                 this.gate.setLocalPosition(p);
