@@ -6,7 +6,7 @@ const currentTerrainHeightManager = {
     currentTerrainHeight : 0,
     get adjustedPlayerHeight() {
         if (realmEditor)
-            return realmEditor.RealmData.Levels[0].terrain.centroid.y;
+            return realmEditor.getClosestTerrainPosition().y;// realmEditor.RealmData.Levels[0].terrain.centroid.y;
         else return 0;
     }
     

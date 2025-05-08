@@ -129,7 +129,6 @@ export default class Terrain {
     }
 
     destroy(){
-        console.log("Relinquish:"+this._data.centroid);
         Terrain.relinquishCentroid(this._data.centroid);
         this.clearTimeouts();
         this.entity.destroy();

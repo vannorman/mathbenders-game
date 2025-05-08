@@ -469,7 +469,6 @@ export class CastleGateDungeon extends CastleGate {
     level;
     dungeonData = {difficulty:2}
     setDungeonData(value){
-        console.log("Set dungeon:"+value);
         this.dungeonData = value;
     }
     getDungeonData(){
@@ -548,7 +547,6 @@ export class CastleGateDungeon extends CastleGate {
             p2.entity.setLocalPosition(0,50,0);
 
             p2.entity.setLocalEulerAngles(0,90,0);
-            console.log("drop p2 ent:"+p2.entity.name);
             this.dropToTerrain(p2.entity);
 
             p1.ConnectTo(p2.number);

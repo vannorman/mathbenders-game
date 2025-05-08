@@ -191,7 +191,19 @@ class RealmEditor extends Listener {
             portals[i+1].ConnectTo(portals[i]);
         }
    } 
- 
+
+    getClosestTerrainPosition(){
+        let d = Infinity;
+        let closest = null;
+        pc.app.root.findByTag('Terrain').forEach(t=>{
+            let d2 = Player.entity.getPosition().sub(t.getPosition()).length();
+            if (d2 < d) {
+                d = d2;
+                closest = t;
+            }
+        }); 
+        return closest.getPosition();
+    }
     get levelClosestToPlayer() {
         let min = Infinity;
         let closest = null;
