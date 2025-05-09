@@ -29,6 +29,7 @@ class TerrainGenerator {
             heightScale2 = 0,
             exp = 0,
             heights = [],
+            buildCollision = true,
         } = data;
 
         this.textureOffset = textureOffset;
@@ -73,7 +74,7 @@ class TerrainGenerator {
         const newTerrain = { entity: null };
         this.Terrains.push(newTerrain);
 
-        const [terrainEntity, positions] = this.Mesh3({ centroid, heights, size });
+        const [terrainEntity, positions] = this.Mesh3({ centroid, heights, size, buildCollision });
         terrainEntity.name = name;
         terrainEntity.tags.add(Constants.Tags.Terrain);
         newTerrain.entity = terrainEntity;
@@ -162,7 +163,7 @@ class TerrainGenerator {
         }
     }
     Mesh3(options){
-        const { centroid = pc.Vec3.ZERO, size=500, heights = []} = options;
+        const { centroid = pc.Vec3.ZERO, size=500, heights = [], buildCollision=true} = options;
         let app = pc.app;
         const  sideResolution = Math.sqrt(options.heights.length);
         const scale = size / sideResolution;
@@ -253,15 +254,17 @@ class TerrainGenerator {
             meshInstances: [meshInstance],
         });
 
-        this.AddCollisionMeshToTerrain({entity:entity,mesh:mesh,physicsMaterial:physicsMaterial}) ;
-            
-        const r = entity.addComponent('rigidbody', {
-            friction: 0.5,
-            type: 'kinematic'
-        });
+        if (buildCollision){
+            this.AddCollisionMeshToTerrain({entity:entity,mesh:mesh,physicsMaterial:physicsMaterial}) ;
+            const r = entity.addComponent('rigidbody', {
+                friction: 0.5,
+                type: 'kinematic'
+            });
+            r.group = Constants.CollisionLayers.FixedObjects;
+            r.mask = pc.BODYMASK_ALL & ~r.group;
 
-        r.group = Constants.CollisionLayers.FixedObjects;
-        r.mask = pc.BODYMASK_ALL & ~r.group;
+         }
+            
 
         app.root.addChild(entity);
         entity.moveTo(centroid);

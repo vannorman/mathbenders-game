@@ -109,48 +109,6 @@ $(document).on("keydown", function (e) {
     }
 
 
-    if (pc.app.keyboard.wasPressed(pc.KEY_1) && pc.app.keyboard.isPressed(pc.KEY_C)) { 
-
-        // Press C1 to place wall in front
-        const p = Game.player.getPosition();
-        const dir = Camera.main.entity.parent.forward.flat().normalize();
-        const left = Camera.main.entity.parent.left.flat().normalize();
-        const right = Camera.main.entity.parent.right.flat().normalize();
-        const leftPos = p.clone().add(dir.clone().mulScalar(5)).add(left.clone().mulScalar(10)).trunc();
-        const rightPos= p.clone().add(dir.clone().mulScalar(5)).add(right.clone().mulScalar(9.75)).trunc();
-        const rot = Quaternion.LookRotation( Camera.main.entity.forward.flat()).getEulerAngles().trunc();
-        const leftCubeOptions ={
-            position:leftPos, 
-            rotation:rot, 
-            scale:new pc.Vec3(15,8,1)
-        }
-        const rightCubeOptions = {
-            position:rightPos,
-            rotation: rot, 
-            scale:new pc.Vec3(15,8,1)
-        }
-        const leftCube = Utils.Cube(leftCubeOptions);
-        const rightCube = Utils.Cube(rightCubeOptions);
-        
-        const numberWallPos = p.clone().add(dir.clone().mulScalar(5)).add(right.clone().mulScalar(-1.75));
-        const numberWallOptions = {
-            position: numberWallPos,
-            rotation:rot,
-            x:4,y:3,z:1, 
-        }
-        Game.Instantiate[Constants.Templates.NumberWall]({position:numberWallPos,rotation:rot.eulerAngles});
-
-        const faucetPos = p.clone().add(dir.clone().mulScalar(2)).add(right.clone().mulScalar(4)).add(new pc.Vec3(0,-0.5,0));
-        const faucetOptions = {
-            position: faucetPos,
-            rotation:new pc.Vec3(-90,0,0),
-            fraction:new Fraction(-1,1),
-        }
-       Game.Instantiate.faucet(faucetOptions); 
-
-    }
-
-
     
     var numOpts = { position : Player.droppedPosition,  numberInfo : { fraction : { numerator:-1, denominator:1 }, } };
     if (pc.app.keyboard.wasPressed(pc.KEY_1)) {
@@ -357,7 +315,12 @@ $(document).on("keydown", function (e) {
     if (ee == 'R'){
         realmEditor.RealmData.Levels.forEach(lev=>{
             lev.templateInstances.forEach(t=>{
-                if (t.wall) t.wall.enabled = !t.wall.enabled;
+                if (t.wall) {
+                    t.wall.enabled = !t.wall.enabled;
+                    t.col.addComponent('render',{type:'box'});
+                    // t.col.setLocalScale(t.col.collision.halfExtents);
+                    t.col.render.enabled = !t.wall.enabled;
+                }
             });
         });
     }

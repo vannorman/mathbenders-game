@@ -482,7 +482,7 @@ Utils = {
     },
     adjustMeshToGround(options) {
         // performanceHelp
-        const {entity} = options;
+        const {entity}=options;//,textScale=0.05,textColor=pc.Color.BLACK} = options;
         // offset is for the CastleWall prefabN
 
         // Before anything, lower mesh as close to ground as it can get before bending.
@@ -499,8 +499,10 @@ Utils = {
             const x = vertices[i * 3];
             const y = vertices[i * 3 + 1];
             const z = vertices[i * 3 + 2];
-            positions[i] = [x,y,z]; 
-        }
+            positions[i] = [x,y,z];
+            
+       }
+        
 
         // each Catalog will define a unique vert/point in the mesh, and keep track of the twins by way of index
         class Catalog {
@@ -532,6 +534,17 @@ Utils = {
             } else {
                 let c = new Catalog({index:i,position:[x,y,z]})
                 catalogs.push(c);
+                //debug vert number
+               /* const vPos = entity.localToWorldPos(new pc.Vec3(x, y+1, z));
+                const debugText = Utils.AddText({
+                    color:textColor,
+                    text:i,
+                    parent:pc.app.root,
+                    localPos:vPos,
+                    scale:textScale
+                });*/
+     
+ 
             }
         }
 
@@ -541,12 +554,18 @@ Utils = {
         // So tht when moving them down to the terrain,
         // The mesh looks better if these pairs are of the same ending height
         // each pair refers to two indexes of vert inside the "positions" variable
-        const pairs = [[3,109],[2,108],[288,156],[106,159],
+        // CHANGED: don't delete, these reference the old (off center) model. Probably we can delete them someday
+/*        const pairs = [[3,109],[2,108],[288,156],[106,159],
                         [8,120],[11,126],[44,161],[41,164],
                         [17,129],[20,135],[54,171],[51,174],
                         [25,138],[28,144],[49,166],[46,169],
-                        [34,147],[37,153]];
-
+                        [34,147],[37,153]]; */
+        
+        const newPairs = [[4,120],[3,119],[313,176],[117,179],
+                        [9,133],[12,140],[50,181],[47,184],
+                        [20,144],[24,151],[60,191],[57,194],
+                        [29,155],[32,162],[55,186],[52,189],
+                        [39,166],[42,173]];
         // Now that we have a modified "positions" array where each y value has been lowered and twins have been matched,
         // flatten that array so we can inflate the mesh with it
 
@@ -581,7 +600,9 @@ Utils = {
                 
                 let localDroppedPos = entity.worldToLocalPos(droppedPos);
 
-                if (y < 1.0) { //1.0 happens to be the lower threshold for the bottom of the wall 
+                if (y < 0.1) { // happens to be the lower threshold for the bottom of the wall 
+                // CHANGED
+
                     // console.log("y:"+y);
                     // let p = result.point;
                     let adjustedY = y - hitDistance - offset;
@@ -614,7 +635,7 @@ Utils = {
         });
         midpoint.mulScalar(1/lowYs.length);
 
-        pairs.forEach(pair=>{
+        newPairs.forEach(pair=>{
             let a = pair[0];
             let b = pair[1];
 //            console.log("Checking :"+a+","+b);

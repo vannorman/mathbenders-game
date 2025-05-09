@@ -140,19 +140,21 @@ export class CastleWall extends Template {
         const {properties}=args;
         this.setProperties2(properties);
         
-        const asset = assets.models.castle_wall;
+        const asset = assets.models.castle_wall2;
         const render = asset.resource.instantiateRenderEntity();
         this.entity.addChild(render);
         const col = new pc.Entity("castlewall collider");
         col.addComponent('rigidbody', {type:pc.RIGIDBODY_TYPE_KINEMATIC});
         col.addComponent('collision',{type:'box',halfExtents:new pc.Vec3(3,3.5,0.5)});
         col.setLocalPosition(0,0,0);
+        col.setLocalScale(3,3.5,0.5);
+        this.col = col;
+        this.wall=render;
         let mat = ApplyTextureAssetToEntity({entity:render,textureAsset:assets.textures.stone}); 
         mat.diffuseMapTiling=new pc.Vec2(3,3); 
         mat.update();
         
         this.entity.addChild(col);
-        render.setLocalPosition(new pc.Vec3(-2.75,-1,0.75));
         this.updateColliderMap();
     }
 }
@@ -173,13 +175,12 @@ export class CastleWallFormed extends Template {
         console.log("this meshdata");
        this.meshData = value; 
     }
-    offset = new pc.Vec3(-2.75,-1,0.75);
     constructor(args={}){
         super(args);
         const {properties}=args;
         this.setProperties2(properties);
         
-        const asset = assets.models.castle_wall;
+        const asset = assets.models.castle_wall2;
         const render = asset.resource.instantiateRenderEntity();
         const clone = render.cloneWithMesh();
         render.destroy();
@@ -201,11 +202,11 @@ export class CastleWallFormed extends Template {
         // col.addComponent('render',{type:'box'});
         const scale = new pc.Vec3(1,1.75,1);
         col.setLocalScale(scale);
-        col.addComponent('collision',{type:'box',halfExtents:scale.mulScalar(0.5)});
+        col.addComponent('collision',{type:'box',halfExtents:scale.clone()});
         col.setLocalPosition(0,0,0);
         this.col=col; 
         this.entity.addChild(col);
-        clone.setLocalPosition(this.offset);
+        this.col.setLocalPosition(0,0,0);
         if (this.meshData){
             this.updateWallMesh(this.meshData);
         }
@@ -220,10 +221,12 @@ export class CastleWallFormed extends Template {
         mesh.setPositions(verts);
         mesh.update(pc.PRIMITIVE_TRIANGLES);
         this.wall.setLocalScale(xScale,1,1);
-        this.col.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(0,midpoint.y,0)));//midpoint));
-        this.col.rotation = Quaternion.LookRotation(slope);
-        this.col.setLocalScale(xScale*11,10,0.5);
-        this.col.collision.halfExtents = this.col.getLocalScale().mulScalar(0.5);
+        this.wall.setLocalPosition(0,1,0);
+        // this.col.rotation = Quaternion.LookRotation(slope);
+        this.col.setLocalScale(xScale*6,14,1.3);
+        this.col.setLocalPosition(0,midpoint.y,0);
+        // this.col.moveTo(this.entity.getPosition().clone().add(new pc.Vec3(1,midpoint.y,0.15)));//midpoint));
+        this.col.collision.halfExtents = this.col.getLocalScale().clone().mulScalar(0.5);
         this.updateColliderMap();
         
     }
@@ -557,7 +560,7 @@ export class CastleGateDungeon extends CastleGate {
     }
 
     RecalculateTerrain(){
-        this.level.terrain.Regenerate();
+        this.level.terrain.Regenerate({buildCollision:false});
     }
 
     onEndDragByEditor(args){

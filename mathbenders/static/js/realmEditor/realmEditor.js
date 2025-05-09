@@ -171,6 +171,7 @@ class RealmEditor extends Listener {
         case GameState.Playing:
             pc.app.off('update',this.update,this);
             // this.ConnectPortals();
+            this.RealmData.Levels.forEach(x=>{x.terrain.Regenerate(); });
             this.disable();
             break;
         }
